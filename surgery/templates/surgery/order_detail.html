@@ -1,0 +1,361 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+
+        <div>
+            <h3 class="mb-1">
+                العملية {{ order.order_number }}
+            </h3>
+
+            <div class="text-muted">
+                {{ order.patient.full_name }}
+                — {{ order.surgery_type.name_ar }}
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+
+            <a
+                href="{% url 'surgery:order_update' order.id %}"
+                class="btn btn-outline-primary"
+            >
+                تعديل
+            </a>
+
+            <a
+                href="{% url 'surgery:order_list' %}"
+                class="btn btn-outline-secondary"
+            >
+                القائمة
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="card shadow-sm mb-3">
+
+        <div class="card-header">
+            <strong>معلومات العملية</strong>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row g-3">
+
+                <div class="col-12 col-md-4">
+                    <div class="text-muted small">المريض</div>
+                    <div class="fw-bold">
+                        {{ order.patient.full_name }}
+                    </div>
+                    <div class="small">
+                        رقم الملف: {{ order.patient.patient_number }}
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <div class="text-muted small">نوع العملية</div>
+                    <div class="fw-bold">
+                        {{ order.surgery_type.name_ar }}
+                    </div>
+                </div>
+
+                <div class="col-6 col-md-2">
+                    <div class="text-muted small">الأولوية</div>
+                    <div>
+                        {{ order.get_priority_display }}
+                    </div>
+                </div>
+
+                <div class="col-6 col-md-2">
+                    <div class="text-muted small">الحالة</div>
+                    <div class="fw-bold">
+                        {{ order.get_status_display }}
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <div class="text-muted small">الجراح</div>
+                    <div>
+                        {% if order.surgeon %}
+                            {{ order.surgeon.full_name }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <div class="text-muted small">تاريخ الطلب</div>
+                    <div>
+                        {{ order.created_at|date:"Y-m-d H:i" }}
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <div class="text-muted small">موعد العملية</div>
+                    <div>
+                        {% if order.scheduled_at %}
+                            {{ order.scheduled_at|date:"Y-m-d H:i" }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="text-muted small">التشخيص</div>
+                    <div class="border rounded p-2">
+                        {{ order.diagnosis|default:"—"|linebreaksbr }}
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="text-muted small">الاستطباب</div>
+                    <div class="border rounded p-2">
+                        {{ order.indication|default:"—"|linebreaksbr }}
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="text-muted small">ملاحظات ما قبل العملية</div>
+                    <div class="border rounded p-2">
+                        {{ order.preoperative_notes|default:"—"|linebreaksbr }}
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+
+    <div class="card shadow-sm mb-3">
+
+        <div class="card-header">
+            <strong>تغيير حالة العملية</strong>
+        </div>
+
+        <div class="card-body">
+
+            <div class="d-flex flex-wrap gap-2">
+
+                <a
+                    href="{% url 'surgery:order_status_update' order.id 'SCHEDULED' %}"
+                    class="btn btn-outline-primary"
+                >
+                    جدولة
+                </a>
+
+                <a
+                    href="{% url 'surgery:order_status_update' order.id 'PREPARATION' %}"
+                    class="btn btn-outline-warning"
+                >
+                    تحضير
+                </a>
+
+                <a
+                    href="{% url 'surgery:order_status_update' order.id 'IN_PROGRESS' %}"
+                    class="btn btn-primary"
+                >
+                    بدء العملية
+                </a>
+
+                <a
+                    href="{% url 'surgery:order_status_update' order.id 'RECOVERY' %}"
+                    class="btn btn-outline-info"
+                >
+                    إفاقة
+                </a>
+
+                <a
+                    href="{% url 'surgery:order_status_update' order.id 'COMPLETED' %}"
+                    class="btn btn-success"
+                >
+                    إكمال
+                </a>
+
+                <a
+                    href="{% url 'surgery:order_status_update' order.id 'CANCELLED' %}"
+                    class="btn btn-outline-danger"
+                >
+                    إلغاء
+                </a>
+
+            </div>
+
+        </div>
+    </div>
+
+
+    <div class="row g-3">
+
+        <div class="col-12 col-lg-4">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-header d-flex justify-content-between">
+                    <strong>الإجراءات الجراحية</strong>
+
+                    <a
+                        href="{% url 'surgery:procedure_create' order.id %}"
+                        class="btn btn-sm btn-primary"
+                    >
+                        +
+                    </a>
+                </div>
+
+                <div class="card-body">
+
+                    {% for item in procedures %}
+
+                        <div class="border rounded p-2 mb-2">
+
+                            <strong>{{ item.procedure_name }}</strong>
+
+                            <div class="small text-muted">
+                                الحالة:
+                                {{ item.get_status_display }}
+                            </div>
+
+                            {% if item.surgeon %}
+                                <div class="small">
+                                    الجراح: {{ item.surgeon.full_name }}
+                                </div>
+                            {% endif %}
+
+                            {% if item.anesthesia_type %}
+                                <div class="small">
+                                    التخدير: {{ item.anesthesia_type }}
+                                </div>
+                            {% endif %}
+
+                        </div>
+
+                    {% empty %}
+
+                        <div class="text-muted text-center py-3">
+                            لا توجد إجراءات مسجلة.
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="col-12 col-lg-4">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-header d-flex justify-content-between">
+                    <strong>فريق العملية</strong>
+
+                    <a
+                        href="{% url 'surgery:team_member_create' order.id %}"
+                        class="btn btn-sm btn-primary"
+                    >
+                        +
+                    </a>
+                </div>
+
+                <div class="card-body">
+
+                    {% for member in team_members %}
+
+                        <div class="border rounded p-2 mb-2">
+
+                            <strong>{{ member.name }}</strong>
+
+                            <div class="small text-muted">
+                                {{ member.get_role_display }}
+                            </div>
+
+                            {% if member.notes %}
+                                <div class="small">
+                                    {{ member.notes }}
+                                </div>
+                            {% endif %}
+
+                        </div>
+
+                    {% empty %}
+
+                        <div class="text-muted text-center py-3">
+                            لا يوجد أعضاء مسجلون.
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="col-12 col-lg-4">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-header d-flex justify-content-between">
+                    <strong>ما بعد العملية</strong>
+
+                    <a
+                        href="{% url 'surgery:postoperative_note_create' order.id %}"
+                        class="btn btn-sm btn-primary"
+                    >
+                        +
+                    </a>
+                </div>
+
+                <div class="card-body">
+
+                    {% for note in postoperative_notes %}
+
+                        <div class="border rounded p-2 mb-2">
+
+                            <div>
+                                {{ note.condition|default:"بدون وصف للحالة" }}
+                            </div>
+
+                            {% if note.pain_score != None %}
+                                <div class="small">
+                                    الألم: {{ note.pain_score }}/10
+                                </div>
+                            {% endif %}
+
+                            {% if note.instructions %}
+                                <div class="small">
+                                    التعليمات: {{ note.instructions }}
+                                </div>
+                            {% endif %}
+
+                            <div class="small text-muted">
+                                {{ note.recorded_at|date:"Y-m-d H:i" }}
+                            </div>
+
+                        </div>
+
+                    {% empty %}
+
+                        <div class="text-muted text-center py-3">
+                            لا توجد ملاحظات بعد العملية.
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,2127 @@
+{% extends "base.html" %}
+
+{% block title %}لوحة التحكم الرئيسية | HIS / LIS{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --dash-bg: #f4f7fb;
+    --dash-card: #ffffff;
+    --dash-text: #172033;
+    --dash-muted: #718096;
+    --dash-border: #e6ebf2;
+}
+
+.dashboard-pro {
+    padding-bottom: 35px;
+}
+
+/* =========================
+   Header
+========================= */
+
+.command-header {
+    position: relative;
+    overflow: hidden;
+    border-radius: 22px;
+    padding: 26px;
+    color: #fff;
+    background: linear-gradient(135deg,#0d6efd,#173b7a 70%,#0b244d);
+    box-shadow: 0 12px 35px rgba(13,110,253,.18);
+    margin-bottom: 20px;
+}
+
+.command-header:after {
+    content: "";
+    position: absolute;
+    width: 230px;
+    height: 230px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.06);
+    left: -70px;
+    top: -100px;
+}
+
+.command-content {
+    position: relative;
+    z-index: 2;
+}
+
+.command-title {
+    font-size: 28px;
+    font-weight: 900;
+    margin: 0;
+}
+
+.command-subtitle {
+    opacity: .88;
+    margin-top: 7px;
+    font-size: 14px;
+}
+
+.command-meta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 17px;
+}
+
+.command-chip {
+    background: rgba(255,255,255,.13);
+    border: 1px solid rgba(255,255,255,.18);
+    border-radius: 11px;
+    padding: 7px 11px;
+    font-size: 12px;
+}
+
+.refresh-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #fff;
+    text-decoration: none;
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: 10px;
+    padding: 8px 13px;
+    background: rgba(255,255,255,.1);
+    margin-top: 15px;
+    font-size: 12px;
+}
+
+.refresh-btn:hover {
+    background: rgba(255,255,255,.2);
+    color: #fff;
+}
+
+/* =========================
+   KPI Cards
+========================= */
+
+.kpi-card {
+    position: relative;
+    height: 100%;
+    background: var(--dash-card);
+    border: 1px solid var(--dash-border);
+    border-radius: 17px;
+    padding: 18px;
+    box-shadow: 0 5px 18px rgba(20,35,70,.055);
+    transition: .2s;
+    overflow: hidden;
+}
+
+.kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 11px 27px rgba(20,35,70,.10);
+}
+
+.kpi-card:after {
+    content: "";
+    position: absolute;
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    left: -35px;
+    bottom: -45px;
+    background: rgba(13,110,253,.035);
+}
+
+.kpi-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.kpi-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    background: #eef4ff;
+}
+
+.kpi-value {
+    font-size: 29px;
+    font-weight: 900;
+    color: var(--dash-text);
+    line-height: 1.1;
+}
+
+.kpi-label {
+    font-size: 12px;
+    color: var(--dash-muted);
+    margin-top: 7px;
+}
+
+.kpi-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 13px;
+    font-size: 11px;
+    color: #8b95a5;
+}
+
+.kpi-link {
+    text-decoration: none;
+    color: #0d6efd;
+    font-weight: 700;
+}
+
+/* =========================
+   Section
+========================= */
+
+.dashboard-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 26px 0 13px;
+}
+
+.dashboard-section h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--dash-text);
+}
+
+.dashboard-section a {
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* =========================
+   Panels
+========================= */
+
+.pro-panel {
+    background: #fff;
+    border: 1px solid var(--dash-border);
+    border-radius: 17px;
+    overflow: hidden;
+    height: 100%;
+    box-shadow: 0 5px 18px rgba(20,35,70,.045);
+}
+
+.pro-panel-header {
+    padding: 15px 17px;
+    border-bottom: 1px solid #edf0f5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.pro-panel-header h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 900;
+}
+
+.pro-panel-body {
+    padding: 16px;
+}
+
+/* =========================
+   Charts
+========================= */
+
+.chart-box {
+    position: relative;
+    height: 265px;
+}
+
+.chart-box canvas {
+    max-height: 265px;
+}
+
+/* =========================
+   Status
+========================= */
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 9px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.status-active {
+    background: #eaf8ef;
+    color: #198754;
+}
+
+.status-idle {
+    background: #f0f2f5;
+    color: #6b7280;
+}
+
+.status-danger {
+    background: #ffe8eb;
+    color: #b42333;
+}
+
+.status-warning {
+    background: #fff5d9;
+    color: #916a00;
+}
+
+.status-info {
+    background: #e5f8fc;
+    color: #087990;
+}
+
+/* =========================
+   Department table
+========================= */
+
+.department-row {
+    padding: 12px 0;
+    border-bottom: 1px solid #edf0f5;
+}
+
+.department-row:last-child {
+    border-bottom: 0;
+}
+
+.department-name {
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.department-en {
+    font-size: 10px;
+    color: #8993a3;
+}
+
+.department-stats {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 7px;
+}
+
+.department-stat {
+    padding: 4px 7px;
+    border-radius: 7px;
+    background: #f5f7fa;
+    color: #697386;
+    font-size: 10px;
+}
+
+/* =========================
+   Alerts
+========================= */
+
+.alert-card {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+    border-radius: 13px;
+    padding: 13px;
+    margin-bottom: 9px;
+    border-right: 4px solid;
+    background: #f8f9fb;
+}
+
+.alert-card:hover {
+    color: inherit;
+    transform: translateX(-2px);
+}
+
+.alert-card.danger {
+    border-color: #dc3545;
+    background: #fff4f5;
+}
+
+.alert-card.warning {
+    border-color: #ffc107;
+    background: #fffaf0;
+}
+
+.alert-card.info {
+    border-color: #0dcaf0;
+    background: #f0fbff;
+}
+
+.alert-card-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.alert-card-icon {
+    font-size: 22px;
+}
+
+.alert-card-title {
+    font-weight: 900;
+    font-size: 13px;
+}
+
+.alert-card-text {
+    color: #70798a;
+    font-size: 11px;
+    margin-top: 3px;
+}
+
+.alert-card-count {
+    margin-right: auto;
+    font-size: 18px;
+    font-weight: 900;
+}
+
+/* =========================
+   Progress
+========================= */
+
+.metric-line {
+    margin-bottom: 14px;
+}
+
+.metric-line:last-child {
+    margin-bottom: 0;
+}
+
+.metric-line-top {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    margin-bottom: 6px;
+    color: #6f7888;
+}
+
+.metric-progress {
+    height: 8px;
+    background: #edf0f5;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.metric-progress .progress-bar {
+    border-radius: 20px;
+}
+
+/* =========================
+   Quick actions
+========================= */
+
+.quick-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: #172033;
+    background: #f7f9fc;
+    border: 1px solid #edf0f5;
+    padding: 11px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 800;
+    transition: .2s;
+}
+
+.quick-box:hover {
+    color: #0d6efd;
+    background: #eef4ff;
+    transform: translateY(-2px);
+}
+
+.quick-box-icon {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: #fff;
+    font-size: 18px;
+}
+
+/* =========================
+   Tables
+========================= */
+
+.pro-table {
+    margin: 0;
+    font-size: 11px;
+}
+
+.pro-table th {
+    background: #f7f9fc;
+    color: #626d7d;
+    font-weight: 900;
+    white-space: nowrap;
+    border-bottom: 1px solid #e8edf5;
+}
+
+.pro-table td,
+.pro-table th {
+    padding: 11px 9px;
+    vertical-align: middle;
+}
+
+.pro-table tbody tr:hover {
+    background: #fafcff;
+}
+
+/* =========================
+   Empty
+========================= */
+
+.empty-dashboard {
+    text-align: center;
+    padding: 27px 10px;
+    color: #8993a3;
+    font-size: 12px;
+}
+
+/* =========================
+   Responsive
+========================= */
+
+
+/* =========================================================
+   PROFESSIONAL UI ENHANCEMENTS — MOBILE + DESKTOP
+   لا يغيّر البيانات أو الـ URLs أو الـ Django variables
+========================================================= */
+
+.dashboard-pro {
+    width: 100%;
+    max-width: 1700px;
+    margin: 0 auto;
+    color: var(--dash-text);
+}
+
+.command-header {
+    min-height: 150px;
+    border: 1px solid rgba(255,255,255,.10);
+    background:
+        radial-gradient(circle at 90% 20%, rgba(255,255,255,.12), transparent 30%),
+        radial-gradient(circle at 15% 110%, rgba(255,255,255,.08), transparent 35%),
+        linear-gradient(135deg,#0b63d8 0%,#17458d 55%,#081f43 100%);
+}
+
+.command-header:before {
+    content: "";
+    position: absolute;
+    width: 160px;
+    height: 160px;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 50%;
+    right: -45px;
+    bottom: -85px;
+}
+
+.command-title {
+    letter-spacing: -.4px;
+}
+
+.command-chip {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: .2s ease;
+}
+
+.command-chip:hover {
+    background: rgba(255,255,255,.19);
+    transform: translateY(-1px);
+}
+
+.refresh-btn {
+    transition: .2s ease;
+}
+
+.refresh-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(0,0,0,.12);
+}
+
+/* KPI */
+.kpi-card {
+    min-height: 142px;
+    border-top: 3px solid transparent;
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease,
+        border-color .2s ease;
+}
+
+.kpi-card:hover {
+    border-top-color: #0d6efd;
+}
+
+.kpi-icon {
+    flex: 0 0 auto;
+    box-shadow: inset 0 0 0 1px rgba(13,110,253,.06);
+    transition: .2s ease;
+}
+
+.kpi-card:hover .kpi-icon {
+    transform: scale(1.06);
+}
+
+.kpi-value {
+    letter-spacing: -.5px;
+    font-variant-numeric: tabular-nums;
+}
+
+.kpi-footer {
+    align-items: center;
+    gap: 8px;
+}
+
+.kpi-footer > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Panels */
+.pro-panel {
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease;
+}
+
+.pro-panel:hover {
+    box-shadow: 0 9px 27px rgba(20,35,70,.075);
+}
+
+.pro-panel-header {
+    min-height: 54px;
+}
+
+.pro-panel-header a {
+    font-size: 11px;
+    font-weight: 800;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.pro-panel-body {
+    min-width: 0;
+}
+
+/* Section titles */
+.dashboard-section {
+    min-height: 28px;
+}
+
+.dashboard-section h2 {
+    letter-spacing: -.2px;
+}
+
+/* Charts */
+.chart-box {
+    min-height: 230px;
+}
+
+.chart-box canvas {
+    width: 100% !important;
+}
+
+/* Alerts */
+.alert-card {
+    transition:
+        transform .18s ease,
+        box-shadow .18s ease;
+}
+
+.alert-card:hover {
+    box-shadow: 0 5px 16px rgba(20,35,70,.07);
+}
+
+/* Quick actions */
+.quick-box {
+    min-height: 60px;
+}
+
+.quick-box-icon {
+    flex: 0 0 36px;
+    box-shadow: 0 2px 8px rgba(20,35,70,.06);
+}
+
+/* Tables */
+.pro-table {
+    min-width: 760px;
+}
+
+.table-responsive {
+    scrollbar-width: thin;
+    scrollbar-color: #c8d0dc transparent;
+}
+
+.table-responsive::-webkit-scrollbar {
+    height: 7px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: #c8d0dc;
+    border-radius: 20px;
+}
+
+/* Status */
+.status-pill {
+    line-height: 1.2;
+}
+
+/* Better focus for keyboard/accessibility */
+.dashboard-pro a:focus-visible,
+.dashboard-pro button:focus-visible {
+    outline: 3px solid rgba(13,110,253,.28);
+    outline-offset: 2px;
+}
+
+/* Tablet */
+@media (max-width: 991.98px) {
+    .command-header {
+        margin-bottom: 16px;
+    }
+
+    .dashboard-section {
+        margin-top: 22px;
+    }
+
+    .pro-panel-header {
+        padding: 13px 14px;
+    }
+
+    .pro-panel-body {
+        padding: 14px;
+    }
+
+    .chart-box {
+        min-height: 240px;
+    }
+}
+
+/* Mobile */
+@media (max-width: 767.98px) {
+    .dashboard-pro {
+        padding-bottom: 22px;
+    }
+
+    .command-header {
+        padding: 17px;
+        min-height: 0;
+        border-radius: 16px;
+    }
+
+    .command-title {
+        font-size: 21px;
+        line-height: 1.35;
+    }
+
+    .command-subtitle {
+        font-size: 12px;
+        line-height: 1.7;
+    }
+
+    .command-meta {
+        gap: 6px;
+        margin-top: 13px;
+    }
+
+    .command-chip {
+        padding: 6px 8px;
+        font-size: 10px;
+    }
+
+    .refresh-btn {
+        width: 100%;
+        justify-content: center;
+        margin-top: 12px;
+    }
+
+    .dashboard-section {
+        margin: 19px 0 11px;
+    }
+
+    .dashboard-section h2 {
+        font-size: 16px;
+    }
+
+    .kpi-card {
+        min-height: 125px;
+        padding: 14px;
+        border-radius: 14px;
+    }
+
+    .kpi-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 11px;
+        font-size: 19px;
+    }
+
+    .kpi-value {
+        font-size: 22px;
+    }
+
+    .kpi-label {
+        font-size: 11px;
+    }
+
+    .kpi-footer {
+        margin-top: 10px;
+        font-size: 10px;
+    }
+
+    .pro-panel {
+        border-radius: 14px;
+    }
+
+    .pro-panel-header {
+        min-height: 50px;
+    }
+
+    .pro-panel-header h3 {
+        font-size: 14px;
+    }
+
+    .chart-box {
+        height: 225px;
+        min-height: 225px;
+    }
+
+    .alert-card {
+        padding: 11px;
+    }
+
+    .alert-card-icon {
+        font-size: 19px;
+    }
+
+    .alert-card-title {
+        font-size: 12px;
+    }
+
+    .alert-card-text {
+        font-size: 10px;
+        line-height: 1.6;
+    }
+
+    .quick-box {
+        min-height: 55px;
+        padding: 9px;
+        font-size: 10px;
+    }
+
+    .quick-box-icon {
+        width: 32px;
+        height: 32px;
+        flex-basis: 32px;
+        font-size: 16px;
+    }
+
+    .department-row {
+        padding: 10px 0;
+    }
+
+    .department-name {
+        font-size: 12px;
+    }
+
+    .department-en {
+        font-size: 9px;
+    }
+
+    .department-stat {
+        font-size: 9px;
+        padding: 4px 6px;
+    }
+
+    .status-pill {
+        font-size: 9px;
+        padding: 4px 7px;
+    }
+
+    .empty-dashboard {
+        padding: 22px 8px;
+        font-size: 11px;
+    }
+}
+
+/* Very small phones */
+@media (max-width: 420px) {
+    .content-area {
+        padding: 9px !important;
+    }
+
+    .command-header {
+        padding: 14px;
+    }
+
+    .command-title {
+        font-size: 19px;
+    }
+
+    .command-meta {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .command-chip {
+        text-align: center;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .kpi-card {
+        min-height: 118px;
+        padding: 12px;
+    }
+
+    .kpi-value {
+        font-size: 20px;
+    }
+
+    .kpi-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 17px;
+    }
+
+    .kpi-footer .kpi-link {
+        font-size: 10px;
+    }
+}
+
+/* Reduce motion when requested by the device */
+@media (prefers-reduced-motion: reduce) {
+    .kpi-card,
+    .pro-panel,
+    .quick-box,
+    .alert-card,
+    .command-chip,
+    .refresh-btn {
+        transition: none !important;
+    }
+}
+
+@media (max-width: 767px) {
+    .content-area {
+        padding: 12px !important;
+    }
+
+    .command-header {
+        border-radius: 15px;
+        padding: 19px;
+    }
+
+    .command-title {
+        font-size: 22px;
+    }
+
+    .kpi-value {
+        font-size: 24px;
+    }
+
+    .chart-box {
+        height: 230px;
+    }
+
+    .dashboard-section {
+        margin-top: 21px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+
+{% if user.is_superuser or user.staff_profile.role == "ADMIN" or user.staff_profile.role == "MANAGER" %}
+<div class="d-flex flex-wrap gap-2 mb-4">
+    <a href="{% url 'reports:dashboard' %}" class="btn btn-primary">
+        📊 مركز التقارير
+    </a>
+    <a href="{% url 'system_settings:dashboard' %}" class="btn btn-outline-secondary">
+        ⚙️ إعدادات النظام
+    </a>
+</div>
+{% endif %}
+
+<div class="dashboard-pro">
+
+    <!-- ================= HEADER ================= -->
+    <div class="command-header">
+        <div class="command-content">
+
+            <h1 class="command-title">
+                🏥 مركز القيادة والتحكم
+            </h1>
+
+            <div class="command-subtitle">
+                HIS / LIS — المتابعة المركزية لحالة المستشفى والمختبر
+            </div>
+
+            <div class="command-meta">
+                <span class="command-chip">
+                    📅 {{ now|date:"Y-m-d" }}
+                </span>
+
+                <span class="command-chip">
+                    🕐 {{ now|date:"H:i" }}
+                </span>
+
+                <span class="command-chip">
+                    👤 {{ request.user.username }}
+                </span>
+
+                <span class="command-chip">
+                    🟢 النظام يعمل
+                </span>
+            </div>
+
+            <a href="{% url 'accounts:dashboard' %}" class="refresh-btn">
+                🔄 تحديث البيانات
+            </a>
+
+        </div>
+    </div>
+
+    <!-- ================= KPI ================= -->
+    <div class="dashboard-section">
+        <h2>📊 المؤشرات التشغيلية</h2>
+    </div>
+
+    <div class="row g-3">
+
+        <div class="col-6 col-xl-3">
+            <div class="kpi-card">
+                <div class="kpi-top">
+                    <div>
+                        <div class="kpi-value">{{ total_patients }}</div>
+                        <div class="kpi-label">إجمالي المرضى</div>
+                    </div>
+                    <div class="kpi-icon">👥</div>
+                </div>
+                <div class="kpi-footer">
+                    <span>{{ today_patients }} جديد اليوم</span>
+                    <a href="{% url 'patients:list' %}" class="kpi-link">فتح</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="kpi-card">
+                <div class="kpi-top">
+                    <div>
+                        <div class="kpi-value">{{ today_visits }}</div>
+                        <div class="kpi-label">زيارات اليوم</div>
+                    </div>
+                    <div class="kpi-icon">🧾</div>
+                </div>
+                <div class="kpi-footer">
+                    <span>{{ open_visits }} مفتوحة</span>
+                    <a href="{% url 'reception:dashboard' %}" class="kpi-link">الاستقبال</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="kpi-card">
+                <div class="kpi-top">
+                    <div>
+                        <div class="kpi-value">{{ active_admissions }}</div>
+                        <div class="kpi-label">التنويم النشط</div>
+                    </div>
+                    <div class="kpi-icon">🛏️</div>
+                </div>
+                <div class="kpi-footer">
+                    <span>{{ available_beds }} سرير متاح</span>
+                    <a href="{% url 'inpatient:dashboard' %}" class="kpi-link">التنويم</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="kpi-card">
+                <div class="kpi-top">
+                    <div>
+                        <div class="kpi-value">{{ emergency_active }}</div>
+                        <div class="kpi-label">حالات الطوارئ</div>
+                    </div>
+                    <div class="kpi-icon">🚑</div>
+                </div>
+                <div class="kpi-footer">
+                    <span>{{ emergency_critical }} حرجة</span>
+                    <a href="{% url 'emergency:dashboard' %}" class="kpi-link">الطوارئ</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="kpi-card">
+                <div class="kpi-top">
+                    <div>
+                        <div class="kpi-value">{{ today_lab_orders }}</div>
+                        <div class="kpi-label">طلبات المختبر اليوم</div>
+                    </div>
+                    <div class="kpi-icon">🧪</div>
+                </div>
+                <div class="kpi-footer">
+                    <span>{{ completed_lab_orders }} مكتمل إجمالًا</span>
+                    <a href="{% url 'laboratory:dashboard' %}" class="kpi-link">المختبر</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="kpi-card">
+                <div class="kpi-top">
+                    <div>
+                        <div class="kpi-value">{{ pending_verification_count }}</div>
+                        <div class="kpi-label">نتائج غير معتمدة</div>
+                    </div>
+                    <div class="kpi-icon">⏳</div>
+                </div>
+                <div class="kpi-footer">
+                    <span>{{ pending_result_orders_count }} طلب</span>
+                    <a href="{% url 'laboratory:result_workflow_dashboard' %}" class="kpi-link">متابعة</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="kpi-card">
+                <div class="kpi-top">
+                    <div>
+                        <div class="kpi-value">{{ pending_result_deliveries }}</div>
+                        <div class="kpi-label">نتائج غير مستلمة</div>
+                    </div>
+                    <div class="kpi-icon">📤</div>
+                </div>
+                <div class="kpi-footer">
+                    <span>{{ today_result_deliveries }} إرسال اليوم</span>
+                    <a href="{% url 'laboratory:result_delivery_dashboard' %}" class="kpi-link">المتابعة</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="kpi-card">
+                <div class="kpi-top">
+                    <div>
+                        <div class="kpi-value">{{ available_beds }}</div>
+                        <div class="kpi-label">الأسرة المتاحة</div>
+                    </div>
+                    <div class="kpi-icon">🛌</div>
+                </div>
+                <div class="kpi-footer">
+                    <span>إشغال {{ bed_occupancy_percent }}%</span>
+                    <a href="{% url 'inpatient:bed_list' %}" class="kpi-link">الأسرة</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ================= CHARTS ================= -->
+    <div class="dashboard-section">
+        <h2>📈 التحليل التشغيلي</h2>
+    </div>
+
+    <div class="row g-3">
+
+        <div class="col-lg-4">
+            <div class="pro-panel">
+                <div class="pro-panel-header">
+                    <h3>🧪 حالة المختبر</h3>
+                    <span class="status-pill status-active">LIVE</span>
+                </div>
+
+                <div class="pro-panel-body">
+                    <div class="chart-box">
+                        <canvas id="laboratoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="pro-panel">
+                <div class="pro-panel-header">
+                    <h3>🚑 حالات الطوارئ</h3>
+                    <span class="status-pill status-danger">
+                        {{ emergency_critical }} حرجة
+                    </span>
+                </div>
+
+                <div class="pro-panel-body">
+                    <div class="chart-box">
+                        <canvas id="emergencyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="pro-panel">
+                <div class="pro-panel-header">
+                    <h3>🛏️ حالة الأسرة</h3>
+                    <span class="status-pill status-info">
+                        {{ bed_occupancy_percent }}% إشغال
+                    </span>
+                </div>
+
+                <div class="pro-panel-body">
+                    <div class="chart-box">
+                        <canvas id="bedsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ================= ALERTS + QUICK ACTIONS ================= -->
+    <div class="dashboard-section">
+        <h2>🚨 مركز التنبيهات والتحكم</h2>
+    </div>
+
+    <div class="row g-3">
+
+        <div class="col-lg-7">
+            <div class="pro-panel">
+                <div class="pro-panel-header">
+                    <h3>🔔 التنبيهات</h3>
+                    <span class="status-pill status-warning">
+                        {{ alerts|length }}
+                    </span>
+                </div>
+
+                <div class="pro-panel-body">
+
+                    {% for alert in alerts %}
+                    <a href="{{ alert.url }}" class="alert-card {{ alert.level }}">
+                        <div class="alert-card-row">
+
+                            <div class="alert-card-icon">
+                                {{ alert.icon }}
+                            </div>
+
+                            <div>
+                                <div class="alert-card-title">
+                                    {{ alert.title }}
+                                </div>
+
+                                <div class="alert-card-text">
+                                    {{ alert.text }}
+                                </div>
+                            </div>
+
+                            <div class="alert-card-count">
+                                {{ alert.count }}
+                            </div>
+
+                        </div>
+                    </a>
+                    {% empty %}
+                    <div class="empty-dashboard">
+                        ✅ لا توجد تنبيهات حرجة حاليًا
+                    </div>
+                    {% endfor %}
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="pro-panel">
+                <div class="pro-panel-header">
+                    <h3>⚡ إجراءات سريعة</h3>
+                </div>
+
+                <div class="pro-panel-body">
+
+                    <div class="row g-2">
+
+                        {% for action in quick_actions %}
+                        <div class="col-6">
+                            <a href="{{ action.url }}" class="quick-box">
+                                <span class="quick-box-icon">
+                                    {{ action.icon }}
+                                </span>
+                                <span>{{ action.title }}</span>
+                            </a>
+                        </div>
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ================= DEPARTMENT STATUS ================= -->
+<div class="dashboard-section d-flex align-items-center justify-content-between gap-2 flex-wrap">
+    <div>
+        <h2>🏥 حالة أقسام المستشفى</h2>
+        <small class="text-muted">الأقسام النشطة أولاً</small>
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+        <span class="status-pill status-active">
+            {{ department_summary|length }} قسم
+        </span>
+
+        <button
+            type="button"
+            class="btn btn-sm btn-outline-primary"
+            id="toggleDepartmentsBtn"
+            aria-expanded="false"
+            onclick="toggleAllDepartments()">
+            <span id="toggleDepartmentsIcon">▼</span>
+            <span id="toggleDepartmentsText">عرض جميع الأقسام</span>
+        </button>
+    </div>
+</div>
+
+<div class="pro-panel">
+    <div class="table-responsive">
+        <table class="table pro-table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>القسم</th>
+                    <th>الزيارات المفتوحة</th>
+                    <th>التنويم</th>
+                    <th>طلبات المختبر</th>
+                    <th>مستوى النشاط</th>
+                    <th>الحالة</th>
+                </tr>
+            </thead>
+
+            <tbody id="departmentsTableBody">
+                {% for department in department_summary %}
+                <tr
+                    class="department-dashboard-row {% if department.status != 'ACTIVE' %}department-inactive-row{% endif %}"
+                    data-status="{{ department.status }}">
+
+                    <td>
+                        <strong>{{ department.name_ar }}</strong>
+                        <br>
+                        <small class="text-muted">
+                            {{ department.name_en }}
+                        </small>
+                    </td>
+
+                    <td>{{ department.visits }}</td>
+                    <td>{{ department.admissions }}</td>
+                    <td>{{ department.lab_orders }}</td>
+
+                    <td style="min-width:150px">
+                        <div class="metric-line">
+                            <div class="metric-line-top">
+                                <span>النشاط</span>
+                                <strong>{{ department.activity }}</strong>
+                            </div>
+
+                            <div class="metric-progress">
+                                {% if department.activity > 20 %}
+                                <div class="progress-bar bg-danger"
+                                     style="width:100%;height:100%"></div>
+                                {% elif department.activity > 10 %}
+                                <div class="progress-bar bg-warning"
+                                     style="width:70%;height:100%"></div>
+                                {% elif department.activity > 0 %}
+                                <div class="progress-bar bg-success"
+                                     style="width:40%;height:100%"></div>
+                                {% else %}
+                                <div class="progress-bar bg-secondary"
+                                     style="width:5%;height:100%"></div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td>
+
+                    <td>
+                        {% if department.status == "ACTIVE" %}
+                        <span class="status-pill status-active">
+                            🟢 {{ department.status_ar }}
+                        </span>
+                        {% else %}
+                        <span class="status-pill status-idle">
+                            ⚪ {{ department.status_ar }}
+                        </span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                {% empty %}
+                <tr>
+                    <td colspan="6">
+                        <div class="empty-dashboard">
+                            لا توجد أقسام
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+.department-inactive-row {
+    display: none;
+}
+
+.department-dashboard-row {
+    transition: background-color .18s ease;
+}
+
+.department-dashboard-row:hover {
+    background: rgba(13, 110, 253, .035);
+}
+
+#toggleDepartmentsBtn {
+    white-space: nowrap;
+}
+
+@media (max-width: 767.98px) {
+    #toggleDepartmentsBtn {
+        font-size: 10px;
+        padding: 6px 9px;
+    }
+
+    .department-dashboard-row td {
+        white-space: nowrap;
+    }
+
+    .department-dashboard-row td:first-child {
+        white-space: normal;
+        min-width: 145px;
+    }
+}
+</style>
+
+<script>
+function toggleAllDepartments() {
+    const rows = document.querySelectorAll('.department-inactive-row');
+    const button = document.getElementById('toggleDepartmentsBtn');
+    const text = document.getElementById('toggleDepartmentsText');
+    const icon = document.getElementById('toggleDepartmentsIcon');
+
+    const expanded = button.getAttribute('aria-expanded') === 'true';
+
+    rows.forEach(function(row) {
+        row.style.display = expanded ? 'none' : 'table-row';
+    });
+
+    button.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+
+    if (expanded) {
+        text.textContent = 'عرض جميع الأقسام';
+        icon.textContent = '▼';
+    } else {
+        text.textContent = 'إخفاء غير النشطة';
+        icon.textContent = '▲';
+    }
+}
+</script>
+
+
+
+            </table>
+
+        </div>
+    </div>
+
+    <!-- ================= CLINICAL OPERATIONS ================= -->
+    <div class="dashboard-section">
+        <h2>🏥 العمليات السريرية</h2>
+    </div>
+
+    <div class="row g-3">
+
+        <!-- Inpatient -->
+        <div class="col-lg-4">
+
+            <div class="pro-panel">
+
+                <div class="pro-panel-header">
+                    <h3>🛏️ التنويم</h3>
+
+                    <a href="{% url 'inpatient:admission_list' %}">
+                        عرض الحالات
+                    </a>
+                </div>
+
+                <div class="pro-panel-body">
+
+                    <div class="metric-line">
+                        <div class="metric-line-top">
+                            <span>الأسرة المشغولة</span>
+                            <strong>{{ occupied_beds }}</strong>
+                        </div>
+
+                        <div class="metric-progress">
+                            <div class="progress-bar bg-danger"
+                                 style="width:{{ bed_occupancy_percent }}%;height:100%">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metric-line">
+                        <div class="metric-line-top">
+                            <span>الأسرة المتاحة</span>
+                            <strong>{{ available_beds }}</strong>
+                        </div>
+
+                        <div class="metric-progress">
+                            <div class="progress-bar bg-success"
+                                 style="width:{% if operational_beds %}{% widthratio available_beds operational_beds 100 %}{% else %}0{% endif %}%;height:100%">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metric-line">
+                        <div class="metric-line-top">
+                            <span>الأسرة المحجوزة</span>
+                            <strong>{{ reserved_beds }}</strong>
+                        </div>
+
+                        <div class="metric-progress">
+                            <div class="progress-bar bg-warning"
+                                 style="width:{% if operational_beds %}{% widthratio reserved_beds operational_beds 100 %}{% else %}0{% endif %}%;height:100%">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="department-stats mt-3">
+                        <span class="department-stat">
+                            تنويم نشط: {{ active_admissions }}
+                        </span>
+
+                        <span class="department-stat">
+                            محولين: {{ transferred_admissions }}
+                        </span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Emergency -->
+        <div class="col-lg-4">
+
+            <div class="pro-panel">
+
+                <div class="pro-panel-header">
+                    <h3>🚑 الطوارئ</h3>
+
+                    <a href="{% url 'emergency:dashboard' %}">
+                        فتح الطوارئ
+                    </a>
+                </div>
+
+                <div class="pro-panel-body">
+
+                    <div class="department-stats mb-3">
+
+                        <span class="status-pill status-danger">
+                            🔴 حرجة: {{ emergency_critical }}
+                        </span>
+
+                        <span class="status-pill status-warning">
+                            انتظار: {{ emergency_waiting }}
+                        </span>
+
+                        <span class="status-pill status-info">
+                            فرز: {{ emergency_triage }}
+                        </span>
+
+                        <span class="status-pill status-active">
+                            رعاية: {{ emergency_under_care }}
+                        </span>
+
+                    </div>
+
+                    <div class="metric-line">
+                        <div class="metric-line-top">
+                            <span>الحالات النشطة</span>
+                            <strong>{{ emergency_active }}</strong>
+                        </div>
+
+                        <div class="metric-progress">
+                            <div class="progress-bar bg-danger"
+                                 style="width:{% if emergency_active %}{% widthratio emergency_critical emergency_active 100 %}{% else %}0{% endif %}%;height:100%">
+                            </div>
+                        </div>
+                    </div>
+
+                    {% for case in recent_emergency|slice:":5" %}
+                    <div class="department-row">
+
+                        <div class="department-name">
+                            {{ case.patient.full_name }}
+                        </div>
+
+                        <div class="department-en">
+                            {{ case.case_number }}
+                        </div>
+
+                        <div class="department-stats">
+                            <span class="department-stat">
+                                {{ case.get_triage_level_display }}
+                            </span>
+
+                            <span class="department-stat">
+                                {{ case.get_status_display }}
+                            </span>
+                        </div>
+
+                    </div>
+                    {% empty %}
+                    <div class="empty-dashboard">
+                        لا توجد حالات طوارئ حديثة
+                    </div>
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Laboratory -->
+        <div class="col-lg-4">
+
+            <div class="pro-panel">
+
+                <div class="pro-panel-header">
+                    <h3>🧪 المختبر</h3>
+
+                    <a href="{% url 'laboratory:result_workflow_dashboard' %}">
+                        دورة النتائج
+                    </a>
+                </div>
+
+                <div class="pro-panel-body">
+
+                    <div class="department-stats mb-3">
+
+                        <span class="status-pill status-warning">
+                            معلقة: {{ pending_lab_orders }}
+                        </span>
+
+                        <span class="status-pill status-info">
+                            معالجة: {{ processing_lab_orders }}
+                        </span>
+
+                        <span class="status-pill status-active">
+                            مكتملة: {{ completed_lab_orders }}
+                        </span>
+
+                    </div>
+
+                    <div class="metric-line">
+                        <div class="metric-line-top">
+                            <span>نتائج بانتظار الاعتماد</span>
+                            <strong>{{ pending_verification_count }}</strong>
+                        </div>
+
+                        <div class="metric-progress">
+                            <div class="progress-bar bg-warning"
+                                 style="width:{% if pending_result_orders_count %}100{% else %}0{% endif %}%;height:100%">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metric-line">
+                        <div class="metric-line-top">
+                            <span>نتائج بانتظار الاستلام</span>
+                            <strong>{{ pending_result_deliveries }}</strong>
+                        </div>
+
+                        <div class="metric-progress">
+                            <div class="progress-bar bg-info"
+                                 style="width:{% if pending_result_deliveries %}100{% else %}0{% endif %}%;height:100%">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metric-line">
+                        <div class="metric-line-top">
+                            <span>طلبات عاجلة</span>
+                            <strong>{{ urgent_pending_lab_orders }}</strong>
+                        </div>
+
+                        <div class="metric-progress">
+                            <div class="progress-bar bg-danger"
+                                 style="width:{% if urgent_pending_lab_orders %}100{% else %}0{% endif %}%;height:100%">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ================= PENDING RESULTS ================= -->
+    <div class="dashboard-section">
+        <h2>⏳ النتائج التي تحتاج متابعة</h2>
+
+        <a href="{% url 'laboratory:result_workflow_dashboard' %}">
+            فتح مركز النتائج →
+        </a>
+    </div>
+
+    <div class="pro-panel">
+
+        <div class="table-responsive">
+
+            <table class="table pro-table table-hover mb-0">
+
+                <thead>
+                    <tr>
+                        <th>الطلب</th>
+                        <th>المريض</th>
+                        <th>الفحص</th>
+                        <th>النتيجة</th>
+                        <th>الفاحص</th>
+                        <th>آخر تحديث</th>
+                        <th>الإجراء</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for item in pending_result_items %}
+
+                    <tr>
+
+                        <td>
+                            <strong>{{ item.order.order_number }}</strong>
+                        </td>
+
+                        <td>
+                            {{ item.order.patient.full_name }}
+                        </td>
+
+                        <td>
+                            {{ item.test.name_en }}
+                        </td>
+
+                        <td>
+                            {% if item.result %}
+                                {{ item.result }}
+                            {% elif item.result_numeric != None %}
+                                {{ item.result_numeric }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if item.examiner %}
+                                {{ item.examiner.get_full_name|default:item.examiner.username }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{ item.updated_at|date:"Y-m-d H:i" }}
+                        </td>
+
+                        <td>
+                            <a href="{% url 'laboratory:order_detail' item.order.id %}"
+                               class="btn btn-sm btn-outline-primary">
+                                فتح
+                            </a>
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-dashboard">
+                                ✅ لا توجد نتائج تحتاج اعتمادًا حاليًا
+                            </div>
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <!-- ================= RECENT ACTIVITY ================= -->
+    <div class="dashboard-section">
+        <h2>🕘 آخر النشاطات</h2>
+    </div>
+
+    <div class="row g-3">
+
+        <div class="col-lg-6">
+
+            <div class="pro-panel">
+
+                <div class="pro-panel-header">
+                    <h3>👥 آخر المرضى</h3>
+
+                    <a href="{% url 'patients:list' %}">
+                        عرض الكل
+                    </a>
+                </div>
+
+                <div class="pro-panel-body">
+
+                    {% for patient in recent_patients %}
+
+                    <div class="department-row">
+
+                        <div class="department-name">
+                            {{ patient.full_name }}
+                        </div>
+
+                        <div class="department-en">
+                            رقم الملف: {{ patient.patient_number }}
+                        </div>
+
+                        <div class="department-stats">
+                            <span class="department-stat">
+                                {{ patient.created_at|date:"Y-m-d H:i" }}
+                            </span>
+                        </div>
+
+                    </div>
+
+                    {% empty %}
+
+                    <div class="empty-dashboard">
+                        لا توجد بيانات
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-6">
+
+            <div class="pro-panel">
+
+                <div class="pro-panel-header">
+                    <h3>🧾 آخر الزيارات</h3>
+
+                    <a href="{% url 'reception:dashboard' %}">
+                        الاستقبال
+                    </a>
+                </div>
+
+                <div class="pro-panel-body">
+
+                    {% for visit in recent_visits %}
+
+                    <div class="department-row">
+
+                        <div class="department-name">
+                            {{ visit.patient.full_name }}
+                        </div>
+
+                        <div class="department-en">
+                            {{ visit.department.name_ar|default:"-" }}
+                            -
+                            {{ visit.doctor.full_name|default:"-" }}
+                        </div>
+
+                        <div class="department-stats">
+                            <span class="department-stat">
+                                {{ visit.get_status_display }}
+                            </span>
+
+                            <span class="department-stat">
+                                {{ visit.created_at|date:"Y-m-d H:i" }}
+                            </span>
+                        </div>
+
+                    </div>
+
+                    {% empty %}
+
+                    <div class="empty-dashboard">
+                        لا توجد زيارات
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ================= DATA INTEGRITY ================= -->
+    {% if integrity_problem_count %}
+
+    <div class="dashboard-section">
+        <h2>🛡️ سلامة بيانات المختبر</h2>
+    </div>
+
+    <div class="pro-panel">
+
+        <div class="pro-panel-body">
+
+            <div class="alert-card danger">
+
+                <div class="alert-card-row">
+
+                    <div class="alert-card-icon">
+                        ⚠️
+                    </div>
+
+                    <div>
+                        <div class="alert-card-title">
+                            يوجد {{ integrity_problem_count }}
+                            سجل يحتاج مراجعة
+                        </div>
+
+                        <div class="alert-card-text">
+                            تم اكتشاف نتائج بحالة مكتملة لكنها غير معتمدة
+                            أو بدون نتيجة. لم يتم تعديلها تلقائيًا.
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            {% for item in integrity_problem_items %}
+
+            <div class="department-row">
+
+                <div class="department-name">
+                    {{ item.order.order_number }}
+                    -
+                    {{ item.order.patient.full_name }}
+                </div>
+
+                <div class="department-en">
+                    {{ item.test.name_en }}
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{{ chart_data|json_script:"dashboard-chart-data" }}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const dataElement = document.getElementById("dashboard-chart-data");
+
+    if (!dataElement) {
+        return;
+    }
+
+    const data = JSON.parse(dataElement.textContent);
+
+    /* =========================
+       Laboratory Chart
+    ========================= */
+
+    const laboratoryCanvas =
+        document.getElementById("laboratoryChart");
+
+    if (laboratoryCanvas) {
+
+        new Chart(laboratoryCanvas, {
+            type: "bar",
+
+            data: {
+                labels: [
+                    "اليوم",
+                    "معلقة",
+                    "معالجة",
+                    "مكتملة",
+                    "اعتماد",
+                    "استلام"
+                ],
+
+                datasets: [{
+                    label: "الحالة",
+                    data: [
+                        data.laboratory.today,
+                        data.laboratory.pending,
+                        data.laboratory.processing,
+                        data.laboratory.completed,
+                        data.laboratory.verification,
+                        data.laboratory.deliveries
+                    ],
+
+                    borderWidth: 1,
+                    borderRadius: 7
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                animation: {
+                    duration: 500
+                },
+
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    /* =========================
+       Emergency Chart
+    ========================= */
+
+    const emergencyCanvas =
+        document.getElementById("emergencyChart");
+
+    if (emergencyCanvas) {
+
+        new Chart(emergencyCanvas, {
+            type: "doughnut",
+
+            data: {
+                labels: [
+                    "انتظار",
+                    "فرز",
+                    "تحت الرعاية",
+                    "حرجة"
+                ],
+
+                datasets: [{
+                    data: [
+                        data.emergency.waiting,
+                        data.emergency.triage,
+                        data.emergency.under_care,
+                        data.emergency.critical
+                    ],
+
+                    borderWidth: 2
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                plugins: {
+                    legend: {
+                        position: "bottom"
+                    }
+                }
+            }
+        });
+    }
+
+    /* =========================
+       Beds Chart
+    ========================= */
+
+    const bedsCanvas =
+        document.getElementById("bedsChart");
+
+    if (bedsCanvas) {
+
+        new Chart(bedsCanvas, {
+            type: "doughnut",
+
+            data: {
+                labels: [
+                    "مشغولة",
+                    "متاحة",
+                    "محجوزة",
+                    "صيانة"
+                ],
+
+                datasets: [{
+                    data: [
+                        data.beds.occupied,
+                        data.beds.available,
+                        data.beds.reserved,
+                        data.beds.maintenance
+                    ],
+
+                    borderWidth: 2
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                plugins: {
+                    legend: {
+                        position: "bottom"
+                    }
+                }
+            }
+        });
+    }
+
+});
+</script>
+
+{% endblock %}

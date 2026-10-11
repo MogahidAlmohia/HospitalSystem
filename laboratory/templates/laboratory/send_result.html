@@ -1,0 +1,278 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>.send-result-page{max-width:1100px;margin:auto}.card,.send-card{border:1px solid #e5eaf1;box-shadow:0 8px 24px rgba(15,23,42,.06);border-radius:16px}</style>
+
+<div class="container-fluid py-4" dir="rtl">
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">
+                📤 إرسال نتيجة المختبر
+            </h4>
+        </div>
+
+        <div class="card-body">
+
+            <div class="alert alert-info">
+                <strong>المريض:</strong>
+                {{ order.patient.full_name }}
+                <br>
+
+                <strong>رقم الطلب:</strong>
+                {{ order.order_number }}
+                <br>
+
+                <strong>حالة الطلب:</strong>
+                {{ order.get_status_display }}
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">
+                            🏥 القسم المستلم
+                        </label>
+
+                        <select
+                            name="department_id"
+                            class="form-select"
+                        >
+                            <option value="">
+                                -- اختر القسم --
+                            </option>
+
+                            {% for department in departments %}
+                                <option
+                                    value="{{ department.id }}"
+                                    {% if order.requesting_department and department.id == order.requesting_department.id %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ department.name_ar }} - {{ department.name_en }}
+                                </option>
+                            {% endfor %}
+                        </select>
+
+                        <div class="form-text">
+                            يمكنك اختيار القسم أو الطبيب أو الاثنين معاً.
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">
+                            👨‍⚕️ الطبيب المستلم
+                        </label>
+
+                        <select
+                            name="doctor_id"
+                            class="form-select"
+                        >
+                            <option value="">
+                                -- اختر الطبيب --
+                            </option>
+
+                            {% for doctor in doctors %}
+                                <option
+                                    value="{{ doctor.id }}"
+                                    {% if order.requesting_doctor and doctor.id == order.requesting_doctor.id %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ doctor.full_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label fw-bold">
+                            📝 ملاحظات الإرسال
+                        </label>
+
+                        <textarea
+                            name="note"
+                            class="form-control"
+                            rows="4"
+                            placeholder="اكتب أي ملاحظة للقسم أو الطبيب..."
+                        ></textarea>
+                    </div>
+
+                </div>
+
+                <div class="mt-4 d-flex gap-2 flex-wrap">
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                        onclick="return confirm('هل أنت متأكد من إرسال نتيجة المختبر؟');"
+                    >
+                        📤 إرسال النتيجة
+                    </button>
+
+                    <a
+                        href="{% url 'laboratory:laboratory_report' order.id %}"
+                        class="btn btn-secondary"
+                    >
+                        ↩️ العودة إلى التقرير
+                    </a>
+
+                    <a
+                        href="{% url 'laboratory:order_detail' order.id %}"
+                        class="btn btn-light"
+                    >
+                        📋 تفاصيل الطلب
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+
+    {% if deliveries %}
+
+    <div class="card shadow-sm">
+
+        <div class="card-header">
+            <h5 class="mb-0">
+                📜 سجل إرسال النتيجة
+            </h5>
+        </div>
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered table-hover mb-0">
+
+                    <thead class="table-light">
+
+                        <tr>
+                            <th>#</th>
+                            <th>القسم</th>
+                            <th>الطبيب</th>
+                            <th>تم الإرسال بواسطة</th>
+                            <th>تاريخ الإرسال</th>
+                            <th>حالة الاستلام</th>
+                            <th>تم الاستلام بواسطة</th>
+                            <th>تاريخ الاستلام</th>
+                            <th>الملاحظة</th>
+                            <th>الإجراء</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for delivery in deliveries %}
+
+                        <tr>
+
+                            <td>
+                                {{ forloop.counter }}
+                            </td>
+
+                            <td>
+                                {% if delivery.department %}
+                                    {{ delivery.department.name_ar }} - {{ delivery.department.name_en }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if delivery.doctor %}
+                                    {{ delivery.doctor.full_name }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if delivery.sent_by %}
+                                    {{ delivery.sent_by.get_full_name|default:delivery.sent_by.username }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {{ delivery.sent_at|date:"Y-m-d H:i" }}
+                            </td>
+
+                            <td>
+                                {% if delivery.received %}
+                                    <span class="badge bg-success">
+                                        ✅ تم الاستلام
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">
+                                        ⏳ بانتظار الاستلام
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if delivery.received_by %}
+                                    {{ delivery.received_by.get_full_name|default:delivery.received_by.username }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if delivery.received_at %}
+                                    {{ delivery.received_at|date:"Y-m-d H:i" }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {{ delivery.note|default:"—" }}
+                            </td>
+
+                            <td>
+                                {% if not delivery.received %}
+                                    <form method="post"
+                                          action="{% url 'laboratory:receive_result' delivery.id %}"
+                                          style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit"
+                                                class="btn btn-sm btn-success"
+                                                onclick="return confirm('هل تؤكد استلام نتيجة المختبر؟');">
+                                            ✅ تم الاستلام
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <span class="text-success fw-bold">
+                                        مكتمل
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

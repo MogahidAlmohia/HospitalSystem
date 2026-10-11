@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}نقل المريض{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+<div class="col-lg-7">
+
+<div class="card p-4">
+
+<h3>🔄 نقل المريض</h3>
+
+<p class="text-muted">
+{{ admission.patient.full_name }}
+-
+{{ admission.admission_number }}
+</p>
+
+<hr>
+
+<form method="post">
+{% csrf_token %}
+
+<div class="mb-3">
+<label class="form-label">السرير الجديد</label>
+
+<select name="bed" class="form-select" required>
+<option value="">-- اختر سريرًا متاحًا --</option>
+
+{% for bed in beds %}
+<option value="{{ bed.id }}">
+{{ bed.room.room_number }}
+/
+{{ bed.bed_number }}
+{% if bed.room.department %}
+-
+{{ bed.room.department.name_ar }}
+{% endif %}
+</option>
+{% endfor %}
+
+</select>
+</div>
+
+<div class="mb-3">
+<label class="form-label">سبب النقل</label>
+<textarea name="reason"
+class="form-control"
+rows="4"></textarea>
+</div>
+
+<button class="btn btn-warning">
+🔄 تأكيد النقل
+</button>
+
+<a href="{% url 'inpatient:admission_detail' admission.id %}"
+class="btn btn-secondary">
+إلغاء
+</a>
+
+</form>
+
+</div>
+</div>
+</div>
+{% endblock %}

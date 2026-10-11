@@ -1,0 +1,56 @@
+# Databases and patient data
+*.sqlite3
+*.sqlite3-*
+db_*.sqlite3
+*.db
+db.sqlite3.before_*
+
+# Backups
+backup*/
+*.bak
+*.backup
+*.old
+
+# Secrets and environment variables
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Logs and runtime files
+*.log
+*.pid
+
+# User uploads
+media/
+
+# Editor and OS files
+.DS_Store
+Thumbs.db
+
+# Development backup files
+*.before_*
+*.before-*
+
+# Additional backup and recovery files
+**/*backup*
+**/*_backup*
+**/*bak*
+**/*broken*
+**/*before*
+*.orig
+*.rej
+
+# Local editor settings
+.vscode/
+
+# Unreviewed upgrade script
+/apply_his_upgrade.py

@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}ملف المريض{% endblock %}
+
+{% block content %}
+<div class="mb-3 d-flex justify-content-end gap-2 flex-wrap"><a href="{% url 'reports:patient_file_pdf' patient.id %}" target="_blank" class="btn btn-danger">
+    🖨️ طباعة ملف المريض
+</a></div>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2>📁 الملف الطبي للمريض</h2>
+        <p class="text-muted mb-0">
+            {{ patient.full_name }} — {{ patient.patient_number }}
+        </p>
+    </div>
+
+    <div class="d-flex gap-2">
+        {% if perms.patients.edit %}
+        <a
+            href="{% url 'patients:edit' patient.id %}"
+            class="btn btn-outline-primary"
+        >
+            ✏️ تعديل
+        </a>
+        {% endif %}
+
+        {% if perms.patients.create %}
+        <a
+            href="{% url 'patients:visit_create' patient.id %}"
+            class="btn btn-success"
+        >
+            ➕ زيارة جديدة
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row g-4">
+
+    <div class="col-lg-5">
+        
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold">🩺 التشخيصات والأمراض المسجلة</h5>
+        <span class="badge bg-primary">{{ patient.clinical_diagnoses.count }} تشخيص</span>
+    </div>
+    <div class="card-body">
+        {% if patient.clinical_diagnoses.all %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>التشخيص</th>
+                            <th>ICD-10</th>
+                            <th>القسم</th>
+                            <th>الحالة</th>
+                            <th>النوع</th>
+                            <th>التاريخ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for diagnosis in patient.clinical_diagnoses.all %}
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">{{ diagnosis.diagnosis_name }}</div>
+                                {% if diagnosis.diagnosis_name_en %}
+                                    <small class="text-muted">{{ diagnosis.diagnosis_name_en }}</small>
+                                {% endif %}
+                                {% if diagnosis.is_chronic %}
+                                    <span class="badge bg-warning text-dark ms-1">مزمن</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ diagnosis.icd10_code|default:"—" }}</td>
+                            <td>{{ diagnosis.department.name_ar|default:"—" }}</td>
+                            <td>{{ diagnosis.get_status_display }}</td>
+                            <td>{{ diagnosis.get_diagnosis_type_display }}</td>
+                            <td>{{ diagnosis.created_at|date:"Y-m-d H:i" }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center text-muted py-4">
+                لا توجد تشخيصات مسجلة لهذا المريض حتى الآن.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card shadow-sm">
+            <div class="card-header">
+                <strong>بيانات المريض</strong>
+            </div>
+
+            <div class="card-body">
+
+                <p><strong>رقم المريض:</strong> {{ patient.patient_number }}</p>
+                <p><strong>الاسم:</strong> {{ patient.full_name }}</p>
+                <p><strong>الجنس:</strong> {{ patient.get_gender_display }}</p>
+                <p><strong>العمر:</strong> {{ patient.age|default:"-" }}</p>
+                <p><strong>تاريخ الميلاد:</strong> {{ patient.date_of_birth|default:"-" }}</p>
+                <p><strong>الهاتف:</strong> {{ patient.phone|default:"-" }}</p>
+                <p><strong>العنوان:</strong> {{ patient.address|default:"-" }}</p>
+                <p><strong>الرقم الوطني:</strong> {{ patient.national_id|default:"-" }}</p>
+                <p><strong>فصيلة الدم:</strong> {{ patient.blood_group|default:"-" }}</p>
+                <p><strong>الحساسية:</strong> {{ patient.allergies|default:"-" }}</p>
+
+                <hr>
+
+                <strong>ملاحظات طبية</strong>
+                <p class="mt-2">
+                    {{ patient.medical_notes|default:"لا توجد ملاحظات." }}
+                </p>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between">
+                <strong>الزيارات</strong>
+
+                <a
+                    href="{% url 'patients:visits' patient.id %}"
+                    class="btn btn-sm btn-outline-primary"
+                >
+                    عرض الكل
+                </a>
+            </div>
+
+            <div class="card-body">
+
+                {% for visit in visits %}
+                <div class="border-bottom py-3">
+
+                    <div class="d-flex justify-content-between">
+                        <strong>
+                            زيارة رقم {{ visit.visit_number }}
+                        </strong>
+
+                        <a
+                            href="{% url 'patients:visit_detail' visit.id %}"
+                            class="btn btn-sm btn-outline-secondary"
+                        >
+                            فتح
+                        </a>
+                    </div>
+
+                    <div class="text-muted mt-1">
+                        القسم:
+                        {% if visit.department %}
+                            {{ visit.department.name_ar|default:visit.department.name_en }}
+                        {% else %}
+                            غير محدد
+                        {% endif %}
+
+                        |
+                        الطبيب:
+                        {{ visit.doctor.full_name|default:"غير محدد" }}
+
+                        |
+                        {{ visit.created_at|date:"Y-m-d H:i" }}
+                    </div>
+
+                </div>
+                {% empty %}
+                <div class="text-center text-muted py-4">
+                    لا توجد زيارات.
+                </div>
+                {% endfor %}
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

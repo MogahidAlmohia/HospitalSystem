@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}وحدات القياس{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+<h3 class="mb-3">وحدات القياس</h3>
+
+{% if can_create %}
+<div class="card shadow-sm mb-3">
+<div class="card-body">
+<form method="post">
+{% csrf_token %}
+<div class="row g-2">
+{% for field in form %}
+<div class="col-12 col-md-4">
+<label class="form-label">{{ field.label }}</label>
+{{ field }}
+{% for error in field.errors %}<small class="text-danger d-block">{{ error }}</small>{% endfor %}
+</div>
+{% endfor %}
+</div>
+<button class="btn btn-primary mt-3">إضافة وحدة</button>
+</form>
+</div>
+</div>
+{% endif %}
+
+<div class="card shadow-sm">
+<div class="card-body p-0">
+{% if units %}
+<div class="table-responsive">
+<table class="table table-hover mb-0">
+<thead><tr><th>الرمز</th><th>العربي</th><th>English</th><th>الحالة</th></tr></thead>
+<tbody>
+{% for row in units %}
+<tr><td>{{ row.code }}</td><td>{{ row.name_ar }}</td><td>{{ row.name_en }}</td><td>{% if row.is_active %}نشطة{% else %}غير نشطة{% endif %}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% else %}
+<div class="p-5 text-center text-muted">لا توجد وحدات قياس مسجلة حاليًا.</div>
+{% endif %}
+</div>
+</div>
+</div>
+{% endblock %}

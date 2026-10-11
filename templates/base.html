@@ -1,0 +1,1880 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/static/pwa/manifest.webmanifest">
+<meta name="theme-color" content="#0d6efd">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="HIS / LIS">
+<link rel="apple-touch-icon" href="/static/favicon.png">
+
+  <link rel="icon" type="image/png" href="{% static 'favicon.png' %}">
+  <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <title>{% block title %}نظام إدارة المستشفى والمختبر{% endblock %}</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #0d6efd;
+      --primary-dark: #084298;
+      --sidebar: #111827;
+      --sidebar-hover: #1f2937;
+      --sidebar-active: #2563eb;
+      --body-bg: #f3f6fa;
+      --text-dark: #172033;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 100% 0%, rgba(13, 110, 253, .055), transparent 28rem),
+        var(--body-bg);
+      color: var(--text-dark);
+      font-family: "Cairo", "Tajawal", Tahoma, Arial, sans-serif;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a,
+    button,
+    input,
+    select,
+    textarea {
+      font-family: inherit;
+    }
+
+    a {
+      transition: color .18s ease, background-color .18s ease, transform .18s ease, box-shadow .18s ease;
+    }
+
+    ::selection {
+      background: rgba(13, 110, 253, .18);
+      color: var(--text-dark);
+    }
+
+    .main-wrapper {
+      position: relative;
+    }
+
+    .content-area>* {
+      animation: page-enter .35s ease both;
+    }
+
+    @keyframes page-enter {
+      from {
+        opacity: 0;
+        transform: translateY(7px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* =========================
+           TOP NAVBAR
+        ========================= */
+
+    .top-navbar {
+      height: 64px;
+      background: linear-gradient(135deg,
+          #0d6efd,
+          #084298);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 22px;
+      position: sticky;
+      top: 0;
+      z-index: 1050;
+      box-shadow: 0 3px 15px rgba(0, 0, 0, .12);
+    }
+
+    .brand-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 23px;
+    }
+
+    .brand-title {
+      font-weight: 800;
+      font-size: 17px;
+      line-height: 1.2;
+    }
+
+    .brand-subtitle {
+      font-size: 11px;
+      opacity: .82;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .top-user {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      background: rgba(255, 255, 255, .13);
+      border-radius: 12px;
+      padding: 7px 12px;
+    }
+
+    .user-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: white;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .user-name {
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .user-role {
+      font-size: 10px;
+      opacity: .8;
+    }
+
+    /* =========================
+           LAYOUT
+        ========================= */
+
+    .app-layout {
+      display: flex;
+      min-height: calc(100vh - 64px);
+    }
+
+    .sidebar {
+      width: 270px;
+      background: var(--sidebar);
+      color: #dbe4f0;
+      padding: 15px 12px;
+      flex-shrink: 0;
+      overflow-y: auto;
+      position: sticky;
+      top: 64px;
+      height: calc(100vh - 64px);
+    }
+
+    .main-wrapper {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .content-area {
+      padding: clamp(18px, 3vw, 34px);
+      max-width: 1740px;
+      margin: auto;
+    }
+
+    .content-area .btn {
+      border-radius: 10px;
+      font-weight: 700;
+      box-shadow: 0 3px 9px rgba(15, 23, 42, .06);
+    }
+
+    .content-area .form-control,
+    .content-area .form-select,
+    .content-area textarea {
+      border: 1px solid #dfe6ef;
+      border-radius: 10px;
+      min-height: 42px;
+      padding: 9px 12px;
+      transition: border-color .18s ease, box-shadow .18s ease;
+    }
+
+    .content-area .form-control:focus,
+    .content-area .form-select:focus,
+    .content-area textarea:focus {
+      border-color: #78aefc;
+      box-shadow: 0 0 0 .22rem rgba(13, 110, 253, .12);
+    }
+
+    .content-area .table-responsive {
+      border-radius: 13px;
+    }
+
+    .content-area .table thead th {
+      background: #f5f8fc;
+      color: #4b5563;
+      font-size: 12px;
+      font-weight: 800;
+      border-bottom: 1px solid #e5eaf1;
+    }
+
+    .content-area .table tbody tr {
+      transition: background-color .16s ease;
+    }
+
+    .content-area .table tbody tr:hover {
+      background: #f8fbff;
+    }
+
+    /* =========================
+           SIDEBAR
+        ========================= */
+
+    .sidebar-section {
+      color: #8fa2bd;
+      font-size: 10px;
+      font-weight: bold;
+      padding: 14px 10px 7px;
+      text-transform: uppercase;
+    }
+
+    .side-link {
+      color: #dbe4f0;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 9px;
+      margin-bottom: 3px;
+      transition: .18s;
+      font-size: 13px;
+    }
+
+    .side-link:hover {
+      background: var(--sidebar-hover);
+      color: white;
+      transform: translateX(-2px);
+    }
+
+    .side-link.active {
+      background: linear-gradient(135deg, #2f7cf6, #1d4ed8);
+      color: white;
+      box-shadow: 0 5px 14px rgba(37, 99, 235, .28);
+    }
+
+    .side-link.active::before {
+      content: "";
+      width: 3px;
+      height: 19px;
+      background: #fff;
+      border-radius: 9px;
+      margin-left: 2px;
+    }
+
+    .side-link:focus-visible,
+    .mobile-menu-btn:focus-visible,
+    .notification-btn:focus-visible,
+    .quick-search input:focus-visible {
+      outline: 3px solid rgba(147, 197, 253, .9);
+      outline-offset: 2px;
+    }
+
+    .sidebar-overlay {
+      display: none;
+    }
+
+    .side-left {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .side-icon {
+      width: 25px;
+      text-align: center;
+      font-size: 17px;
+    }
+
+    .side-badge {
+      font-size: 9px;
+      background: #374151;
+      color: #cbd5e1;
+      padding: 3px 6px;
+      border-radius: 20px;
+    }
+
+    .sidebar-divider {
+      border-color: #374151;
+      opacity: .5;
+      margin: 14px 5px;
+    }
+
+    .dev-link {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    .dev-link:hover {
+      transform: none;
+      background: transparent;
+      color: #dbe4f0;
+    }
+
+    .notification-wrap {
+      position: relative;
+    }
+
+    .notification-btn {
+      position: relative;
+      border: 0;
+      background: rgba(255, 255, 255, .12);
+      color: #fff;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .notification-count {
+      position: absolute;
+      top: -5px;
+      left: -5px;
+      min-width: 20px;
+      height: 20px;
+      padding: 1px 5px;
+      border-radius: 20px;
+      background: #dc3545;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 18px;
+      border: 2px solid #084298;
+    }
+
+    .notification-menu {
+      display: none;
+      position: absolute;
+      top: 48px;
+      left: 0;
+      width: 340px;
+      max-width: calc(100vw - 24px);
+      background: #fff;
+      color: #172033;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      box-shadow: 0 14px 35px rgba(0, 0, 0, .18);
+      overflow: hidden;
+      z-index: 2000;
+    }
+
+    .notification-menu.show {
+      display: block;
+    }
+
+    .notification-menu-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 13px 15px;
+      border-bottom: 1px solid #edf0f5;
+    }
+
+    .notification-menu-head a {
+      font-size: 11px;
+      text-decoration: none;
+    }
+
+    .notification-item {
+      display: flex;
+      gap: 10px;
+      padding: 12px 14px;
+      color: #172033;
+      text-decoration: none;
+      border-bottom: 1px solid #f0f2f5;
+    }
+
+    .notification-item:hover,
+    .notification-item.unread {
+      background: #f6f9ff;
+    }
+
+    .notification-item strong {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 3px;
+    }
+
+    .notification-item small {
+      display: block;
+      color: #6b7280;
+      font-size: 10px;
+      line-height: 1.5;
+    }
+
+    .notification-level {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex: 0 0 auto;
+      background: #0d6efd;
+    }
+
+    .level-danger {
+      background: #dc3545;
+    }
+
+    .level-warning {
+      background: #ffc107;
+    }
+
+    .level-success {
+      background: #198754;
+    }
+
+    .notification-empty {
+      padding: 24px 15px;
+      text-align: center;
+      color: #6b7280;
+      font-size: 12px;
+    }
+
+    /* =========================
+           MOBILE
+        ========================= */
+
+    .mobile-menu-btn {
+      display: none;
+      border: 0;
+      background: rgba(255, 255, 255, .15);
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 9px;
+      font-size: 20px;
+    }
+
+    @media (max-width: 991px) {
+
+      .mobile-menu-btn {
+        display: block;
+      }
+
+      .sidebar {
+        position: fixed;
+        right: -285px;
+        top: 64px;
+        z-index: 1040;
+        transition: .25s;
+        box-shadow: -5px 0 20px rgba(0, 0, 0, .25);
+      }
+
+      .sidebar.show {
+        right: 0;
+      }
+
+      .sidebar-overlay {
+        position: fixed;
+        inset: 64px 0 0;
+        background: rgba(15, 23, 42, .45);
+        z-index: 1035;
+      }
+
+      .sidebar-overlay.show {
+        display: block;
+      }
+
+      .content-area {
+        padding: 17px;
+      }
+
+      .brand-subtitle {
+        display: none;
+      }
+
+      .user-role {
+        display: none;
+      }
+    }
+
+    @media (max-width: 600px) {
+
+      .top-navbar {
+        padding: 0 10px;
+      }
+
+      .brand-title {
+        font-size: 13px;
+      }
+
+      .brand-icon {
+        width: 37px;
+        height: 37px;
+      }
+
+      .top-user {
+        padding: 5px;
+        background: transparent;
+      }
+
+      .user-name {
+        display: none;
+      }
+    }
+
+    /* =========================
+           CARDS / TABLES
+        ========================= */
+
+    .card {
+      border: 1px solid rgba(226, 232, 240, .9);
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, .06);
+      overflow: hidden;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+
+    .card:hover {
+      box-shadow: 0 12px 30px rgba(15, 23, 42, .09);
+    }
+
+    .card-header {
+      border-bottom: 1px solid #edf1f6 !important;
+    }
+
+    .form-control,
+    .form-select {
+      border-color: #dbe3ed;
+      border-radius: 10px;
+      padding-top: .62rem;
+      padding-bottom: .62rem;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      border-color: #78aefc;
+      box-shadow: 0 0 0 .22rem rgba(13, 110, 253, .12);
+    }
+
+    .btn {
+      border-radius: 10px;
+      font-weight: 700;
+    }
+
+    .btn-primary {
+      box-shadow: 0 4px 12px rgba(13, 110, 253, .18);
+    }
+
+    .table tbody tr {
+      transition: background-color .16s ease;
+    }
+
+    .table tbody tr:hover {
+      background-color: #f5f9ff;
+    }
+
+    .page-title {
+      font-size: 25px;
+      font-weight: 800;
+      margin-bottom: 5px;
+    }
+
+    .page-subtitle {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 22px;
+    }
+
+    .table {
+      vertical-align: middle;
+    }
+
+    .table thead th {
+      white-space: nowrap;
+    }
+
+    /* =========================
+           QUICK SEARCH
+        ========================= */
+
+    .quick-search {
+      max-width: 330px;
+      position: relative;
+    }
+
+    .quick-search input {
+      border: 0;
+      background: rgba(255, 255, 255, .14);
+      color: white;
+      border-radius: 10px;
+      padding: 9px 38px 9px 12px;
+      width: 100%;
+      outline: none;
+      font-size: 12px;
+    }
+
+    .quick-search input::placeholder {
+      color: rgba(255, 255, 255, .75);
+    }
+
+    .quick-search-icon {
+      position: absolute;
+      right: 12px;
+      top: 8px;
+    }
+
+    @media (max-width: 800px) {
+      .quick-search {
+        display: none;
+      }
+    }
+
+    /* =========================
+           NOTIFICATION
+        ========================= */
+
+    .notification-btn {
+      width: 38px;
+      height: 38px;
+      border: 0;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, .13);
+      color: white;
+      position: relative;
+    }
+
+    .notification-dot {
+      position: absolute;
+      width: 7px;
+      height: 7px;
+      background: #dc3545;
+      border-radius: 50%;
+      top: 7px;
+      right: 7px;
+    }
+
+    /* =========================
+           FOOTER & MAIN CONTENT
+        ========================= */
+
+    .content-area {
+      min-height: calc(100vh - 132px);
+    }
+
+    .content-area>.card,
+    .content-area>.panel,
+    .content-area>.table-card {
+      border: 1px solid rgba(226, 232, 240, .9);
+      box-shadow: 0 10px 28px rgba(15, 23, 42, .06);
+    }
+
+    .content-area .page-header,
+    .content-area .workflow-header,
+    .content-area .audit-header {
+      border-radius: 18px;
+    }
+
+    .content-area table thead th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    @media (max-width: 768px) {
+      .content-area {
+        padding: 16px 12px;
+      }
+
+      .content-area h1,
+      .content-area h2 {
+        font-size: 1.35rem;
+      }
+    }
+
+    footer {
+      color: #7b8494;
+      font-size: 12px;
+      text-align: center;
+      padding: 25px 10px;
+    }
+
+    /* =========================
+           SCROLLBAR
+        ========================= */
+
+    .sidebar::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+      background: #374151;
+      border-radius: 10px;
+    }
+
+    /* =========================
+           ALERTS
+        ========================= */
+
+    .alert {
+      border: 0;
+      border-radius: 12px;
+    }
+  </style>
+
+  {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+  <!-- =========================
+     TOP BAR
+========================= -->
+
+  <nav class="top-navbar">
+
+    <div class="brand-area">
+
+      <button class="mobile-menu-btn" type="button" aria-label="فتح القائمة الجانبية" aria-controls="mainSidebar"
+        aria-expanded="false">
+        ☰
+      </button>
+
+      <div class="brand-icon">
+        🏥
+      </div>
+
+      <div>
+        <div class="brand-title">
+          نظام إدارة المستشفى والمختبر
+        </div>
+
+        <div class="brand-subtitle">
+          HIS / LIS — Hospital Information System
+        </div>
+      </div>
+
+    </div>
+
+    <div class="top-actions">
+
+      <div class="quick-search">
+        <span class="quick-search-icon">🔍</span>
+        <input type="text" id="globalSearch" placeholder="بحث سريع..." autocomplete="off">
+      </div>
+
+      {% if request.user.is_authenticated %}
+
+      <div class="notification-wrap">
+        <button type="button" class="notification-btn" id="notificationBtn" title="الإشعارات" aria-expanded="false">
+          🔔
+          {% if notification_count %}<span class="notification-count">{{ notification_count }}</span>{% endif %}
+        </button>
+        <div class="notification-menu" id="notificationMenu">
+          <div class="notification-menu-head">
+            <strong>الإشعارات</strong>
+            <a href="{% url 'notifications:list' %}">عرض الكل</a>
+          </div>
+          {% for n in notifications_list %}
+          <a class="notification-item {% if not n.is_read %}unread{% endif %}"
+            href="{% if n.url %}{{ n.url }}{% else %}{% url 'notifications:list' %}{% endif %}">
+            <span class="notification-level level-{{ n.level|lower }}"></span>
+            <span><strong>{{ n.title }}</strong><small>{{ n.message }}</small></span>
+          </a>
+          {% empty %}
+          <div class="notification-empty">لا توجد إشعارات نشطة.</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="top-user">
+
+        <div class="user-avatar">
+          {{ request.user.username|first|upper }}
+        </div>
+
+        <div>
+          <div class="user-name">
+            {{ request.user.username }}
+          </div>
+
+          <div class="user-role">
+            {% if request.user.is_superuser %}
+            مدير النظام
+            {% elif request.user.is_staff %}
+            موظف النظام
+            {% else %}
+            مستخدم
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+
+      {% endif %}
+
+    </div>
+
+  </nav>
+
+
+  <!-- =========================
+     APPLICATION LAYOUT
+========================= -->
+
+  <div class="app-layout">
+
+    <!-- =========================
+         SIDEBAR
+    ========================= -->
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar(false)"></div>
+
+    <aside class="sidebar" id="mainSidebar">
+
+      <!-- =========================
+             الرئيسية
+        ========================== -->
+
+      <div class="sidebar-section">
+        الرئيسية
+      </div>
+
+      <a href="{% url 'accounts:dashboard' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">🏠</span>
+          لوحة التحكم
+        </span>
+      </a>
+
+
+      <!-- =========================
+             المرضى والاستقبال
+        ========================== -->
+
+      <div class="sidebar-section">
+        المرضى والاستقبال
+      </div>
+
+      <a href="{% url 'reception:dashboard' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">🧾</span>
+          لوحة الاستقبال
+        </span>
+      </a>
+
+      <a href="{% url 'reception:register_patient' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">➕</span>
+          تسجيل مريض
+        </span>
+      </a>
+
+      <a href="{% url 'reception:patient_search' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">🔍</span>
+          البحث عن مريض
+        </span>
+      </a>
+
+      <a href="{% url 'patients:list' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">👥</span>
+          قائمة المرضى
+        </span>
+      </a>
+
+
+      <!-- =========================
+             الأطباء والأقسام
+        ========================== -->
+
+      <div class="sidebar-section">
+        الأطباء والأقسام
+      </div>
+
+      <a href="{% url 'doctors:list' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">👨‍⚕️</span>
+          الأطباء
+        </span>
+      </a>
+
+      <a href="{% url 'departments:list' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">🏢</span>
+          الأقسام
+        </span>
+      </a>
+
+      <!-- =========================
+             الأقسام الطبية
+        ========================== -->
+
+      <div class="sidebar-section">
+        الأقسام الطبية
+      </div>
+
+      {% for department in sidebar_departments %}
+      <a href="{% url 'departments:dashboard' department.id %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">🏥</span>
+          {{ department.name_ar }}
+        </span>
+      </a>
+      {% endfor %}
+
+
+
+      <!-- =========================
+             الطوارئ
+        ========================== -->
+
+      <div class="sidebar-section">
+        الطوارئ
+      </div>
+
+      <a href="{% url 'emergency:dashboard' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">🚑</span>
+          لوحة الطوارئ
+        </span>
+      </a>
+
+      <a href="{% url 'emergency:create' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">➕</span>
+          تسجيل حالة طوارئ
+        </span>
+      </a>
+
+      <a href="{% url 'emergency:search' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">🔍</span>
+          بحث حالات الطوارئ
+        </span>
+      </a>
+
+
+      <!-- =========================
+             التنويم
+        ========================== -->
+
+      <div class="sidebar-section">
+        التنويم
+      </div>
+
+      <a href="{% url 'inpatient:dashboard' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">🛏️</span>
+          لوحة التنويم
+        </span>
+      </a>
+
+      <a href="{% url 'inpatient:admission_list' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">📋</span>
+          المرضى المنومون
+        </span>
+      </a>
+
+      <a href="{% url 'inpatient:admission_create' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">➕</span>
+          تنويم مريض
+        </span>
+      </a>
+
+      <a href="{% url 'inpatient:room_list' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">🏥</span>
+          الغرف
+        </span>
+      </a>
+
+      <a href="{% url 'inpatient:bed_list' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">🛏️</span>
+          الأسرة
+        </span>
+      </a>
+
+      <a href="{% url 'inpatient:search' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">🔍</span>
+          بحث التنويم
+        </span>
+      </a>
+
+
+      <!-- =========================
+             المختبر
+        ========================== -->
+
+      <div class="sidebar-section">
+        المختبر الطبي
+      </div>
+
+      <a href="{% url 'laboratory:dashboard' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">🧪</span>
+          لوحة المختبر
+        </span>
+      </a>
+
+      <a href="{% url 'laboratory:result_workflow_dashboard' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">🔄</span>
+          سير عمل النتائج
+        </span>
+      </a>
+
+      <a href="{% url 'laboratory:sample_reception' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">🧫</span>
+          استقبال العينات
+        </span>
+      </a>
+
+      <a href="{% url 'laboratory:result_delivery_dashboard' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">📤</span>
+          تسليم واستلام النتائج
+        </span>
+      </a>
+
+      <a href="{% url 'laboratory:test_list' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">🔬</span>
+          إدارة الفحوصات
+        </span>
+      </a>
+
+      <a href="{% url 'laboratory:device_list' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">⚙️</span>
+          أجهزة المختبر
+        </span>
+      </a>
+
+      <a href="{% url 'laboratory:reagent_list' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">🧴</span>
+          الكواشف
+        </span>
+      </a>
+
+      <a href="{% url 'laboratory:inventory_dashboard' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">📦</span>
+          مخزون المختبر
+        </span>
+      </a>
+
+      <a href="{% url 'laboratory:audit_dashboard' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">📋</span>
+          سجل تدقيق المختبر
+        </span>
+      </a>
+
+      <a href="{% url 'laboratory:report_settings' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">🖨️</span>
+          إعدادات تقارير المختبر
+        </span>
+      </a>
+
+
+      <!-- =========================
+             خدمات المستشفى
+        ========================== -->
+
+      <div class="sidebar-section">
+        خدمات المستشفى
+      </div>
+
+      <a href="{% url 'radiology:dashboard' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">🩻</span>
+          الأشعة
+        </span>
+      </a>
+
+      <a href="{% url 'pharmacy:dashboard' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">💊</span>
+          الصيدلية
+        </span>
+      </a>
+
+      <a href="{% url 'nursing:dashboard' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">👩‍⚕️</span>
+          التمريض
+        </span>
+      </a>
+
+      <a href="{% url 'surgery:dashboard' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">🏥</span>
+          العمليات
+        </span>
+      </a>
+
+      <a href="{% url 'blood_bank:dashboard' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">🩸</span>
+          بنك الدم
+        </span>
+      </a>
+
+      <a href="{% url 'billing:dashboard' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">💰</span>
+          الفوترة
+        </span>
+      </a>
+
+      <a href="{% url 'inventory:dashboard' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">📦</span>
+          مخزون المستشفى
+        </span>
+      </a>
+
+
+      <!-- =========================
+             التقارير
+        ========================== -->
+
+      <div class="sidebar-section">
+        التقارير
+      </div>
+
+      <a href="{% url 'reports:dashboard' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">📊</span>
+          التقارير
+        </span>
+      </a>
+
+
+      <!-- =========================
+             إدارة النظام
+        ========================== -->
+
+      {% if request.user.is_superuser or request.user.is_staff %}
+
+      <hr class="sidebar-divider">
+
+      <div class="sidebar-section">
+        إدارة النظام
+      </div>
+
+      <a href="{% url 'accounts:hr_dashboard' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">🧑‍💼</span>
+          الموارد البشرية
+        </span>
+      </a>
+
+      <a href="{% url 'accounts:user_list' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">👥</span>
+          المستخدمون
+        </span>
+      </a>
+
+      <a href="{% url 'accounts:user_create' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">➕</span>
+          إضافة مستخدم
+        </span>
+      </a>
+
+      <a href="{% url 'system_settings:dashboard' %}" class="side-link">
+        <span class="side-left">
+          <span class="side-icon">⚙️</span>
+          إعدادات النظام
+        </span>
+      </a>
+
+      {% endif %}
+
+
+      <!-- =========================
+             تسجيل الخروج
+        ========================== -->
+
+      {% if request.user.is_authenticated %}
+
+      <hr class="sidebar-divider">
+
+      <form method="post" action="{% url 'accounts:logout' %}" class="m-0">
+
+        {% csrf_token %}
+
+        <button type="submit" class="side-link side-logout border-0 bg-transparent text-start w-100">
+          <span class="side-left">
+            <span class="side-icon">🚪</span>
+            تسجيل الخروج
+          </span>
+        </button>
+
+      </form>
+
+      {% endif %}
+
+    </aside>
+
+
+    <!-- =========================
+         MAIN CONTENT
+    ========================== -->
+
+    <main class="main-wrapper">
+
+      {% if messages %}
+      <div class="container-fluid pt-3">
+
+        {% for message in messages %}
+
+        <div class="alert
+                        {% if message.tags %}
+                            alert-{{ message.tags }}
+                        {% else %}
+                            alert-info
+                        {% endif %}
+                        alert-dismissible fade show" role="alert">
+
+          {{ message }}
+
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="إغلاق">
+          </button>
+
+        </div>
+
+        {% endfor %}
+
+      </div>
+      {% endif %}
+
+      <div class="content-area">
+        {% block content %}{% endblock %}
+      </div>
+
+    </main>
+
+  </div>
+
+  <script>
+(function () {
+    "use strict";
+
+    function setSidebarState(show) {
+        const sidebar = document.getElementById("mainSidebar");
+        const overlay = document.getElementById("sidebarOverlay");
+        const button = document.querySelector(".mobile-menu-btn");
+
+        if (!sidebar) {
+            console.error("HIS/LIS: mainSidebar غير موجود");
+            return;
+        }
+
+        sidebar.classList.toggle("show", show);
+
+        if (overlay) {
+            overlay.classList.toggle("show", show);
+        }
+
+        if (button) {
+            button.setAttribute("aria-expanded", show ? "true" : "false");
+        }
+
+        document.body.classList.toggle("sidebar-open", show);
+    }
+
+    window.toggleSidebar = function (force) {
+        const sidebar = document.getElementById("mainSidebar");
+
+        if (!sidebar) {
+            console.error("HIS/LIS: mainSidebar غير موجود");
+            return;
+        }
+
+        const show = typeof force === "boolean"
+            ? force
+            : !sidebar.classList.contains("show");
+
+        setSidebarState(show);
+    };
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const button = document.querySelector(".mobile-menu-btn");
+        const sidebar = document.getElementById("mainSidebar");
+        const overlay = document.getElementById("sidebarOverlay");
+
+        if (button) {
+            button.addEventListener("click", function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                window.toggleSidebar();
+            });
+        }
+
+        if (overlay) {
+            overlay.addEventListener("click", function () {
+                window.toggleSidebar(false);
+            });
+        }
+
+        if (sidebar) {
+            sidebar.querySelectorAll("a.side-link").forEach(function (link) {
+                link.addEventListener("click", function () {
+                    if (window.innerWidth <= 991) {
+                        window.toggleSidebar(false);
+                    }
+                });
+            });
+        }
+
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") {
+                window.toggleSidebar(false);
+            }
+        });
+
+        window.addEventListener("resize", function () {
+            if (window.innerWidth > 991) {
+                window.toggleSidebar(false);
+            }
+        });
+
+        // قائمة الإشعارات
+        const notificationBtn = document.getElementById("notificationBtn");
+        const notificationMenu = document.getElementById("notificationMenu");
+
+        if (notificationBtn && notificationMenu) {
+            notificationBtn.addEventListener("click", function (e) {
+                e.stopPropagation();
+                const isExpanded = notificationMenu.classList.toggle("show");
+                notificationBtn.setAttribute("aria-expanded", isExpanded);
+            });
+
+            document.addEventListener("click", function (e) {
+                if (!notificationMenu.contains(e.target) && !notificationBtn.contains(e.target)) {
+                    notificationMenu.classList.remove("show");
+                    notificationBtn.setAttribute("aria-expanded", "false");
+                }
+            });
+        }
+    });
+})();
+</script>
+
+
+<style>
+/* =========================================================
+   HIS APP UI — MOBILE + DESKTOP
+   واجهة تطبيق موحدة للهاتف والكمبيوتر
+   لا تغيّر البيانات أو الروابط أو الصلاحيات
+========================================================= */
+
+:root {
+    --his-primary: #0d6efd;
+    --his-primary-dark: #084298;
+    --his-bg: #f4f7fb;
+    --his-card: #ffffff;
+    --his-text: #172033;
+    --his-muted: #718096;
+    --his-border: #e5eaf1;
+    --his-radius: 16px;
+    --his-shadow: 0 5px 20px rgba(20,35,70,.06);
+}
+
+/* General */
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background: var(--his-bg);
+    color: var(--his-text);
+    -webkit-tap-highlight-color: transparent;
+}
+
+a,
+button,
+.btn,
+.nav-link,
+.dropdown-item {
+    -webkit-tap-highlight-color: transparent;
+}
+
+button,
+.btn,
+.nav-link,
+.dropdown-item {
+    touch-action: manipulation;
+}
+
+/* Cards */
+.card,
+.pro-panel,
+.kpi-card {
+    border-radius: var(--his-radius);
+}
+
+.card {
+    border-color: var(--his-border);
+    box-shadow: var(--his-shadow);
+}
+
+/* Tables */
+.table-responsive {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Form controls */
+.form-control,
+.form-select,
+.input-group-text {
+    min-height: 42px;
+    border-radius: 10px;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: rgba(13,110,253,.55);
+    box-shadow: 0 0 0 .2rem rgba(13,110,253,.10);
+}
+
+/* Buttons */
+.btn {
+    min-height: 40px;
+    border-radius: 10px;
+    font-weight: 700;
+    transition: transform .16s ease, box-shadow .16s ease;
+}
+
+.btn:active {
+    transform: scale(.98);
+}
+
+/* Sidebar */
+.sidebar {
+    transition:
+        width .25s ease,
+        transform .25s ease,
+        box-shadow .25s ease;
+}
+
+/* Main content */
+.content-area {
+    min-width: 0;
+    width: 100%;
+}
+
+/* Mobile app header */
+.his-mobile-bar {
+    display: none;
+}
+
+/* Desktop */
+@media (min-width: 992px) {
+    .content-area {
+        min-height: 100vh;
+    }
+}
+
+/* Tablet */
+@media (max-width: 991.98px) {
+    .content-area {
+        padding-left: 14px !important;
+        padding-right: 14px !important;
+    }
+
+    .card {
+        box-shadow: 0 4px 16px rgba(20,35,70,.055);
+    }
+}
+
+/* =========================================================
+   PHONE MODE
+========================================================= */
+@media (max-width: 767.98px) {
+
+    body {
+        font-size: 13px;
+        overflow-x: hidden;
+    }
+
+    .content-area {
+        width: 100%;
+        padding: 10px !important;
+        padding-top: 64px !important;
+    }
+
+    /* Mobile top bar */
+    .his-mobile-bar {
+        display: flex;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 54px;
+        z-index: 1040;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 8px 11px;
+        background:
+            linear-gradient(135deg, #0d6efd 0%, #084298 100%);
+        color: #fff;
+        box-shadow: 0 3px 14px rgba(0,0,0,.16);
+    }
+
+    .his-mobile-brand {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+        font-weight: 800;
+    }
+
+    .his-mobile-brand-icon {
+        width: 34px;
+        height: 34px;
+        flex: 0 0 34px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        background: rgba(255,255,255,.16);
+        font-size: 18px;
+    }
+
+    .his-mobile-brand-text {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .his-mobile-actions {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .his-mobile-action {
+        width: 36px;
+        height: 36px;
+        display: grid;
+        place-items: center;
+        border: 0;
+        border-radius: 10px;
+        background: rgba(255,255,255,.13);
+        color: #fff;
+        font-size: 17px;
+    }
+
+    /* Sidebar becomes an app drawer */
+    .sidebar {
+        position: fixed !important;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        left: auto;
+        z-index: 1050;
+        width: min(86vw, 330px) !important;
+        max-width: 330px;
+        transform: translateX(110%);
+        box-shadow: -10px 0 35px rgba(0,0,0,.20);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .sidebar.mobile-open {
+        transform: translateX(0);
+    }
+
+    /* Overlay */
+    .his-sidebar-overlay {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 1045;
+        background: rgba(4,15,35,.48);
+        backdrop-filter: blur(2px);
+        -webkit-backdrop-filter: blur(2px);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity .22s ease;
+    }
+
+    .his-sidebar-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* Sidebar links */
+    .sidebar .nav-link,
+    .sidebar a {
+        min-height: 46px;
+    }
+
+    .sidebar .nav-link {
+        margin: 3px 8px;
+        border-radius: 12px;
+    }
+
+    /* Dashboard / sections */
+    .dashboard-section {
+        margin-top: 18px;
+    }
+
+    .dashboard-section h2 {
+        font-size: 16px;
+    }
+
+    /* Grid safety */
+    .row {
+        --bs-gutter-x: .65rem;
+        --bs-gutter-y: .65rem;
+    }
+
+    /* Tables */
+    .table-responsive {
+        border-radius: 12px;
+        scrollbar-width: thin;
+    }
+
+    .table {
+        font-size: 11px;
+    }
+
+    .table th,
+    .table td {
+        padding: 9px 8px;
+    }
+
+    /* Cards */
+    .card {
+        border-radius: 14px;
+    }
+
+    /* Modals */
+    .modal-dialog {
+        margin: 10px;
+    }
+
+    .modal-content {
+        border-radius: 16px;
+    }
+
+    /* Forms */
+    .form-control,
+    .form-select {
+        min-height: 44px;
+        font-size: 14px;
+    }
+
+    textarea.form-control {
+        min-height: 100px;
+    }
+
+    /* Buttons */
+    .btn {
+        min-height: 42px;
+    }
+
+    .btn-sm {
+        min-height: 36px;
+    }
+
+    /* Prevent accidental horizontal overflow */
+    img,
+    video,
+    canvas,
+    iframe {
+        max-width: 100%;
+    }
+}
+
+/* Small phones */
+@media (max-width: 420px) {
+
+    .content-area {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+    }
+
+    .his-mobile-bar {
+        height: 52px;
+    }
+
+    .his-mobile-brand-text {
+        font-size: 12px;
+    }
+
+    .his-mobile-action {
+        width: 34px;
+        height: 34px;
+    }
+
+    .sidebar {
+        width: min(90vw, 310px) !important;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+    }
+}
+</style>
+
+<script>
+/* =========================================================
+   HIS MOBILE APP SHELL
+========================================================= */
+
+(function () {
+    function setupHISMobileUI() {
+
+        if (document.querySelector('.his-mobile-bar')) {
+            return;
+        }
+
+        const bar = document.createElement('div');
+        bar.className = 'his-mobile-bar';
+
+        bar.innerHTML = `
+            <div class="his-mobile-brand">
+                <div class="his-mobile-brand-icon">🏥</div>
+                <div class="his-mobile-brand-text">HIS / LIS</div>
+            </div>
+
+            <div class="his-mobile-actions">
+                <button
+                    type="button"
+                    class="his-mobile-action"
+                    id="hisMobileMenuBtn"
+                    aria-label="فتح القائمة">
+                    ☰
+                </button>
+            </div>
+        `;
+
+        document.body.prepend(bar);
+
+        let overlay = document.querySelector('.his-sidebar-overlay');
+
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.className = 'his-sidebar-overlay';
+            document.body.appendChild(overlay);
+        }
+
+        const menuBtn = document.getElementById('hisMobileMenuBtn');
+        const sidebar = document.querySelector('.sidebar');
+
+        function openMenu() {
+            if (!sidebar) return;
+
+            sidebar.classList.add('mobile-open');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMenu() {
+            if (!sidebar) return;
+
+            sidebar.classList.remove('mobile-open');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        if (menuBtn) {
+            menuBtn.addEventListener('click', function () {
+                if (sidebar && sidebar.classList.contains('mobile-open')) {
+                    closeMenu();
+                } else {
+                    openMenu();
+                }
+            });
+        }
+
+        overlay.addEventListener('click', closeMenu);
+
+        if (sidebar) {
+            sidebar.querySelectorAll('a').forEach(function (link) {
+                link.addEventListener('click', function () {
+                    closeMenu();
+                });
+            });
+        }
+
+        window.addEventListener('resize', function () {
+            if (window.innerWidth >= 768) {
+                closeMenu();
+            }
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setupHISMobileUI);
+    } else {
+        setupHISMobileUI();
+    }
+})();
+</script>
+
+
+<script>
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+        navigator.serviceWorker.register("/static/pwa/service-worker.js")
+            .then(function (registration) {
+                console.log("HIS/LIS Service Worker registered:", registration.scope);
+            })
+            .catch(function (error) {
+                console.error("HIS/LIS Service Worker registration failed:", error);
+            });
+    });
+}
+</script>
+
+</body>
+
+</html>

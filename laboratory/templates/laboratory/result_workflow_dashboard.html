@@ -1,0 +1,815 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+.workflow-page,.audit-page,.sample-page{max-width:1600px;margin:auto}
+.workflow-header{box-shadow:0 12px 30px rgba(15,23,42,.16);border:1px solid rgba(255,255,255,.12)}
+.stats-grid,.audit-stats,.audit-action-grid{gap:16px}
+.stat-card,.filters,.workflow-table-wrapper{border:1px solid #e5eaf1;box-shadow:0 8px 24px rgba(15,23,42,.06)}
+.workflow-table tbody tr{transition:.18s}.workflow-table tbody tr:hover{background:#f0f7ff;transform:translateY(-1px)}
+@media(max-width:900px){.stats-grid,.filters-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.stats-grid,.filters-grid{grid-template-columns:1fr}.workflow-page{padding:10px}}
+</style>
+
+<style>
+.workflow-page {
+    direction: rtl;
+    padding: 20px;
+}
+
+.workflow-header {
+    background: linear-gradient(135deg, #0f172a, #1e3a8a);
+    color: white;
+    padding: 25px;
+    border-radius: 18px;
+    margin-bottom: 20px;
+}
+
+.workflow-header h1 {
+    margin: 0 0 8px;
+    font-size: 25px;
+}
+
+.workflow-header p {
+    margin: 0;
+    opacity: .85;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 15px;
+    padding: 17px;
+    box-shadow: 0 3px 14px rgba(0,0,0,.07);
+    border: 1px solid #e5e7eb;
+}
+
+.stat-title {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.stat-number {
+    font-size: 25px;
+    font-weight: 800;
+    margin-top: 5px;
+}
+
+.filters {
+    background: white;
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 20px;
+    box-shadow: 0 3px 14px rgba(0,0,0,.06);
+}
+
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.filters label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 5px;
+    font-size: 13px;
+}
+
+.filters input,
+.filters select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 9px;
+    background: white;
+}
+
+.filter-actions {
+    margin-top: 14px;
+    display: flex;
+    gap: 8px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 10px 15px;
+    border-radius: 9px;
+    text-decoration: none;
+    border: 0;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.btn-primary {
+    background: #2563eb;
+    color: white;
+}
+
+.btn-secondary {
+    background: #e5e7eb;
+    color: #111827;
+}
+
+.workflow-table-wrapper {
+    background: white;
+    border-radius: 16px;
+    overflow-x: auto;
+    box-shadow: 0 3px 14px rgba(0,0,0,.06);
+}
+
+.workflow-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1250px;
+}
+
+.workflow-table th {
+    background: #f8fafc;
+    padding: 12px;
+    text-align: right;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.workflow-table td {
+    padding: 12px;
+    border-top: 1px solid #eef2f7;
+    vertical-align: top;
+    font-size: 13px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.badge-requested { background: #fef3c7; color: #92400e; }
+.badge-received { background: #dbeafe; color: #1e40af; }
+.badge-collected { background: #cffafe; color: #155e75; }
+.badge-processing { background: #ede9fe; color: #5b21b6; }
+.badge-completed { background: #dcfce7; color: #166534; }
+.badge-rejected { background: #fee2e2; color: #991b1b; }
+.badge-cancelled { background: #e5e7eb; color: #374151; }
+
+.result-value {
+    font-weight: 800;
+}
+
+.flag-high {
+    color: #b91c1c;
+    font-weight: 900;
+}
+
+.flag-low {
+    color: #b45309;
+    font-weight: 900;
+}
+
+.flag-normal {
+    color: #15803d;
+    font-weight: 900;
+}
+
+.verified {
+    color: #15803d;
+    font-weight: 800;
+}
+
+.unverified {
+    color: #b45309;
+    font-weight: 800;
+}
+
+.action-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.action-links a {
+    text-decoration: none;
+    padding: 6px 8px;
+    border-radius: 7px;
+    background: #f1f5f9;
+    color: #1e293b;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.empty-state {
+    padding: 50px;
+    text-align: center;
+    color: #64748b;
+}
+
+.workflow-path {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
+
+.workflow-step {
+    padding: 6px 9px;
+    border-radius: 7px;
+    background: rgba(255,255,255,.13);
+    font-size: 11px;
+}
+
+@media (max-width: 900px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .filters-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .workflow-page {
+        padding: 10px;
+    }
+}
+</style>
+
+<div class="workflow-page">
+
+    <div class="workflow-header">
+        <h1>🧪 لوحة سير نتائج المختبر</h1>
+        <p>
+            متابعة دورة الفحص من استلام الطلب حتى التحقق وإرسال النتيجة للقسم أو الطبيب
+        </p>
+
+        <div class="workflow-path">
+            <span class="workflow-step">REQUESTED</span>
+            <span class="workflow-step">RECEIVED</span>
+            <span class="workflow-step">COLLECTED</span>
+            <span class="workflow-step">PROCESSING</span>
+            <span class="workflow-step">RESULT ENTERED</span>
+            <span class="workflow-step">VERIFIED</span>
+            <span class="workflow-step">REPORT READY</span>
+            <span class="workflow-step">SENT</span>
+            <span class="workflow-step">RECEIVED BY DEPARTMENT</span>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <div class="stat-title">إجمالي الفحوصات</div>
+            <div class="stat-number">{{ total_items }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-title">طلبات جديدة</div>
+            <div class="stat-number">{{ requested_count }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-title">العينات مستلمة</div>
+            <div class="stat-number">{{ received_count }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-title">العينات مجمعة</div>
+            <div class="stat-number">{{ collected_count }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-title">قيد المعالجة</div>
+            <div class="stat-number">{{ processing_count }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-title">تم إدخال النتيجة</div>
+            <div class="stat-number">{{ entered_count }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-title">تم التحقق</div>
+            <div class="stat-number">{{ verified_count }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-title">بانتظار التحقق</div>
+            <div class="stat-number">{{ unverified_count }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-title">مكتملة</div>
+            <div class="stat-number">{{ completed_count }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-title">مرسلة</div>
+            <div class="stat-number">{{ sent_count }}</div>
+        </div>
+
+
+        <div class="stat-card">
+            <div class="stat-title">جاهزة للتقرير</div>
+            <div class="stat-number">{{ report_ready_count }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-title">طلبات مرسلة</div>
+            <div class="stat-number">{{ sent_orders_count }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-title">مستلمة من القسم</div>
+            <div class="stat-number">{{ received_orders_count }}</div>
+        </div>
+
+    </div>
+
+
+    {% if integrity_problem_count %}
+    <div style="
+        margin:20px 0;
+        padding:18px;
+        border:1px solid #f0ad4e;
+        border-radius:14px;
+        background:#fff8e6;
+    ">
+        <div style="
+            font-size:20px;
+            font-weight:800;
+            margin-bottom:8px;
+            color:#8a5a00;
+        ">
+            ⚠️ تنبيه سلامة بيانات المختبر
+        </div>
+
+        <div style="margin-bottom:12px;color:#664d03;">
+            يوجد <strong>{{ integrity_problem_count }}</strong>
+            طلب/فحص حالته مكتملة، ولكن توجد مشكلة في النتيجة أو التحقق.
+        </div>
+
+        <div style="overflow-x:auto;">
+            <table style="
+                width:100%;
+                border-collapse:collapse;
+                background:#fff;
+                border-radius:10px;
+                overflow:hidden;
+            ">
+                <thead>
+                    <tr style="background:#f8f1df;">
+                        <th style="padding:10px;text-align:right;">الطلب</th>
+                        <th style="padding:10px;text-align:right;">المريض</th>
+                        <th style="padding:10px;text-align:right;">الفحص</th>
+                        <th style="padding:10px;text-align:right;">الحالة</th>
+                        <th style="padding:10px;text-align:right;">الإجراء</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for problem_item in integrity_problem_items %}
+                    <tr style="border-top:1px solid #eee;">
+                        <td style="padding:10px;">
+                            {{ problem_item.order.order_number }}
+                        </td>
+
+                        <td style="padding:10px;">
+                            {{ problem_item.order.patient.full_name }}
+                        </td>
+
+                        <td style="padding:10px;">
+                            {{ problem_item.test.name_en }}
+                        </td>
+
+                        <td style="padding:10px;">
+                            {% if not problem_item.verified %}
+                                <span style="
+                                    display:inline-block;
+                                    padding:5px 9px;
+                                    border-radius:8px;
+                                    background:#fff0f0;
+                                    color:#b42318;
+                                    font-weight:700;
+                                ">
+                                    غير متحقق
+                                </span>
+                            {% endif %}
+
+                            {% if not problem_item.result and problem_item.result_numeric == None %}
+                                <span style="
+                                    display:inline-block;
+                                    padding:5px 9px;
+                                    border-radius:8px;
+                                    background:#fff4e5;
+                                    color:#9a6700;
+                                    font-weight:700;
+                                ">
+                                    لا توجد نتيجة
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td style="padding:10px;">
+                            <a
+                                href="{% url 'laboratory:order_detail' problem_item.order.id %}"
+                                style="
+                                    display:inline-block;
+                                    padding:7px 12px;
+                                    border-radius:8px;
+                                    background:#0d6efd;
+                                    color:white;
+                                    text-decoration:none;
+                                    font-weight:700;
+                                "
+                            >
+                                فتح الطلب
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="filters">
+
+        <form method="get">
+
+            <div class="filters-grid">
+
+                <div>
+                    <label>بحث</label>
+                    <input
+                        type="text"
+                        name="q"
+                        value="{{ q }}"
+                        placeholder="رقم الطلب، المريض، الفحص، العينة..."
+                    >
+                </div>
+
+                <div>
+                    <label>قسم المختبر</label>
+                    <select name="department_id">
+                        <option value="">كل الأقسام</option>
+                        {% for department in departments %}
+                            <option
+                                value="{{ department.id }}"
+                                {% if department_id == department.id|stringformat:"s" %}selected{% endif %}
+                            >
+                                {{ department.name_ar }} - {{ department.name_en }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label>الطبيب</label>
+                    <select name="doctor_id">
+                        <option value="">كل الأطباء</option>
+                        {% for doctor in doctors %}
+                            <option
+                                value="{{ doctor.id }}"
+                                {% if doctor_id == doctor.id|stringformat:"s" %}selected{% endif %}
+                            >
+                                {{ doctor.full_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label>حالة العينة</label>
+                    <select name="sample_status">
+                        <option value="">كل الحالات</option>
+                        {% for value, label in status_choices %}
+                            <option
+                                value="{{ value }}"
+                                {% if sample_status == value %}selected{% endif %}
+                            >
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label>حالة النتيجة</label>
+                    <select name="result_status">
+                        <option value="">كل النتائج</option>
+                        <option value="ENTERED" {% if result_status == "ENTERED" %}selected{% endif %}>
+                            تم إدخال النتيجة
+                        </option>
+                        <option value="EMPTY" {% if result_status == "EMPTY" %}selected{% endif %}>
+                            لم تدخل النتيجة
+                        </option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>التحقق</label>
+                    <select name="verification">
+                        <option value="">الكل</option>
+                        <option value="VERIFIED" {% if verification == "VERIFIED" %}selected{% endif %}>
+                            تم التحقق
+                        </option>
+                        <option value="UNVERIFIED" {% if verification == "UNVERIFIED" %}selected{% endif %}>
+                            بانتظار التحقق
+                        </option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>من تاريخ</label>
+                    <input type="date" name="date_from" value="{{ date_from }}">
+                </div>
+
+                <div>
+                    <label>إلى تاريخ</label>
+                    <input type="date" name="date_to" value="{{ date_to }}">
+                </div>
+
+            </div>
+
+            <div class="filter-actions">
+                <button class="btn btn-primary" type="submit">
+                    🔎 بحث وتصفية
+                </button>
+
+                <a
+                    href="{% url 'laboratory:result_workflow_dashboard' %}"
+                    class="btn btn-secondary"
+                >
+                    إعادة ضبط
+                </a>
+            </div>
+
+        </form>
+
+    </div>
+
+    <div class="workflow-table-wrapper">
+
+        <table class="workflow-table">
+
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>الطلب / المريض</th>
+                    <th>الفحص</th>
+                    <th>قسم المختبر</th>
+                    <th>العينة</th>
+                    <th>الحالة</th>
+                    <th>النتيجة</th>
+                    <th>التحقق</th>
+                    <th>الفاحص</th>
+                    <th>التواريخ</th>
+                    <th>الإجراءات</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for item in items %}
+
+                    <tr>
+
+                        <td>
+                            {{ forloop.counter }}
+                        </td>
+
+                        <td>
+                            <strong>{{ item.order.order_number }}</strong>
+                            <br>
+                            {{ item.order.patient.full_name }}
+
+                            {% if item.order.requesting_department %}
+                                <br>
+                                <small>
+                                    {{ item.order.requesting_department.name_ar }}
+                                </small>
+                            {% endif %}
+
+                            {% if item.order.requesting_doctor %}
+                                <br>
+                                <small>
+                                    د/ {{ item.order.requesting_doctor.full_name }}
+                                </small>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <strong>{{ item.test.name_en }}</strong>
+
+                            {% if item.test.name_ar %}
+                                <br>
+                                <small>{{ item.test.name_ar }}</small>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if item.test.department %}
+                                {{ item.test.department.name_ar }}
+                                <br>
+                                <small>{{ item.test.department.name_en }}</small>
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if item.sample_id %}
+                                <strong>{{ item.sample_id }}</strong>
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+                        <td>
+
+                            {% if item.status == "REQUESTED" %}
+                                <span class="badge badge-requested">REQUESTED</span>
+
+                            {% elif item.status == "RECEIVED" %}
+                                <span class="badge badge-received">RECEIVED</span>
+
+                            {% elif item.status == "COLLECTED" %}
+                                <span class="badge badge-collected">COLLECTED</span>
+
+                            {% elif item.status == "PROCESSING" %}
+                                <span class="badge badge-processing">PROCESSING</span>
+
+                            {% elif item.status == "COMPLETED" %}
+                                <span class="badge badge-completed">COMPLETED</span>
+
+                            {% elif item.status == "REJECTED" %}
+                                <span class="badge badge-rejected">REJECTED</span>
+
+                            {% elif item.status == "CANCELLED" %}
+                                <span class="badge badge-cancelled">CANCELLED</span>
+
+                            {% else %}
+                                <span class="badge">{{ item.status }}</span>
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {% if item.result or item.result_numeric != None %}
+
+                                <span class="result-value">
+                                    {% if item.result_numeric != None %}
+                                        {{ item.result_numeric }}
+                                    {% else %}
+                                        {{ item.result }}
+                                    {% endif %}
+                                </span>
+
+                                {% if item.result_flag == "H" %}
+                                    <span class="flag-high">H</span>
+
+                                {% elif item.result_flag == "L" %}
+                                    <span class="flag-low">L</span>
+
+                                {% elif item.result_flag == "NORMAL" %}
+                                    <span class="flag-normal">NORMAL</span>
+                                {% endif %}
+
+                                {% if item.test.unit %}
+                                    <br>
+                                    <small>{{ item.test.unit }}</small>
+                                {% endif %}
+
+                            {% else %}
+                                <span class="unverified">
+                                    لم تدخل
+                                </span>
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {% if item.verified %}
+
+                                <span class="verified">
+                                    ✅ VERIFIED
+                                </span>
+
+                                {% if item.verified_by %}
+                                    <br>
+                                    <small>
+                                        {{ item.verified_by.username }}
+                                    </small>
+                                {% endif %}
+
+                                {% if item.verified_at %}
+                                    <br>
+                                    <small>
+                                        {{ item.verified_at|date:"Y-m-d H:i" }}
+                                    </small>
+                                {% endif %}
+
+                            {% else %}
+
+                                <span class="unverified">
+                                    ⏳ UNVERIFIED
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+                            {% if item.examiner %}
+                                {{ item.examiner.username }}
+
+                                {% if item.examined_at %}
+                                    <br>
+                                    <small>
+                                        {{ item.examined_at|date:"Y-m-d H:i" }}
+                                    </small>
+                                {% endif %}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if item.sample_collected_at %}
+                                <small>
+                                    جمع العينة:
+                                    {{ item.sample_collected_at|date:"Y-m-d H:i" }}
+                                </small>
+                                <br>
+                            {% endif %}
+
+                            <small>
+                                الطلب:
+                                {{ item.order.requested_at|date:"Y-m-d H:i" }}
+                            </small>
+                        </td>
+
+                        <td>
+
+                            <div class="action-links">
+
+                                <a href="{% url 'laboratory:order_detail' item.order.id %}">
+                                    📋 الطلب
+                                </a>
+
+                                {% if not item.verified %}
+                                    <a href="{% url 'laboratory:enter_results' item.order.id %}">
+                                        📝 إدخال
+                                    </a>
+                                {% endif %}
+
+                                {% if item.order.status == "COMPLETED" %}
+                                    <a href="{% url 'laboratory:laboratory_report' item.order.id %}">
+                                        📄 التقرير
+                                    </a>
+                                {% endif %}
+
+                                {% if item.order.status == "COMPLETED" %}
+                                    <a href="{% url 'laboratory:send_result' item.order.id %}">
+                                        📤 إرسال
+                                    </a>
+                                {% endif %}
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+                        <td colspan="11">
+                            <div class="empty-state">
+                                لا توجد نتائج مطابقة للبحث.
+                            </div>
+                        </td>
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

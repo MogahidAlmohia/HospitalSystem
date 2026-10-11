@@ -1,0 +1,931 @@
+{% extends "base.html" %}
+
+{% block title %}
+استقبال العينات - المختبر
+{% endblock %}
+
+{% block content %}
+<style>
+.sample-page{max-width:1600px;margin:auto}.page-header{background:linear-gradient(135deg,#17324d,#1f6f8b);color:#fff;padding:22px;border-radius:18px;box-shadow:0 12px 28px rgba(15,23,42,.13)}.page-subtitle{color:rgba(255,255,255,.78)}.stat-card,.toolbar{border-color:#e5eaf1;box-shadow:0 8px 24px rgba(15,23,42,.06)}
+@media(max-width:900px){.stats-grid{grid-template-columns:repeat(3,1fr)}.toolbar form{grid-template-columns:1fr 1fr}}@media(max-width:560px){.stats-grid{grid-template-columns:1fr 1fr}.toolbar form{grid-template-columns:1fr}}
+</style>
+
+<style>
+    .sample-page {
+        direction: rtl;
+        padding: 20px;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .page-title {
+        font-size: 26px;
+        font-weight: 800;
+        margin: 0;
+    }
+
+    .page-subtitle {
+        color: #64748b;
+        margin-top: 5px;
+        font-size: 14px;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(140px, 1fr));
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+
+    .stat-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 16px;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, .05);
+    }
+
+    .stat-label {
+        color: #64748b;
+        font-size: 13px;
+        margin-bottom: 8px;
+    }
+
+    .stat-value {
+        font-size: 28px;
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+    .toolbar {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 16px;
+        margin-bottom: 20px;
+    }
+
+    .toolbar form {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr auto auto;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .form-control,
+    .form-select {
+        width: 100%;
+        min-height: 42px;
+        border: 1px solid #cbd5e1;
+        border-radius: 9px;
+        padding: 8px 12px;
+        background: #fff;
+    }
+
+    .btn {
+        border: 0;
+        border-radius: 9px;
+        padding: 9px 14px;
+        cursor: pointer;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-height: 42px;
+    }
+
+    .btn-primary {
+        background: #2563eb;
+        color: #fff;
+    }
+
+    .btn-secondary {
+        background: #e2e8f0;
+        color: #0f172a;
+    }
+
+    .btn-success {
+        background: #16a34a;
+        color: #fff;
+    }
+
+    .btn-warning {
+        background: #d97706;
+        color: #fff;
+    }
+
+    .btn-danger {
+        background: #dc2626;
+        color: #fff;
+    }
+
+    .btn-info {
+        background: #0891b2;
+        color: #fff;
+    }
+
+    .btn-sm {
+        min-height: 34px;
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+
+    .table-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, .05);
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 1150px;
+    }
+
+    th {
+        background: #f8fafc;
+        color: #334155;
+        font-size: 13px;
+        padding: 13px 10px;
+        text-align: right;
+        border-bottom: 1px solid #e2e8f0;
+        white-space: nowrap;
+    }
+
+    td {
+        padding: 13px 10px;
+        border-bottom: 1px solid #eef2f7;
+        vertical-align: middle;
+        font-size: 13px;
+    }
+
+    tr:hover td {
+        background: #fafcff;
+    }
+
+    .patient-name {
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+    .muted {
+        color: #64748b;
+        font-size: 12px;
+    }
+
+    .test-code {
+        font-family: monospace;
+        font-weight: 800;
+        color: #2563eb;
+    }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 5px 9px;
+        font-size: 11px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .badge-requested {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .badge-received {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .badge-rejected {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .badge-stat {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .badge-urgent {
+        background: #ffedd5;
+        color: #c2410c;
+    }
+
+    .actions {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        min-width: 190px;
+    }
+
+    .rejection-box {
+        margin-top: 8px;
+        background: #fff7f7;
+        border: 1px solid #fecaca;
+        border-radius: 9px;
+        padding: 8px;
+        color: #991b1b;
+        max-width: 260px;
+    }
+
+    .rejection-title {
+        font-weight: 800;
+        font-size: 11px;
+        margin-bottom: 3px;
+    }
+
+    .rejection-reason {
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 55px 20px;
+        color: #64748b;
+    }
+
+    .empty-icon {
+        font-size: 48px;
+        margin-bottom: 10px;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        inset: 0;
+        background: rgba(15, 23, 42, .55);
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .modal.active {
+        display: flex;
+    }
+
+    .modal-card {
+        width: min(520px, 100%);
+        background: #fff;
+        border-radius: 16px;
+        padding: 22px;
+        box-shadow: 0 20px 50px rgba(15, 23, 42, .25);
+    }
+
+    .modal-title {
+        font-size: 20px;
+        font-weight: 800;
+        margin-bottom: 5px;
+    }
+
+    .modal-subtitle {
+        color: #64748b;
+        font-size: 13px;
+        margin-bottom: 16px;
+    }
+
+    .modal textarea {
+        width: 100%;
+        min-height: 130px;
+        resize: vertical;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        padding: 12px;
+        font-family: inherit;
+        margin-bottom: 15px;
+    }
+
+    .modal-actions {
+        display: flex;
+        justify-content: flex-start;
+        gap: 8px;
+    }
+
+    @media (max-width: 1200px) {
+        .stats-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .toolbar form {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @media (max-width: 700px) {
+        .sample-page {
+            padding: 10px;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .stat-card {
+            padding: 12px;
+        }
+
+        .stat-value {
+            font-size: 22px;
+        }
+
+        .toolbar form {
+            grid-template-columns: 1fr;
+        }
+
+        .page-title {
+            font-size: 21px;
+        }
+    }
+</style>
+
+<div class="sample-page">
+
+    <!-- Header -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">🧪 استقبال العينات</h1>
+            <div class="page-subtitle">
+                إدارة استلام العينات وسحبها ورفضها وإعادة السحب
+            </div>
+        </div>
+
+        <a href="{% url 'laboratory:dashboard' %}"
+           class="btn btn-secondary">
+            ← لوحة المختبر
+        </a>
+    </div>
+
+    <!-- Statistics -->
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <div class="stat-label">🟡 بانتظار الاستلام</div>
+            <div class="stat-value">{{ requested_count }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">🔵 تم الاستلام</div>
+            <div class="stat-value">{{ received_count }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">🔴 عينات مرفوضة</div>
+            <div class="stat-value">{{ rejected_count }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">🧪 تم سحبها</div>
+            <div class="stat-value">{{ collected_count }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">🚨 STAT</div>
+            <div class="stat-value">{{ stat_count }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">🔄 إعادة السحب</div>
+            <div class="stat-value">{{ resample_count }}</div>
+        </div>
+
+    </div>
+
+    <!-- Search / Filters -->
+    <div class="toolbar">
+
+        <form method="get">
+
+            <input
+                type="text"
+                name="q"
+                value="{{ query }}"
+                class="form-control"
+                placeholder="بحث: رقم الطلب، المريض، رقم الملف، الفحص، Sample ID..."
+            >
+
+            <select name="status" class="form-select">
+
+                <option value="">
+                    جميع الحالات
+                </option>
+
+                <option value="REQUESTED"
+                    {% if status_filter == "REQUESTED" %}selected{% endif %}>
+                    🟡 بانتظار الاستلام
+                </option>
+
+                <option value="RECEIVED"
+                    {% if status_filter == "RECEIVED" %}selected{% endif %}>
+                    🔵 تم الاستلام
+                </option>
+
+                <option value="REJECTED"
+                    {% if status_filter == "REJECTED" %}selected{% endif %}>
+                    🔴 مرفوضة
+                </option>
+
+            </select>
+
+            <select name="priority" class="form-select">
+
+                <option value="">
+                    جميع الأولويات
+                </option>
+
+                <option value="NORMAL"
+                    {% if priority_filter == "NORMAL" %}selected{% endif %}>
+                    عادي
+                </option>
+
+                <option value="URGENT"
+                    {% if priority_filter == "URGENT" %}selected{% endif %}>
+                    🚨 عاجل
+                </option>
+
+                <option value="STAT"
+                    {% if priority_filter == "STAT" %}selected{% endif %}>
+                    ⚡ STAT
+                </option>
+
+            </select>
+
+            <button type="submit"
+                    class="btn btn-primary">
+                🔎 بحث
+            </button>
+
+            <a href="{% url 'laboratory:sample_reception' %}"
+               class="btn btn-secondary">
+                إعادة ضبط
+            </a>
+
+        </form>
+
+    </div>
+
+    <!-- Samples Table -->
+    <div class="table-card">
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>الطلب</th>
+                        <th>المريض</th>
+                        <th>الفحص</th>
+                        <th>القسم</th>
+                        <th>الأولوية</th>
+                        <th>الحالة</th>
+                        <th>Sample ID</th>
+                        <th>إعادة السحب</th>
+                        <th>الرفض</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                {% for item in items %}
+
+                    <tr>
+
+                        <td>
+                            <strong>{{ forloop.counter }}</strong>
+                        </td>
+
+                        <td>
+                            <strong>{{ item.order.order_number }}</strong>
+                            <div class="muted">
+                                {{ item.order.requested_at|date:"Y-m-d H:i" }}
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="patient-name">
+                                {{ item.order.patient.full_name }}
+                            </div>
+
+                            <div class="muted">
+                                ملف:
+                                {{ item.order.patient.patient_number }}
+                            </div>
+                        </td>
+
+                        <td>
+
+                            <div class="test-code">
+                                {{ item.test.code }}
+                            </div>
+
+                            <div>
+                                {{ item.test.name_en }}
+                            </div>
+
+                            {% if item.test.name_ar %}
+                                <div class="muted">
+                                    {{ item.test.name_ar }}
+                                </div>
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+                            {% if item.test.department %}
+                                {{ item.test.department.name }}
+                            {% elif item.order.requesting_department %}
+                                {{ item.order.requesting_department.name }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+                        <td>
+
+                            {% if item.order.priority == "STAT" %}
+                                <span class="badge badge-stat">
+                                    ⚡ STAT
+                                </span>
+
+                            {% elif item.order.priority == "URGENT" %}
+                                <span class="badge badge-urgent">
+                                    🚨 عاجل
+                                </span>
+
+                            {% else %}
+                                <span class="muted">
+                                    عادي
+                                </span>
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {% if item.status == "REQUESTED" %}
+
+                                <span class="badge badge-requested">
+                                    🟡 REQUESTED
+                                </span>
+
+                            {% elif item.status == "RECEIVED" %}
+
+                                <span class="badge badge-received">
+                                    🔵 RECEIVED
+                                </span>
+
+                            {% elif item.status == "REJECTED" %}
+
+                                <span class="badge badge-rejected">
+                                    🔴 REJECTED
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge">
+                                    {{ item.status }}
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {% if item.sample_id %}
+
+                                <strong>
+                                    {{ item.sample_id }}
+                                </strong>
+
+                            {% else %}
+
+                                <span class="muted">
+                                    —
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {% if item.resample_count %}
+                                <span class="badge badge-rejected">
+                                    {{ item.resample_count }} مرة
+                                </span>
+                            {% else %}
+                                <span class="muted">
+                                    لا توجد
+                                </span>
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {% if item.status == "REJECTED" or item.rejection_reason %}
+
+                                <div class="rejection-box">
+
+                                    <div class="rejection-title">
+                                        سبب الرفض
+                                    </div>
+
+                                    <div class="rejection-reason">
+                                        {{ item.rejection_reason|default:"غير محدد" }}
+                                    </div>
+
+                                    {% if item.rejected_by %}
+                                        <div class="muted">
+                                            بواسطة:
+                                            {{ item.rejected_by.get_full_name|default:item.rejected_by.username }}
+                                        </div>
+                                    {% endif %}
+
+                                    {% if item.rejected_at %}
+                                        <div class="muted">
+                                            {{ item.rejected_at|date:"Y-m-d H:i" }}
+                                        </div>
+                                    {% endif %}
+
+                                </div>
+
+                            {% else %}
+
+                                <span class="muted">
+                                    —
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            <div class="actions">
+
+                                {% if item.status == "REQUESTED" %}
+
+                                    <form method="post"
+                                          style="display:inline;">
+                                        {% csrf_token %}
+
+                                        <input type="hidden"
+                                               name="item_id"
+                                               value="{{ item.id }}">
+
+                                        <input type="hidden"
+                                               name="action"
+                                               value="receive">
+
+                                        <button type="submit"
+                                                class="btn btn-info btn-sm">
+                                            📥 استلام
+                                        </button>
+
+                                    </form>
+
+                                    <button type="button"
+                                            class="btn btn-danger btn-sm"
+                                            onclick="openRejectModal('{{ item.id }}', '{{ item.order.order_number|escapejs }}', '{{ item.test.name_en|escapejs }}')">
+                                        ❌ رفض
+                                    </button>
+
+                                {% elif item.status == "RECEIVED" %}
+
+                                    <form method="post"
+                                          style="display:inline;">
+                                        {% csrf_token %}
+
+                                        <input type="hidden"
+                                               name="item_id"
+                                               value="{{ item.id }}">
+
+                                        <input type="hidden"
+                                               name="action"
+                                               value="collect">
+
+                                        <button type="submit"
+                                                class="btn btn-success btn-sm">
+                                            🧪 سحب العينة
+                                        </button>
+
+                                    </form>
+
+                                    <button type="button"
+                                            class="btn btn-danger btn-sm"
+                                            onclick="openRejectModal('{{ item.id }}', '{{ item.order.order_number|escapejs }}', '{{ item.test.name_en|escapejs }}')">
+                                        ❌ رفض
+                                    </button>
+
+                                {% elif item.status == "REJECTED" %}
+
+                                    <form method="post"
+                                          style="display:inline;"
+                                          onsubmit="return confirm('هل تريد إعادة العينة إلى قائمة السحب؟');">
+
+                                        {% csrf_token %}
+
+                                        <input type="hidden"
+                                               name="item_id"
+                                               value="{{ item.id }}">
+
+                                        <input type="hidden"
+                                               name="action"
+                                               value="resample">
+
+                                        <button type="submit"
+                                                class="btn btn-warning btn-sm">
+                                            🔄 إعادة السحب
+                                        </button>
+
+                                    </form>
+
+                                {% endif %}
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+
+                        <td colspan="11">
+
+                            <div class="empty-state">
+
+                                <div class="empty-icon">
+                                    🧪
+                                </div>
+
+                                <h3>
+                                    لا توجد عينات مطابقة
+                                </h3>
+
+                                <p>
+                                    لا توجد حاليًا عينات بانتظار الاستلام
+                                    أو الاستلام الداخلي أو الرفض.
+                                </p>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ==========================================================
+     Reject Modal
+========================================================== -->
+
+<div id="rejectModal"
+     class="modal"
+     onclick="closeRejectModal(event)">
+
+    <div class="modal-card"
+         onclick="event.stopPropagation();">
+
+        <div class="modal-title">
+            ❌ رفض العينة
+        </div>
+
+        <div class="modal-subtitle">
+
+            الطلب:
+            <strong id="rejectOrderNumber">—</strong>
+
+            <br>
+
+            الفحص:
+            <strong id="rejectTestName">—</strong>
+
+        </div>
+
+        <form method="post">
+
+            {% csrf_token %}
+
+            <input type="hidden"
+                   name="item_id"
+                   id="rejectItemId">
+
+            <input type="hidden"
+                   name="action"
+                   value="reject">
+
+            <label style="display:block;font-weight:800;margin-bottom:7px;">
+                سبب الرفض *
+            </label>
+
+            <textarea
+                name="rejection_reason"
+                required
+                placeholder="مثال: العينة متحللة، كمية غير كافية، الأنبوب غير مناسب، العينة متجلطة..."
+            ></textarea>
+
+            <div class="modal-actions">
+
+                <button type="submit"
+                        class="btn btn-danger">
+                    ❌ تأكيد رفض العينة
+                </button>
+
+                <button type="button"
+                        class="btn btn-secondary"
+                        onclick="closeRejectModal()">
+                    إلغاء
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script>
+
+function openRejectModal(itemId, orderNumber, testName) {
+
+    document.getElementById("rejectItemId").value = itemId;
+    document.getElementById("rejectOrderNumber").textContent = orderNumber;
+    document.getElementById("rejectTestName").textContent = testName;
+
+    document.getElementById("rejectModal")
+        .classList.add("active");
+
+    setTimeout(function() {
+
+        const textarea =
+            document.querySelector(
+                '#rejectModal textarea[name="rejection_reason"]'
+            );
+
+        if (textarea) {
+            textarea.focus();
+        }
+
+    }, 100);
+
+}
+
+function closeRejectModal(event) {
+
+    if (event && event.target !== event.currentTarget) {
+        return;
+    }
+
+    document.getElementById("rejectModal")
+        .classList.remove("active");
+
+}
+
+document.addEventListener("keydown", function(event) {
+
+    if (event.key === "Escape") {
+        closeRejectModal();
+    }
+
+});
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-3" dir="rtl">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3>📦 مخزون الصيدلية</h3>
+            <p class="text-muted mb-0">حالة مخزون الأدوية الحالية</p>
+        </div>
+
+        <a href="{% url 'pharmacy:stock_movements' %}"
+           class="btn btn-outline-primary">
+            📊 حركة المخزون
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead class="table-primary">
+                    <tr>
+                        <th>الكود</th>
+                        <th>الدواء</th>
+                        <th>الوحدة</th>
+                        <th>المخزون</th>
+                        <th>حد إعادة الطلب</th>
+                        <th>الحالة</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                {% for medicine in medicines %}
+
+                    <tr>
+
+                        <td>{{ medicine.code }}</td>
+
+                        <td>
+                            <strong>{{ medicine.name_ar }}</strong>
+                            <br>
+                            <small class="text-muted">
+                                {{ medicine.name_en }}
+                            </small>
+                        </td>
+
+                        <td>{{ medicine.unit }}</td>
+
+                        <td>
+                            {{ medicine.stock_quantity }}
+                        </td>
+
+                        <td>
+                            {{ medicine.reorder_level }}
+                        </td>
+
+                        <td>
+
+                            {% if medicine.stock_quantity <= 0 %}
+                                <span class="badge bg-danger">
+                                    منتهٍ
+                                </span>
+
+                            {% elif medicine.stock_quantity <= medicine.reorder_level %}
+                                <span class="badge bg-warning text-dark">
+                                    منخفض
+                                </span>
+
+                            {% else %}
+                                <span class="badge bg-success">
+                                    متوفر
+                                </span>
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+                        <td colspan="6"
+                            class="text-center py-4">
+                            لا توجد أدوية في المخزون.
+                        </td>
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,1678 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ar" dir="{% if settings.rtl_layout %}rtl{% else %}ltr{% endif %}">
+<head>
+
+<meta charset="UTF-8">
+
+<title>
+{% if settings.report_title_en %}
+{{ settings.report_title_en }}
+{% else %}
+Laboratory Report
+{% endif %}
+</title>
+
+<style>
+
+:root{
+    --accent: {{ settings.accent_color|default:"#0d6efd" }};
+    --table-header: {{ settings.table_header_color|default:"#0d6efd" }};
+    --table-text: {{ settings.table_header_text_color|default:"#ffffff" }};
+    --background: {{ settings.report_background_color|default:"#ffffff" }};
+    --font-size: {{ settings.report_font_size|default:"9.5" }}pt;
+    --table-font-size: {{ settings.table_font_size|default:"7.5" }}pt;
+}
+
+*{
+    box-sizing:border-box;
+}
+
+html,
+body{
+    margin:0;
+    padding:0;
+}
+
+body{
+    background:radial-gradient(circle at 100% 0%,rgba(13,110,253,.08),transparent 30rem),#eef2f7;
+    font-family:
+        Arial,
+        Tahoma,
+        "Segoe UI",
+        sans-serif;
+    color:#212529;
+    font-size:var(--font-size);
+}
+
+.toolbar{
+    position:sticky;
+    top:0;
+    z-index:1000;
+    background:#212529;
+    padding:10px;
+    display:flex;
+    justify-content:center;
+    gap:10px;
+}
+
+.toolbar button,
+.toolbar a{
+    border:0;
+    border-radius:8px;
+    padding:9px 18px;
+    color:#fff;
+    text-decoration:none;
+    cursor:pointer;
+    font-size:14px;
+}
+
+.btn-print{
+    background:var(--accent);
+}
+
+.btn-back{
+    background:#6c757d;
+}
+
+.report{
+    position:relative;
+    width:210mm;
+    min-height:297mm;
+    margin:20px auto;
+    padding:
+        {{ settings.margin_top|default:"14" }}mm
+        {{ settings.margin_right|default:"12" }}mm
+        {{ settings.margin_bottom|default:"18" }}mm
+        {{ settings.margin_left|default:"12" }}mm;
+
+    background:var(--background);
+    box-shadow:0 5px 25px rgba(0,0,0,.15);
+    overflow:hidden;
+}
+
+.report-content{
+    position:relative;
+    z-index:2;
+}
+
+/* Watermark */
+
+.watermark{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:1;
+    pointer-events:none;
+    overflow:hidden;
+}
+
+.watermark span{
+    font-size:90px;
+    font-weight:900;
+    color:rgba(0,0,0,{{ settings.watermark_opacity|default:"0.08" }});
+    transform:rotate(-35deg);
+    white-space:nowrap;
+}
+
+/* Header */
+
+.header{
+    border-bottom:3px solid var(--accent);
+    padding-bottom:12px;
+    margin-bottom:15px;
+}
+
+.header-grid{
+    display:grid;
+    grid-template-columns:1fr 1.5fr 1fr;
+    align-items:center;
+    gap:15px;
+}
+
+.logo{
+    max-width:85px;
+    max-height:85px;
+    object-fit:contain;
+}
+
+.logo-area{
+    display:flex;
+    align-items:center;
+}
+
+.logo-left{
+    justify-content:flex-start;
+}
+
+.logo-center{
+    justify-content:center;
+}
+
+.logo-right{
+    justify-content:flex-end;
+}
+
+.hospital{
+    text-align:center;
+}
+
+.hospital-ar{
+    font-size:20px;
+    font-weight:800;
+    margin-bottom:3px;
+}
+
+.hospital-en{
+    font-size:12px;
+    font-weight:700;
+}
+
+.lab-ar{
+    font-size:15px;
+    font-weight:700;
+    margin-top:5px;
+}
+
+.lab-en{
+    font-size:10px;
+    color:#555;
+}
+
+.report-title{
+    text-align:center;
+    margin:18px 0 5px;
+}
+
+.report-title-ar{
+    font-size:17px;
+    font-weight:800;
+    color:var(--accent);
+}
+
+.report-title-en{
+    font-size:13px;
+    font-weight:700;
+}
+
+.report-subtitle{
+    text-align:center;
+    color:#666;
+    margin-top:5px;
+}
+
+/* Meta */
+
+.meta{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+    margin:12px 0;
+}
+
+.meta-box{
+    border:1px solid #dee2e6;
+    border-radius:6px;
+    padding:8px;
+    background:#fafafa;
+}
+
+.meta-label{
+    font-size:9px;
+    color:#6c757d;
+    margin-bottom:3px;
+}
+
+.meta-value{
+    font-weight:700;
+    direction:ltr;
+    text-align:center;
+}
+
+/* Patient */
+
+.section-title{
+    background:var(--table-header);
+    color:var(--table-text);
+    padding:7px 10px;
+    border-radius:5px;
+    font-weight:700;
+    margin:15px 0 7px;
+}
+
+.patient-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:7px;
+}
+
+.info{
+    border:1px solid #e1e5e9;
+    border-radius:5px;
+    padding:7px;
+    min-height:45px;
+}
+
+.label{
+    color:#6c757d;
+    font-size:9px;
+    margin-bottom:3px;
+}
+
+.value{
+    font-weight:700;
+}
+
+/* Results */
+
+.results-wrapper{
+    overflow:hidden;
+}
+
+
+.lab-department{
+    margin-top:14px;
+    page-break-inside:avoid;
+}
+
+.lab-department-title{
+    background:#eef3f7;
+    color:#17324d;
+    border-left:4px solid #1f6f8b;
+    border-right:1px solid #cfd6dd;
+    border-top:1px solid #cfd6dd;
+    border-bottom:1px solid #cfd6dd;
+    padding:8px 10px;
+    font-weight:800;
+    margin-bottom:6px;
+    direction:ltr;
+    text-align:left;
+}
+
+
+
+.lab-department + .lab-department{
+    margin-top:16px;
+}
+
+.results{
+    width:100%;
+    border-collapse:collapse;
+    table-layout:auto;
+    direction:ltr;
+    font-size:var(--table-font-size);
+}
+
+.results th{
+    background:var(--table-header);
+    color:var(--table-text);
+    padding:7px 5px;
+    border:1px solid #d0d7de;
+    font-weight:700;
+}
+
+.results td{
+    padding:6px 5px;
+    border:1px solid #d0d7de;
+    vertical-align:middle;
+    text-align:center;
+}
+
+.results tbody tr:nth-child(even){
+    background:#f8f9fa;
+}
+
+.test-name{
+    font-weight:700;
+    text-align:left !important;
+}
+
+.result-value{
+    font-weight:800;
+    font-size:calc(var(--table-font-size) + 1pt);
+}
+
+.flag{
+    display:inline-block;
+    min-width:35px;
+    padding:2px 5px;
+    border-radius:4px;
+    font-weight:800;
+}
+
+.flag-H,
+.flag-L{
+    background:#fff3cd;
+    color:#856404;
+}
+
+.flag-NORMAL{
+    background:#d1e7dd;
+    color:#0f5132;
+}
+
+.flag-CRITICAL_HIGH,
+.flag-CRITICAL_LOW{
+    background:#dc3545;
+    color:#fff;
+    animation:pulse 1.5s infinite;
+}
+
+.critical{
+    background:#dc3545 !important;
+    color:#fff;
+    font-weight:900;
+}
+
+@keyframes pulse{
+    0%{opacity:1}
+    50%{opacity:.65}
+    100%{opacity:1}
+}
+
+/* Notes */
+
+.notes{
+    margin-top:15px;
+}
+
+.note-item{
+    border-bottom:1px solid #e9ecef;
+    padding:6px;
+}
+
+.note-item strong{
+    color:var(--accent);
+}
+
+/* Status */
+
+.status{
+    margin:15px 0;
+    text-align:center;
+    font-weight:800;
+}
+
+.completed{
+    color:#198754;
+}
+
+.processing{
+    color:#fd7e14;
+}
+
+/* Signatures */
+
+.signatures{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+    margin-top:30px;
+}
+
+.signature{
+    text-align:center;
+    min-height:80px;
+}
+
+.signature-title{
+    font-weight:700;
+    margin-bottom:20px;
+}
+
+.signature-name{
+    min-height:20px;
+    font-weight:700;
+}
+
+.signature-line{
+    border-bottom:1px solid #333;
+    margin:15px auto 0;
+    width:80%;
+}
+
+/* Footer */
+
+.footer{
+    margin-top:25px;
+    border-top:1px solid #ced4da;
+    padding-top:8px;
+    text-align:center;
+    color:#6c757d;
+    font-size:8px;
+    line-height:1.7;
+}
+
+/* Print */
+
+@media print{
+
+    @page{
+        size:A4 portrait;
+        margin:0;
+    }
+
+    body{
+        background:#fff;
+    }
+
+    .toolbar{
+        display:none !important;
+    }
+
+    .report{
+        margin:0;
+        width:210mm;
+        min-height:297mm;
+        box-shadow:none;
+        page-break-after:auto;
+    }
+
+    .flag-CRITICAL_HIGH,
+    .flag-CRITICAL_LOW{
+        animation:none;
+    }
+
+}
+
+@media(max-width:900px){
+
+    .report{
+        width:100%;
+        min-height:auto;
+        margin:0;
+        box-shadow:none;
+    }
+
+    .header-grid,
+    .patient-grid,
+    .meta,
+    .signatures{
+        grid-template-columns:1fr;
+    }
+
+    .results{
+        min-width:700px;
+    }
+
+    .results-wrapper{
+        overflow-x:auto;
+    }
+
+}
+
+
+<style>
+.btn-send-result {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    background: #198754;
+    color: #fff !important;
+    text-decoration: none !important;
+    font-weight: 700;
+    border: 1px solid #198754;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.btn-send-result:hover {
+    background: #157347;
+    border-color: #146c43;
+    transform: translateY(-1px);
+}
+
+@media print {
+    .btn-send-result {
+        display: none !important;
+    }
+}
+</style>
+
+</style>
+
+
+<style id="professional-results-style">
+/* Professional bilingual result presentation */
+.lab-department-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    direction: rtl;
+    text-align: right;
+    border-right: 4px solid #1f6f8b;
+    border-left: 0;
+    border-radius: 4px;
+}
+.department-title-main { font-size: 12px; }
+.department-title-en { font-size: 9px; color: #607080; direction: ltr; margin-right: auto; }
+.department-title-count {
+    font-size: 8px;
+    color: #1f6f8b;
+    background: #e5f1f5;
+    border-radius: 12px;
+    padding: 3px 8px;
+    white-space: nowrap;
+}
+.results th small { display: block; font-size: 7px; font-weight: 500; opacity: .85; margin-top: 2px; }
+.results th.col-test { width: 25%; }
+.results th.col-result { width: 16%; }
+.results td.result-value { font-size: 11px; letter-spacing: .2px; }
+.result-unit-inline { font-size: 8px; font-weight: 500; color: #607080; margin-right: 3px; }
+.results td:nth-child(1) { color: #73808c; font-weight: 700; }
+.flag { min-width: 48px; text-transform: uppercase; text-align: center; }
+.flag-NORMAL { background: #e8f5ee; color: #137a43; border: 1px solid #a9ddbe; }
+.flag-H, .flag-L { background: #fff7df; color: #946200; border: 1px solid #efd28a; }
+.critical { box-shadow: inset 3px 0 0 #c62828; }
+
+@media print {
+    .lab-department-title { border-right-width: 3px; }
+    .department-title-count { color: #17324d; background: #eef3f7; }
+    .results td.result-value { font-size: 10pt; }
+}
+</style>
+
+<style id="final-a4-report-style">
+
+/* ==========================================================
+   FINAL HIS / LIS LABORATORY REPORT
+   A4 PRINT + PDF
+   ========================================================== */
+
+:root {
+    --report-font: Arial, "Noto Sans", sans-serif;
+    --table-font-size: 10px;
+}
+
+/* ---------- Main report ---------- */
+
+body {
+    font-family: var(--report-font);
+    background: #eef2f5;
+    margin: 0;
+    padding: 20px;
+    color: #17212b;
+}
+
+.report-container {
+    width: 210mm;
+    max-width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    background: #ffffff;
+    box-sizing: border-box;
+    padding: 12mm;
+}
+
+/* ---------- Header ---------- */
+
+.report-header {
+    width: 100%;
+    border-bottom: 2px solid #17324d;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+}
+
+.report-header table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.report-header td {
+    vertical-align: middle;
+}
+
+.report-logo {
+    width: 25%;
+    text-align: left;
+}
+
+.report-logo img {
+    max-width: 42mm;
+    max-height: 22mm;
+    object-fit: contain;
+}
+
+.report-title {
+    width: 50%;
+    text-align: center;
+}
+
+.report-title h1 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: .3px;
+}
+
+.report-title .subtitle {
+    margin-top: 3px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.report-meta {
+    width: 25%;
+    text-align: right;
+    font-size: 9px;
+    line-height: 1.6;
+}
+
+/* ---------- Patient information ---------- */
+
+.patient-card {
+    border: 1px solid #cbd5dc;
+    border-radius: 5px;
+    padding: 7px 9px;
+    margin-bottom: 10px;
+    background: #fafcfd;
+}
+
+.patient-card table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.patient-card td {
+    padding: 3px 5px;
+    vertical-align: top;
+}
+
+.patient-label {
+    font-weight: 700;
+    color: #506070;
+    width: 13%;
+    white-space: nowrap;
+}
+
+.patient-value {
+    font-weight: 700;
+    width: 20%;
+}
+
+.patient-value-ar {
+    direction: rtl;
+    text-align: right;
+}
+
+/* ---------- Laboratory department ---------- */
+
+.lab-department {
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 12px;
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+.lab-department-title {
+    width: 100%;
+    box-sizing: border-box;
+    background: #edf3f7;
+    color: #17324d;
+    border: 1px solid #bdc9d2;
+    border-left: 4px solid #1f6f8b;
+    padding: 6px 8px;
+    font-size: 12px;
+    font-weight: 800;
+    direction: ltr;
+    text-align: left;
+    page-break-after: avoid;
+    break-after: avoid;
+}
+
+/* ---------- Results table ---------- */
+
+.results-wrapper {
+    width: 100%;
+    overflow: visible;
+}
+
+.results {
+    width: 100%;
+    max-width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    direction: ltr;
+    font-size: var(--table-font-size);
+}
+
+.results th {
+    background: #17324d;
+    color: #ffffff;
+    border: 1px solid #c4ccd2;
+    padding: 5px 4px;
+    font-weight: 800;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.results td {
+    border: 1px solid #cbd3d9;
+    padding: 5px 4px;
+    vertical-align: middle;
+    text-align: center;
+    overflow-wrap: anywhere;
+    word-break: normal;
+}
+
+.results tbody tr:nth-child(even) {
+    background: #f7f9fa;
+}
+
+.results tbody tr {
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+.test-name {
+    text-align: left !important;
+    font-weight: 700;
+}
+
+.result-value {
+    font-weight: 800;
+}
+
+/* ---------- Flags ---------- */
+
+.flag {
+    display: inline-block;
+    min-width: 35px;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-weight: 800;
+    font-size: 9px;
+}
+
+.flag-H {
+    font-weight: 900;
+}
+
+.flag-L {
+    font-weight: 900;
+}
+
+.flag-NORMAL {
+    font-weight: 800;
+}
+
+/* ---------- Notes ---------- */
+
+.examiner-notes {
+    margin-top: 8px;
+    border: 1px solid #d1d8de;
+    padding: 6px 8px;
+    font-size: 9px;
+}
+
+.examiner-notes-title {
+    font-weight: 800;
+    margin-bottom: 3px;
+}
+
+/* ---------- Footer ---------- */
+
+.report-footer {
+    margin-top: 14px;
+    padding-top: 7px;
+    border-top: 1px solid #cbd3d9;
+    font-size: 8px;
+    color: #596773;
+}
+
+.report-footer table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.report-footer td {
+    width: 33.333%;
+    vertical-align: top;
+    padding: 2px 5px;
+}
+
+.footer-center {
+    text-align: center;
+}
+
+.footer-right {
+    text-align: right;
+}
+
+/* ==========================================================
+   PRINT
+   ========================================================== */
+
+@media print {
+
+    @page {
+        size: A4 portrait;
+        margin: 8mm 7mm 10mm 7mm;
+    }
+
+    html,
+    body {
+        width: 210mm !important;
+        min-height: 297mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+    }
+
+    body {
+        font-family: var(--report-font) !important;
+    }
+
+    .report-container {
+        width: 100% !important;
+        max-width: none !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        box-shadow: none !important;
+    }
+
+    .no-print,
+    .print-button,
+    .toolbar,
+    button,
+    .btn {
+        display: none !important;
+    }
+
+    .report-header {
+        margin-bottom: 7px !important;
+        padding-bottom: 6px !important;
+    }
+
+    .patient-card {
+        margin-bottom: 7px !important;
+        padding: 5px 7px !important;
+        border-radius: 0 !important;
+    }
+
+    .patient-card td {
+        padding: 2px 4px !important;
+    }
+
+    .lab-department {
+        margin-top: 8px !important;
+        margin-bottom: 9px !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    .lab-department-title {
+        padding: 5px 7px !important;
+        font-size: 10.5pt !important;
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+    }
+
+    .results {
+        width: 100% !important;
+        max-width: 100% !important;
+        table-layout: fixed !important;
+        font-size: 8.5pt !important;
+    }
+
+    .results thead {
+        display: table-header-group !important;
+    }
+
+    .results th {
+        padding: 3.5px 3px !important;
+        font-size: 8pt !important;
+    }
+
+    .results td {
+        padding: 3.5px 3px !important;
+        font-size: 8.5pt !important;
+        white-space: normal !important;
+        overflow-wrap: anywhere !important;
+        word-break: normal !important;
+    }
+
+    .results tr {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    .examiner-notes {
+        margin-top: 5px !important;
+        padding: 4px 6px !important;
+        font-size: 8pt !important;
+    }
+
+    .report-footer {
+        margin-top: 8px !important;
+        padding-top: 5px !important;
+        font-size: 7.5pt !important;
+    }
+}
+
+/* ==========================================================
+   MOBILE PREVIEW
+   ========================================================== */
+
+@media screen and (max-width: 800px) {
+
+    body {
+        padding: 0;
+        background: #ffffff;
+    }
+
+    .report-container {
+        width: 100%;
+        max-width: 100%;
+        min-height: auto;
+        padding: 12px;
+    }
+
+    .results-wrapper {
+        overflow-x: auto;
+    }
+
+    .results {
+        min-width: 680px;
+    }
+}
+
+</style>
+
+<style id="results-final-overrides">
+/* Header and identity */
+.header { border-bottom: 3px solid #17324d; padding-bottom: 14px; margin-bottom: 12px; }
+.header-grid { grid-template-columns: 1fr 2fr 1fr; gap: 12px; }
+.hospital-ar { color:#17324d; font-size:22px; letter-spacing:.1px; }
+.hospital-en { color:#4b6070; font-size:11px; letter-spacing:.3px; }
+.lab-ar { color:#1f6f8b; font-size:16px; }
+.lab-en { color:#71808c; font-size:9px; letter-spacing:.5px; }
+.logo { max-width:95px; max-height:78px; }
+.report-title { margin: 16px 0 8px; }
+.report-title-ar { font-size:20px; letter-spacing:.2px; }
+.report-title-en { color:#526574; font-size:12px; letter-spacing:.4px; }
+.meta { gap:10px; margin:14px 0; }
+.meta-box { border:0; border-top:3px solid #1f6f8b; border-radius:4px; padding:7px 8px; background:#f4f8fa; }
+.meta-label { color:#637684; font-weight:700; }
+
+/* Professional result sections */
+.lab-department-title { display:flex; align-items:center; gap:8px; direction:rtl; text-align:right; border-right:4px solid #1f6f8b; border-left:0; border-radius:4px; }
+.department-title-main { font-size:12px; }
+.department-title-en { font-size:9px; color:#607080; direction:ltr; margin-right:auto; }
+.department-title-count { font-size:8px; color:#1f6f8b; background:#e5f1f5; border-radius:12px; padding:3px 8px; white-space:nowrap; }
+.results th small { display:block; font-size:7px; font-weight:500; opacity:.85; margin-top:2px; }
+.results th.col-test { width:25%; } .results th.col-result { width:16%; }
+.results td.result-value { font-size:11px; letter-spacing:.2px; }
+.result-unit-inline { font-size:8px; font-weight:500; color:#607080; margin-right:3px; }
+.results td:nth-child(1) { color:#73808c; font-weight:700; }
+.flag { min-width:48px; text-align:center; }
+.flag-NORMAL { background:#e8f5ee; color:#137a43; border:1px solid #a9ddbe; }
+.flag-H, .flag-L { background:#fff7df; color:#946200; border:1px solid #efd28a; }
+.critical { box-shadow:inset 3px 0 0 #c62828; }
+
+/* Signature block */
+.signatures { margin-top:34px; gap:24px; border-top:1px solid #d5dde3; padding-top:18px; }
+.signature { min-height:92px; padding:0 10px; }
+.signature-title { color:#17324d; font-size:10px; margin-bottom:24px; }
+.signature-name { color:#1f6f8b; min-height:22px; }
+.signature-line { width:88%; border-bottom:1px solid #657684; margin-top:18px; }
+.footer { margin-top:28px; color:#637684; }
+@media print { .lab-department-title { border-right-width:3px; } .results td.result-value { font-size:10pt; } .signatures { margin-top:24px; } }
+</style>
+
+</head>
+
+<body>
+
+<div class="toolbar">
+
+    <button class="btn-print"
+            onclick="window.print()">
+        🖨️ طباعة التقرير
+    </button>
+
+    {% if can_send_result %}
+    <a class="btn-send-result"
+       href="{% url 'laboratory:send_result' order.id %}">
+        📤 إرسال النتيجة للطبيب أو القسم
+    </a>
+    {% endif %}
+
+    <a class="btn-back"
+       href="{% url 'laboratory:dashboard' %}">
+        ↩ العودة
+    </a>
+
+</div>
+
+<div class="report">
+
+{% if settings.watermark_enabled %}
+<div class="watermark">
+    <span>{{ settings.watermark_text }}</span>
+</div>
+{% endif %}
+
+<div class="report-content">
+
+<!-- ================= HEADER ================= -->
+
+<div class="header">
+
+<div class="header-grid">
+
+<div class="logo-area
+    {% if settings.logo_position == 'LEFT' %}
+        logo-left
+    {% elif settings.logo_position == 'RIGHT' %}
+        logo-right
+    {% else %}
+        logo-center
+    {% endif %}
+">
+
+{% if settings.show_logo and settings.logo %}
+<img src="{{ settings.logo.url }}"
+     class="logo"
+     alt="Logo">
+{% endif %}
+
+</div>
+
+<div class="hospital">
+
+{% if settings.hospital_name_ar %}
+<div class="hospital-ar">
+{{ settings.hospital_name_ar }}
+</div>
+{% endif %}
+
+{% if settings.hospital_name_en %}
+<div class="hospital-en">
+{{ settings.hospital_name_en }}
+</div>
+{% endif %}
+
+{% if settings.laboratory_name_ar %}
+<div class="lab-ar">
+{{ settings.laboratory_name_ar }}
+</div>
+{% endif %}
+
+{% if settings.laboratory_name_en %}
+<div class="lab-en">
+{{ settings.laboratory_name_en }}
+</div>
+{% endif %}
+
+</div>
+
+<div></div>
+
+</div>
+
+</div>
+
+<!-- ================= TITLE ================= -->
+
+<div class="report-title">
+
+{% if settings.report_title_ar %}
+<div class="report-title-ar">
+{{ settings.report_title_ar }}
+</div>
+{% endif %}
+
+{% if settings.report_title_en %}
+<div class="report-title-en">
+{{ settings.report_title_en }}
+</div>
+{% endif %}
+
+</div>
+
+{% if settings.report_subtitle_ar or settings.report_subtitle_en %}
+<div class="report-subtitle">
+
+{% if settings.report_subtitle_ar %}
+<div>{{ settings.report_subtitle_ar }}</div>
+{% endif %}
+
+{% if settings.report_subtitle_en %}
+<div>{{ settings.report_subtitle_en }}</div>
+{% endif %}
+
+</div>
+{% endif %}
+
+<!-- ================= REPORT META ================= -->
+
+<div class="meta">
+
+{% if settings.show_report_number %}
+<div class="meta-box">
+<div class="meta-label">رقم التقرير / Report No.</div>
+<div class="meta-value">
+{{ order.order_number|default:order.id }}
+</div>
+</div>
+{% endif %}
+
+{% if settings.show_report_date %}
+<div class="meta-box">
+<div class="meta-label">تاريخ التقرير / Report Date</div>
+<div class="meta-value">
+{{ order.requested_at|date:"Y-m-d"|default:"-" }}
+</div>
+</div>
+{% endif %}
+
+{% if settings.show_report_time %}
+<div class="meta-box">
+<div class="meta-label">وقت التقرير / Report Time</div>
+<div class="meta-value">
+{{ order.requested_at|date:"H:i"|default:"-" }}
+</div>
+</div>
+{% endif %}
+
+{% if settings.show_generated_datetime %}
+<div class="meta-box">
+<div class="meta-label">تاريخ الإنشاء / Generated</div>
+<div class="meta-value">
+{% now "Y-m-d H:i" %}
+</div>
+</div>
+{% endif %}
+
+</div>
+
+<!-- ================= PATIENT ================= -->
+
+<div class="section-title">
+Patient Information / بيانات المريض
+</div>
+
+<div class="patient-grid">
+
+{% if settings.show_patient_number %}
+<div class="info">
+<div class="label">Patient Number / رقم المريض</div>
+<div class="value">
+{{ order.patient.patient_number|default:order.patient.id }}
+</div>
+</div>
+{% endif %}
+
+{% if settings.show_patient_name %}
+<div class="info">
+<div class="label">Patient Name / اسم المريض</div>
+<div class="value">
+{{ order.patient.full_name|default:"-" }}
+</div>
+</div>
+{% endif %}
+
+{% if settings.show_patient_age %}
+<div class="info">
+<div class="label">Age / العمر</div>
+<div class="value">
+{{ order.patient.age|default:"-" }}
+</div>
+</div>
+{% endif %}
+
+{% if settings.show_patient_gender %}
+<div class="info">
+<div class="label">Gender / الجنس</div>
+<div class="value">
+{{ order.patient.gender|default:"-" }}
+</div>
+</div>
+{% endif %}
+
+{% if settings.show_patient_phone %}
+<div class="info">
+<div class="label">Phone / الهاتف</div>
+<div class="value" dir="ltr">
+{{ order.patient.phone|default:"-" }}
+</div>
+</div>
+{% endif %}
+
+{% if settings.show_patient_address %}
+<div class="info">
+<div class="label">Address / العنوان</div>
+<div class="value">
+{{ order.patient.address|default:"-" }}
+</div>
+</div>
+{% endif %}
+
+{% if settings.show_visit_number %}
+<div class="info">
+<div class="label">Visit Number / رقم الزيارة</div>
+<div class="value">
+{{ order.visit.id|default:"-" }}
+</div>
+</div>
+{% endif %}
+
+{% if settings.show_requesting_department %}
+<div class="info">
+<div class="label">Requesting Department / القسم الطالب</div>
+<div class="value">
+{% if order.requesting_department %}
+{{ order.requesting_department.name_ar|default:"-" }}
+{% else %}
+-
+{% endif %}
+</div>
+</div>
+{% endif %}
+
+{% if settings.show_requesting_doctor %}
+<div class="info">
+<div class="label">Requesting Doctor / الطبيب الطالب</div>
+<div class="value">
+{{ order.requesting_doctor|default:"-" }}
+</div>
+</div>
+{% endif %}
+
+</div>
+
+<!-- ================= RESULTS ================= -->
+
+<div class="section-title">
+Laboratory Results / نتائج المختبر
+</div>
+
+{% for group in grouped_results %}
+
+<div class="lab-department">
+
+    <div class="lab-department-title">
+        <span class="department-title-main">
+            {% if group.department %}
+                {{ group.department.name_ar|default:group.department.name_en|default:"مختبر غير محدد" }}
+            {% else %}
+                مختبر غير محدد
+            {% endif %}
+        </span>
+        {% if group.department.name_en %}
+        <span class="department-title-en">{{ group.department.name_en }}</span>
+        {% endif %}
+        <span class="department-title-count">{{ group.items|length }} اختبار</span>
+    </div>
+
+    <div class="results-wrapper">
+
+        <table class="results">
+
+            <thead>
+                <tr>
+
+                    <th>#</th>
+
+                    {% if settings.show_test_name %}
+                    <th class="col-test">الفحص<br><small>Test</small></th>
+                    {% endif %}
+
+                    {% if settings.show_result %}
+                    <th class="col-result">النتيجة<br><small>Result</small></th>
+                    {% endif %}
+
+                    {% if settings.show_unit %}
+                    <th>الوحدة<br><small>Unit</small></th>
+                    {% endif %}
+
+                    {% if settings.show_reference_range %}
+                    <th>المدى المرجعي<br><small>Reference Range</small></th>
+                    {% endif %}
+
+                    {% if settings.show_result_flag %}
+                    <th>التقييم<br><small>Flag</small></th>
+                    {% endif %}
+
+                    {% if settings.show_critical_status %}
+                    <th>الحالة الحرجة<br><small>Critical</small></th>
+                    {% endif %}
+
+                    {% if settings.show_sample_type %}
+                    <th>العينة<br><small>Sample</small></th>
+                    {% endif %}
+
+                    {% if settings.show_device %}
+                    <th>الجهاز<br><small>Device</small></th>
+                    {% endif %}
+
+                    {% if settings.show_reagent %}
+                    <th>الكاشف<br><small>Reagent</small></th>
+                    {% endif %}
+
+                </tr>
+            </thead>
+
+            <tbody>
+
+            {% for item in group.items %}
+
+                <tr>
+
+                    <td>
+                        {{ forloop.counter }}
+                    </td>
+
+                    {% if settings.show_test_name %}
+                    <td class="test-name">
+                        {{ item.test.name_en|default:"-" }}
+                    </td>
+                    {% endif %}
+
+                    {% if settings.show_result %}
+                    <td class="result-value
+                        {% if item.critical_status %}
+                            critical
+                        {% endif %}
+                    ">
+
+                        {% if item.result_numeric is not None %}
+                            {{ item.result_numeric }}
+                        {% elif item.result %}
+                            {{ item.result }}
+                        {% else %}
+                            -
+                        {% endif %}
+                        {% if item.test.unit %}<span class="result-unit-inline">{{ item.test.unit }}</span>{% endif %}
+
+                    </td>
+                    {% endif %}
+
+                    {% if settings.show_unit %}
+                    <td>
+                        {{ item.test.unit|default:"-" }}
+                    </td>
+                    {% endif %}
+
+                    {% if settings.show_reference_range %}
+                    <td>
+                        {{ item.test.reference_range|default:"-" }}
+                    </td>
+                    {% endif %}
+
+                    {% if settings.show_result_flag %}
+                    <td>
+                        {% if item.result_flag %}
+                            <span class="flag flag-{{ item.result_flag }}">
+                                {{ item.result_flag }}
+                            </span>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    {% endif %}
+
+                    {% if settings.show_critical_status %}
+                    <td>
+                        {% if item.critical_status %}
+                            <span class="flag flag-{{ item.critical_status }}">
+                                {{ item.critical_status }}
+                            </span>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    {% endif %}
+
+                    {% if settings.show_sample_type %}
+                    <td>
+                        {{ item.test.sample_type|default:"-" }}
+                    </td>
+                    {% endif %}
+
+                    {% if settings.show_device %}
+                    <td>
+                        {{ item.test.device|default:"-" }}
+                    </td>
+                    {% endif %}
+
+                    {% if settings.show_reagent %}
+                    <td>
+                        {{ item.test.reagent|default:"-" }}
+                    </td>
+                    {% endif %}
+
+                </tr>
+
+            {% empty %}
+
+                <tr>
+                    <td colspan="12">
+                        No laboratory results available.
+                    </td>
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% empty %}
+
+<div class="results-wrapper">
+
+    <table class="results">
+
+        <tbody>
+
+            <tr>
+                <td colspan="12">
+                    No laboratory results available.
+                </td>
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endfor %}
+
+{% if settings.show_examiner_notes %}
+
+<div class="section-title">
+Examiner Notes / ملاحظات الفاحص
+</div>
+
+<div class="notes">
+
+{% for item in items %}
+
+{% if item.examiner_notes %}
+
+<div class="note-item">
+
+<strong>
+{{ item.test.name_en }}:
+</strong>
+
+{{ item.examiner_notes }}
+
+</div>
+
+{% endif %}
+
+{% empty %}
+
+<div class="note-item">
+-
+</div>
+
+{% endfor %}
+
+</div>
+
+{% endif %}
+
+<!-- ================= STATUS ================= -->
+
+<div class="status">
+
+{% if order.status == "COMPLETED" %}
+
+<span class="completed">
+✓ Report Completed & Verified
+</span>
+
+{% elif order.status == "VERIFIED" %}
+
+<span class="completed">
+✓ Results Verified
+</span>
+
+{% else %}
+
+<span class="processing">
+Report Status: {{ order.status }}
+</span>
+
+{% endif %}
+
+</div>
+
+<!-- ================= SIGNATURES ================= -->
+
+<div class="signatures">
+
+{% if settings.show_examiner_signature %}
+
+<div class="signature">
+
+<div class="signature-title">
+{{ settings.examiner_signature_label }}
+</div>
+
+{% for item in items %}
+
+{% if forloop.first and item.examiner %}
+
+<div class="signature-name">
+{{ item.examiner.get_full_name|default:item.examiner.username }}
+</div>
+
+{% endif %}
+
+{% endfor %}
+
+<div class="signature-line"></div>
+
+</div>
+
+{% endif %}
+
+
+{% if settings.show_verifier_signature %}
+
+<div class="signature">
+
+<div class="signature-title">
+{{ settings.verifier_signature_label }}
+</div>
+
+{% for item in items %}
+
+{% if forloop.first and item.verified_by %}
+
+<div class="signature-name">
+{{ item.verified_by.get_full_name|default:item.verified_by.username }}
+</div>
+
+{% endif %}
+
+{% endfor %}
+
+<div class="signature-line"></div>
+
+</div>
+
+{% endif %}
+
+
+{% if settings.show_director_signature %}
+
+<div class="signature">
+
+<div class="signature-title">
+{{ settings.director_signature_label }}
+</div>
+
+<div class="signature-name">
+-
+</div>
+
+<div class="signature-line"></div>
+
+</div>
+
+{% endif %}
+
+</div>
+
+<!-- ================= FOOTER ================= -->
+
+{% if settings.show_footer %}
+
+<div class="footer">
+
+{% if settings.address %}
+<div>{{ settings.address }}</div>
+{% endif %}
+
+{% if settings.phone %}
+<div>Phone: {{ settings.phone }}</div>
+{% endif %}
+
+{% if settings.email %}
+<div>Email: {{ settings.email }}</div>
+{% endif %}
+
+{% if settings.report_footer %}
+<div>{{ settings.report_footer }}</div>
+{% endif %}
+
+{% if settings.report_footer_en %}
+<div dir="ltr">{{ settings.report_footer_en }}</div>
+{% endif %}
+
+{% if settings.show_page_number %}
+<div>
+Page / الصفحة
+</div>
+{% endif %}
+
+</div>
+
+{% endif %}
+
+</div>
+
+</div>
+
+</body>
+</html>

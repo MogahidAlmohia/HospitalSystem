@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>طلب تحاليل مختبرية</title>
+
+    <style>
+        :root{--blue:#0d6efd;--navy:#17324d;--line:#e5eaf1;--soft:#f6f9fc}
+        body{font-family:"Cairo",Arial,Tahoma,sans-serif;background:radial-gradient(circle at 100% 0%,rgba(13,110,253,.08),transparent 30rem),#f1f5f9}
+        .header{background:linear-gradient(135deg,#0d6efd,#084298);box-shadow:0 10px 26px rgba(13,110,253,.16)}
+        .card{border:1px solid var(--line);box-shadow:0 9px 24px rgba(15,23,42,.06)}
+        .info{background:var(--soft);border-color:var(--line)}
+        input:focus,select:focus,textarea:focus{outline:0;border-color:#78aefc;box-shadow:0 0 0 .22rem rgba(13,110,253,.12)}
+        button,.btn{transition:.18s}button:hover,.btn:hover{transform:translateY(-1px);box-shadow:0 6px 14px rgba(15,23,42,.10)}
+        @media(max-width:650px){.container{margin:14px auto;padding:8px}.header{padding:18px}.toolbar{display:grid}.search,.priority{min-width:0}}
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Tahoma, sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 15px;
+        }
+
+        .header {
+            background: #0f766e;
+            color: white;
+            padding: 25px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            margin: 0 0 8px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.06);
+        }
+
+        .patient-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .info {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 14px;
+            border-radius: 10px;
+        }
+
+        .label {
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+
+        .value {
+            font-weight: bold;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        .search {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .priority {
+            min-width: 180px;
+        }
+
+        .department {
+            margin-top: 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .department-title {
+            background: #f1f5f9;
+            padding: 14px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .test-row {
+            display: grid;
+            grid-template-columns: 45px 100px 1fr 140px 130px 130px;
+            gap: 10px;
+            align-items: center;
+            padding: 12px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .test-row:hover {
+            background: #f8fafc;
+        }
+
+        .test-code {
+            font-family: monospace;
+            font-weight: bold;
+        }
+
+        .test-name {
+            font-weight: bold;
+        }
+
+        .english {
+            direction: ltr;
+            text-align: left;
+        }
+
+        .sample {
+            color: #475569;
+            font-size: 13px;
+        }
+
+        .range {
+            color: #475569;
+            font-size: 13px;
+        }
+
+        .selected-counter {
+            background: #ecfeff;
+            color: #155e75;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-start;
+            margin-top: 20px;
+        }
+
+        button {
+            border: none;
+            padding: 13px 22px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+        .submit {
+            background: #0f766e;
+            color: white;
+        }
+
+        .clear {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 16px;font-size:19px;color:#0f2742}.section-title small{font-size:12px;font-weight:normal;color:#64748b}.required-note{font-size:12px;color:#64748b;margin-top:-8px;margin-bottom:14px}.priority select{font-weight:700}.priority select option[value="URGENT"]{color:#b45309}.priority select option[value="STAT"]{color:#b91c1c}.selection-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:14px;padding:12px 14px;border:1px solid #bfdbfe;border-radius:10px;background:#eff6ff;color:#1e40af;font-size:13px}.test-row.is-selected{background:#eff6ff;border-right:3px solid #0d6efd}.test-checkbox{accent-color:#0d6efd;transform:scale(1.15)}.no-results{display:none;padding:22px;text-align:center;color:#64748b;border:1px dashed #cbd5e1;border-radius:10px;margin-top:14px}.form-error{display:none;margin:0 0 14px;padding:12px;border-radius:10px;background:#fff1f2;color:#be123c;border:1px solid #fecdd3;font-size:13px}
+
+        @media (max-width: 800px) {
+
+            .test-row {
+                grid-template-columns: 40px 1fr;
+            }
+
+            .test-row > div:not(:first-child) {
+                grid-column: 2;
+            }
+
+            .test-code {
+                grid-column: 2 !important;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+
+        <h1>🧪 طلب تحاليل مختبرية</h1>
+
+        <div>
+            Laboratory Order
+        </div>
+
+    </div>
+
+
+    <form method="post"{% if admission %} action="{% url 'laboratory:create_order_for_admission' admission.id %}"{% elif visit %} action="{% url 'laboratory:create_order' visit.id %}"{% endif %}>
+
+
+        {% csrf_token %}
+
+
+    
+
+
+    <!-- بيانات المريض -->
+    <div class="card">
+
+        <h2>بيانات المريض</h2>
+
+        <div class="patient-grid">
+
+            <div class="info">
+                <div class="label">المريض</div>
+                <div class="value">
+                    {% if admission %}
+                        {{ admission.patient.full_name }}
+                    {% elif visit %}
+                        {{ visit.patient.full_name }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="info">
+                <div class="label">رقم الملف</div>
+                <div class="value english">
+                    {% if admission %}
+                        {{ admission.patient.patient_number }}
+                    {% elif visit %}
+                        {{ visit.patient.patient_number }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="info">
+                <div class="label">رقم الزيارة</div>
+                <div class="value english">
+                    {% if visit %}
+                        {{ visit.visit_number|default:visit.id }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if admission %}
+            <div class="info">
+                <div class="label">رقم التنويم</div>
+                <div class="value english">
+                    {{ admission.admission_number }}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="info">
+                <div class="label">القسم</div>
+                <div class="value">
+                    {% if admission and admission.department %}
+                        {{ admission.department.name_ar|default:"-" }}
+                    {% elif visit and visit.department %}
+                        {{ visit.department.name_ar|default:"-" }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="info">
+                <div class="label">الطبيب</div>
+                <div class="value">
+                    {% if admission and admission.doctor %}
+                        {{ admission.doctor.name }}
+                    {% elif visit and visit.doctor %}
+                        {{ visit.doctor.name }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- بيانات الطلب -->
+
+        <div class="card">
+
+            <h2 class="section-title"><span>بيانات الطلب</span><small>الحقول المعلّمة مطلوبة لإرسال الطلب</small></h2>
+
+            <div class="toolbar">
+
+                <div class="priority">
+
+                    <label>
+                        الأولوية
+                    </label>
+
+                    <select name="priority">
+
+                        <option value="NORMAL">
+                            Normal
+                        </option>
+
+                        <option value="URGENT">
+                            Urgent
+                        </option>
+
+                        <option value="STAT">
+                            STAT
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="search">
+
+                    <label>
+                        البحث عن الفحص
+                    </label>
+
+                    <input
+                        type="text"
+                        id="testSearch"
+                        placeholder="ابحث باسم الفحص أو الكود..."
+                    >
+
+                </div>
+
+            </div>
+
+            <label>
+                Clinical Notes
+            </label>
+
+            <textarea
+                name="clinical_notes"
+                placeholder="أدخل الملاحظات السريرية..."
+            ></textarea>
+
+        </div>
+
+
+        <!-- الفحوصات -->
+
+        <div class="card">
+
+            <h2 class="section-title"><span>اختيار الفحوصات</span><small>اختر الفحوصات المطلوبة فقط</small></h2>
+            <div id="formError" class="form-error">يجب اختيار فحص مخبري واحد على الأقل قبل إرسال الطلب.</div>
+
+            <div class="selected-counter">
+
+                الفحوصات المحددة:
+                <span id="selectedCount">0</span>
+
+            </div>
+
+
+            {% regroup tests by department as department_list %}
+
+            {% for department in department_list %}
+
+                <div
+                    class="department"
+                    data-department="{{ department.grouper.name_ar|default:'بدون قسم' }}"
+                >
+
+                    <div class="department-title">
+
+                        🧪
+
+                        {% if department.grouper %}
+                            {{ department.grouper.name_ar }}
+                            -
+                            {{ department.grouper.name_en }}
+                        {% else %}
+                            فحوصات غير مصنفة
+                        {% endif %}
+
+                    </div>
+
+
+                    {% for test in department.list %}
+
+                        <div
+                            class="test-row"
+                            data-test="
+                                {{ test.name_en }}
+                                {{ test.name_ar }}
+                                {{ test.code }}
+                            "
+                        >
+
+                            <div>
+
+                                <input
+                                    type="checkbox"
+                                    name="tests"
+                                    value="{{ test.id }}"
+                                    class="test-checkbox"
+                                >
+
+                            </div>
+
+
+                            <div class="test-code">
+                                {{ test.code }}
+                            </div>
+
+
+                            <div class="test-name english">
+                                {{ test.name_en }}
+
+                                {% if test.name_ar %}
+                                    <br>
+                                    <span style="font-weight:normal;">
+                                        {{ test.name_ar }}
+                                    </span>
+                                {% endif %}
+                            </div>
+
+
+                            <div class="sample">
+                                {{ test.get_sample_type_display }}
+                            </div>
+
+
+                            <div class="range">
+                                {{ test.reference_range|default:"—" }}
+                            </div>
+
+
+                            <div>
+                                {{ test.unit|default:"—" }}
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% empty %}
+
+                <div class="info">
+                    لا توجد فحوصات نشطة في النظام.
+                </div>
+
+            {% endfor %}
+            <div id="noResults" class="no-results">لا توجد فحوصات مطابقة للبحث الحالي.</div>
+
+
+            <div class="actions">
+
+                <button
+                    type="submit"
+                    class="submit"
+                >
+                    🧪 إنشاء وإرسال طلب المختبر
+                </button>
+
+
+                <button
+                    type="button"
+                    class="clear"
+                    onclick="clearTests()"
+                >
+                    إلغاء التحديد
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+<script>
+
+    const form = document.querySelector("form");
+    const checkboxes = document.querySelectorAll(".test-checkbox");
+    const counter = document.getElementById("selectedCount");
+    const formError = document.getElementById("formError");
+    const noResults = document.getElementById("noResults");
+
+    const search =
+        document.getElementById("testSearch");
+
+
+    function updateCounter() {
+
+        const selected =
+            document.querySelectorAll(
+                ".test-checkbox:checked"
+            ).length;
+
+        counter.textContent = selected;
+        checkboxes.forEach(function(box) {
+            box.closest(".test-row").classList.toggle("is-selected", box.checked);
+        });
+        if (selected > 0) formError.style.display = "none";
+    }
+
+
+    checkboxes.forEach(function(box) {
+
+        box.addEventListener(
+            "change",
+            updateCounter
+        );
+
+    });
+
+
+    function clearTests() {
+
+        checkboxes.forEach(function(box) {
+
+            box.checked = false;
+
+        });
+
+        updateCounter();
+    }
+
+
+    search.addEventListener(
+        "input",
+        function() {
+
+            const query =
+                this.value.toLowerCase().trim();
+
+            document
+                .querySelectorAll(".test-row")
+                .forEach(function(row) {
+
+                    const text =
+                        row.dataset.test
+                            .toLowerCase();
+
+                    row.style.display =
+                        text.includes(query)
+                            ? "grid"
+                            : "none";
+
+                });
+
+
+            let totalVisible = 0;
+            document
+                .querySelectorAll(".department")
+                .forEach(function(department) {
+
+                    let found = false;
+
+                    department
+                        .querySelectorAll(".test-row")
+                        .forEach(function(row) {
+
+                            if (row.style.display !== "none") {
+                                found = true;
+                                totalVisible += 1;
+                            }
+
+                        });
+
+                    department.style.display = found ? "block" : "none";
+                });
+            noResults.style.display = totalVisible ? "none" : "block";
+
+        }
+    );
+
+    form.addEventListener("submit", function(event) {
+        if (!document.querySelector(".test-checkbox:checked")) {
+            event.preventDefault();
+            formError.style.display = "block";
+            formError.scrollIntoView({behavior: "smooth", block: "center"});
+        }
+    });
+
+    updateCounter();
+
+</script>
+
+</body>
+
+</html>

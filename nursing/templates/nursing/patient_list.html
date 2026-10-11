@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}مرضى التمريض{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3" dir="rtl">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+
+        <div>
+            <h3 class="fw-bold mb-1">مرضى التمريض</h3>
+            <div class="text-muted">
+                البحث والوصول إلى الملف التمريضي
+            </div>
+        </div>
+
+        <a href="{% url 'nursing:dashboard' %}"
+           class="btn btn-secondary">
+            لوحة التمريض
+        </a>
+
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+
+            <form method="get">
+
+                <div class="input-group">
+
+                    <input type="text"
+                           name="q"
+                           value="{{ q }}"
+                           class="form-control"
+                           placeholder="اسم المريض أو رقم الملف أو الهاتف">
+
+                    <button class="btn btn-primary">
+                        بحث
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead>
+                    <tr>
+                        <th>رقم الملف</th>
+                        <th>اسم المريض</th>
+                        <th>الجنس</th>
+                        <th>العمر</th>
+                        <th>الهاتف</th>
+                        <th></th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                {% for patient in patients %}
+
+                    <tr>
+
+                        <td>{{ patient.patient_number }}</td>
+
+                        <td class="fw-bold">
+                            {{ patient.full_name }}
+                        </td>
+
+                        <td>{{ patient.get_gender_display }}</td>
+
+                        <td>{{ patient.age|default:"-" }}</td>
+
+                        <td>{{ patient.phone|default:"-" }}</td>
+
+                        <td>
+                            <a href="{% url 'nursing:patient_record' patient.id %}"
+                               class="btn btn-sm btn-primary">
+                                الملف التمريضي
+                            </a>
+                        </td>
+
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+                        <td colspan="6"
+                            class="text-center text-muted py-4">
+                            لا توجد نتائج.
+                        </td>
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if department %}تعديل القسم{% else %}إضافة قسم{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+
+        <div class="card">
+            <div class="card-body p-4">
+
+                <h3 class="mb-4">
+                    {% if department %}
+                        ✏️ تعديل القسم
+                    {% else %}
+                        ➕ إضافة قسم جديد
+                    {% endif %}
+                </h3>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <label class="form-label">اسم القسم بالعربي</label>
+                            <input
+                                type="text"
+                                name="name_ar"
+                                class="form-control"
+                                value="{{ department.name_ar|default:'' }}"
+                                required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Department Name</label>
+                            <input
+                                type="text"
+                                name="name_en"
+                                class="form-control"
+                                value="{{ department.name_en|default:'' }}"
+                                required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">كود القسم</label>
+                            <input
+                                type="text"
+                                name="code"
+                                class="form-control"
+                                value="{{ department.code|default:'' }}"
+                                required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">نوع القسم</label>
+
+                            <select
+                                name="department_type"
+                                class="form-select">
+
+                                {% for value,label in department_types %}
+                                <option
+                                    value="{{ value }}"
+                                    {% if department and department.department_type == value %}
+                                        selected
+                                    {% endif %}>
+                                    {{ label }}
+                                </option>
+                                {% endfor %}
+
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">الهاتف</label>
+                            <input
+                                type="text"
+                                name="phone"
+                                class="form-control"
+                                value="{{ department.phone|default:'' }}">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">الموقع</label>
+                            <input
+                                type="text"
+                                name="location"
+                                class="form-control"
+                                value="{{ department.location|default:'' }}">
+                        </div>
+
+                    </div>
+
+                    <div class="mt-4 d-flex gap-2">
+
+                        <button class="btn btn-primary" type="submit">
+                            💾 حفظ
+                        </button>
+
+                        <a
+                            href="{% url 'departments:list' %}"
+                            class="btn btn-secondary">
+                            إلغاء
+                        </a>
+
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

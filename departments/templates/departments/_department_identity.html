@@ -1,0 +1,83 @@
+<div class="department-identity-card mb-4">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <div class="department-identity-icon">
+                {{ dept_icon }}
+            </div>
+
+            <div>
+                <h2 class="mb-1 fw-bold">
+                    {{ dept_title }}
+                </h2>
+
+                <div class="text-muted">
+                    {{ dept_desc }}
+                </div>
+
+                <div class="mt-2">
+                    <span class="badge bg-primary">
+                        {{ department.code }}
+                    </span>
+
+                    <span class="badge bg-success">
+                        {{ department.get_department_type_display }}
+                    </span>
+
+                    {% if department.location %}
+                    <span class="badge bg-light text-dark border">
+                        📍 {{ department.location }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="text-end">
+            <div class="small text-muted">
+                نظام إدارة المستشفى
+            </div>
+            <div class="fw-semibold">
+                HIS / LIS
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.department-identity-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f4f8fc 100%);
+    border: 1px solid #dce6f0;
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 6px 20px rgba(15, 55, 95, 0.08);
+}
+
+.department-identity-icon {
+    width: 68px;
+    height: 68px;
+    min-width: 68px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e8f2ff;
+    font-size: 34px;
+}
+
+.department-identity-card h2 {
+    color: #123b63;
+}
+
+@media (max-width: 576px) {
+    .department-identity-card {
+        padding: 16px;
+    }
+
+    .department-identity-icon {
+        width: 54px;
+        height: 54px;
+        min-width: 54px;
+        font-size: 27px;
+    }
+}
+</style>

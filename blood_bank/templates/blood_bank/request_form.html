@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+
+{% block title %}طلب دم جديد{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-file-medical text-warning"></i>
+                طلب دم جديد
+            </h2>
+            <p class="text-muted mb-0">
+                إنشاء طلب لتجهيز وحدات الدم للمريض
+            </p>
+        </div>
+
+        <div class="d-flex gap-2 mt-2 mt-md-0">
+            <a href="{% url 'blood_bank:request_list' %}"
+               class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-right"></i>
+                طلبات الدم
+            </a>
+
+            <a href="{% url 'blood_bank:dashboard' %}"
+               class="btn btn-outline-primary">
+                <i class="bi bi-droplet-half"></i>
+                بنك الدم
+            </a>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+
+        <div class="col-12 col-xl-10">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-header fw-bold">
+                    <i class="bi bi-file-earmark-medical"></i>
+                    بيانات طلب الدم
+                </div>
+
+                <div class="card-body">
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="row g-3">
+
+                            <!-- Patient -->
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">
+                                    المريض
+                                    <span class="text-danger">*</span>
+                                </label>
+
+                                {{ form.patient }}
+
+                                {% for error in form.patient.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Visit -->
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">
+                                    الزيارة
+                                </label>
+
+                                {{ form.visit }}
+
+                                {% for error in form.visit.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Doctor -->
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">
+                                    الطبيب الطالب
+                                </label>
+
+                                {{ form.requesting_doctor }}
+
+                                {% for error in form.requesting_doctor.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Department -->
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">
+                                    القسم الطالب
+                                </label>
+
+                                {{ form.requesting_department }}
+
+                                {% for error in form.requesting_department.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Patient Blood Group -->
+                            <div class="col-12 col-md-4">
+                                <label class="form-label">
+                                    فصيلة دم المريض
+                                </label>
+
+                                {{ form.patient_blood_group }}
+
+                                {% for error in form.patient_blood_group.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+
+                                <div class="form-text">
+                                    يجب التأكد من فصيلة المريض وفق إجراءات بنك الدم.
+                                </div>
+                            </div>
+
+                            <!-- Component -->
+                            <div class="col-12 col-md-4">
+                                <label class="form-label">
+                                    مكوّن الدم
+                                    <span class="text-danger">*</span>
+                                </label>
+
+                                {{ form.component }}
+
+                                {% for error in form.component.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Units -->
+                            <div class="col-12 col-md-4">
+                                <label class="form-label">
+                                    عدد الوحدات
+                                    <span class="text-danger">*</span>
+                                </label>
+
+                                {{ form.units_requested }}
+
+                                {% for error in form.units_requested.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Priority -->
+                            <div class="col-12 col-md-4">
+                                <label class="form-label">
+                                    الأولوية
+                                    <span class="text-danger">*</span>
+                                </label>
+
+                                {{ form.priority }}
+
+                                {% for error in form.priority.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Indication -->
+                            <div class="col-12 col-md-8">
+                                <label class="form-label">
+                                    سبب طلب الدم / التشخيص
+                                </label>
+
+                                {{ form.indication }}
+
+                                {% for error in form.indication.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Notes -->
+                            <div class="col-12">
+                                <label class="form-label">
+                                    ملاحظات
+                                </label>
+
+                                {{ form.notes }}
+
+                                {% for error in form.notes.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            يجب التحقق من هوية المريض وفصيلة الدم والتوافق وإجراءات بنك الدم المعتمدة قبل صرف أي وحدة.
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-2">
+
+                            <button type="submit"
+                                    class="btn btn-warning px-4">
+
+                                <i class="bi bi-check-lg"></i>
+                                إنشاء طلب الدم
+
+                            </button>
+
+                            <a href="{% url 'blood_bank:request_list' %}"
+                               class="btn btn-outline-secondary px-4">
+
+                                <i class="bi bi-x-lg"></i>
+                                إلغاء
+
+                            </a>
+
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

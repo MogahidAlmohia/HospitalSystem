@@ -1,0 +1,601 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+.audit-page{max-width:1600px;margin:auto}.audit-header{background:linear-gradient(135deg,#0f172a,#1f4b68);color:#fff;padding:24px;border-radius:18px;box-shadow:0 12px 28px rgba(15,23,42,.14)}
+.audit-stat,.audit-action-stat,.audit-table-wrapper{border:1px solid #e5eaf1;box-shadow:0 8px 24px rgba(15,23,42,.06);transition:.18s}.audit-stat:hover,.audit-action-stat:hover{transform:translateY(-2px)}
+@media(max-width:700px){.audit-action-grid,.audit-stats{grid-template-columns:1fr 1fr}}@media(max-width:480px){.audit-action-grid,.audit-stats{grid-template-columns:1fr}}
+</style>
+
+<style>
+.audit-page {
+    direction: rtl;
+    padding: 20px;
+}
+
+.audit-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.audit-header h1 {
+    margin: 0;
+    font-size: 28px;
+}
+
+.audit-subtitle {
+    color: #6b7280;
+    margin-top: 6px;
+}
+
+.audit-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.audit-btn {
+    display: inline-block;
+    padding: 10px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    color: #111827;
+    cursor: pointer;
+}
+
+.audit-btn:hover {
+    background: #f3f4f6;
+}
+
+.audit-btn-primary {
+    background: #2563eb;
+    color: white;
+    border-color: #2563eb;
+}
+
+.audit-btn-primary:hover {
+    background: #1d4ed8;
+}
+
+.audit-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.audit-stat {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.05);
+}
+
+.audit-stat-title {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.audit-stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    margin-top: 5px;
+}
+
+.audit-statistics-section,
+.audit-user-section {
+    margin-bottom: 20px;
+}
+
+.audit-statistics-section h2,
+.audit-user-section h2 {
+    font-size: 20px;
+    margin: 0 0 12px;
+}
+
+.audit-action-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.audit-action-stat {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.04);
+}
+
+.audit-action-stat-title {
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.audit-action-stat-count {
+    font-size: 25px;
+    font-weight: 700;
+    margin-top: 5px;
+}
+
+.audit-user-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.audit-user-stat {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 15px;
+}
+
+.audit-user-count {
+    color: #6b7280;
+    margin-top: 5px;
+    font-size: 13px;
+}
+
+
+.audit-filter-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 20px;
+}
+
+.audit-filter-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+    gap: 12px;
+    align-items: end;
+}
+
+.audit-field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.audit-field input,
+.audit-field select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: white;
+}
+
+.audit-filter-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+.audit-table-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.audit-table-wrapper {
+    overflow-x: auto;
+}
+
+.audit-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1050px;
+}
+
+.audit-table th {
+    background: #f8fafc;
+    padding: 12px;
+    text-align: right;
+    white-space: nowrap;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.audit-table td {
+    padding: 12px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: top;
+}
+
+.audit-table tr:hover {
+    background: #f8fafc;
+}
+
+.audit-action {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: #eef2ff;
+    color: #3730a3;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.audit-order {
+    font-weight: 700;
+    color: #2563eb;
+}
+
+.audit-description {
+    max-width: 350px;
+    line-height: 1.6;
+}
+
+.audit-ip {
+    direction: ltr;
+    text-align: right;
+    font-family: monospace;
+}
+
+.audit-empty {
+    text-align: center;
+    padding: 40px;
+    color: #6b7280;
+}
+
+.audit-footer {
+    padding: 15px;
+    color: #6b7280;
+    font-size: 13px;
+}
+
+@media (max-width: 1100px) {
+    .audit-action-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .audit-user-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+
+@media (max-width: 900px) {
+    .audit-filter-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .audit-action-grid,
+    .audit-user-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .audit-page {
+        padding: 10px;
+    }
+
+    .audit-header h1 {
+        font-size: 22px;
+    }
+
+    .audit-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .audit-filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .audit-btn {
+        width: 100%;
+        text-align: center;
+        box-sizing: border-box;
+    }
+}
+</style>
+
+<div class="audit-page">
+
+    <div class="audit-header">
+        <div>
+            <h1>📋 سجل تدقيق المختبر</h1>
+            <div class="audit-subtitle">
+                متابعة وتوثيق جميع العمليات المهمة التي تمت داخل نظام المختبر
+            </div>
+        </div>
+
+        <div class="audit-actions">
+            <a href="{% url 'laboratory:dashboard' %}" class="audit-btn">
+                ← لوحة المختبر
+            </a>
+
+            <a href="{% url 'laboratory:result_delivery_dashboard' %}" class="audit-btn">
+                📤 إرسال واستلام النتائج
+            </a>
+        </div>
+    </div>
+
+
+    <div class="audit-stats">
+
+        <div class="audit-stat">
+            <div class="audit-stat-title">إجمالي السجلات</div>
+            <div class="audit-stat-value">{{ total_count }}</div>
+        </div>
+
+        <div class="audit-stat">
+            <div class="audit-stat-title">عمليات اليوم</div>
+            <div class="audit-stat-value">{{ today_count }}</div>
+        </div>
+
+    </div>
+
+
+
+    <div id="audit-action-statistics" class="audit-statistics-section">
+
+        <h2>📊 إحصائيات العمليات</h2>
+
+        <div class="audit-action-grid">
+
+            {% for item in action_counts %}
+
+            <div class="audit-action-stat">
+
+                <div class="audit-action-stat-title">
+                    {{ item.label }}
+                </div>
+
+                <div class="audit-action-stat-count">
+                    {{ item.count }}
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+
+    <div class="audit-user-section">
+
+        <h2>👤 نشاط المستخدمين</h2>
+
+        <div class="audit-user-grid">
+
+            {% for item in user_counts %}
+
+            <div class="audit-user-stat">
+
+                <div>
+                    <strong>{{ item.user__username }}</strong>
+                </div>
+
+                <div class="audit-user-count">
+                    {{ item.count }} عملية
+                </div>
+
+            </div>
+
+            {% empty %}
+
+            <div class="audit-empty">
+                لا توجد بيانات نشاط للمستخدمين.
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+
+    <div class="audit-filter-card">
+
+        <form method="get">
+
+            <div class="audit-filter-grid">
+
+                <div class="audit-field">
+                    <label>🔎 بحث</label>
+                    <input
+                        type="text"
+                        name="q"
+                        value="{{ q }}"
+                        placeholder="رقم الطلب، المريض، المستخدم، أو الوصف..."
+                    >
+                </div>
+
+                <div class="audit-field">
+                    <label>⚙️ العملية</label>
+                    <select name="action">
+                        <option value="">كل العمليات</option>
+
+                        {% for value, label in action_choices %}
+                            <option
+                                value="{{ value }}"
+                                {% if action == value %}selected{% endif %}
+                            >
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="audit-field">
+                    <label>👤 المستخدم</label>
+                    <select name="user_id">
+                        <option value="">كل المستخدمين</option>
+
+                        {% for item in users %}
+                            <option
+                                value="{{ item.user_id }}"
+                                {% if user_id == item.user_id|stringformat:"s" %}selected{% endif %}
+                            >
+                                {{ item.user__username }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="audit-field">
+                    <label>📅 من تاريخ</label>
+                    <input
+                        type="date"
+                        name="date_from"
+                        value="{{ date_from }}"
+                    >
+                </div>
+
+                <div class="audit-field">
+                    <label>📅 إلى تاريخ</label>
+                    <input
+                        type="date"
+                        name="date_to"
+                        value="{{ date_to }}"
+                    >
+                </div>
+
+            </div>
+
+            <div class="audit-filter-actions">
+                <button type="submit" class="audit-btn audit-btn-primary">
+                    🔎 تطبيق البحث
+                </button>
+
+                <a href="{% url 'laboratory:audit_dashboard' %}" class="audit-btn">
+                    ♻️ إعادة ضبط
+                </a>
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <div class="audit-table-card">
+
+        <div class="audit-table-wrapper">
+
+            <table class="audit-table">
+
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>التاريخ والوقت</th>
+                        <th>العملية</th>
+                        <th>طلب المختبر</th>
+                        <th>المريض</th>
+                        <th>المستخدم</th>
+                        <th>الوصف</th>
+                        <th>IP</th>
+                        <th>التفاصيل</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for log in logs %}
+
+                    <tr>
+
+                        <td>{{ log.id }}</td>
+
+                        <td>
+                            {{ log.created_at|date:"Y-m-d H:i:s" }}
+                        </td>
+
+                        <td>
+                            <span class="audit-action">
+                                {{ log.get_action_display }}
+                            </span>
+                        </td>
+
+                        <td>
+                            {% if log.order %}
+                                <a
+                                    href="{% url 'laboratory:order_detail' log.order.id %}"
+                                    class="audit-order"
+                                >
+                                    {{ log.order.order_number }}
+                                </a>
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if log.order and log.order.patient %}
+                                {{ log.order.patient.full_name }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if log.user %}
+                                {{ log.user.username }}
+                            {% else %}
+                                النظام
+                            {% endif %}
+                        </td>
+
+                        <td class="audit-description">
+                            {{ log.description|default:"—" }}
+                        </td>
+
+                        <td class="audit-ip">
+                            {{ log.ip_address|default:"—" }}
+                        </td>
+
+                        <td>
+                            <a
+                                href="{% url 'laboratory:audit_detail' log.id %}"
+                                class="audit-btn"
+                            >
+                                👁️ تفاصيل
+                            </a>
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+                        <td colspan="9" class="audit-empty">
+                            لا توجد سجلات تدقيق مطابقة للبحث.
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div class="audit-footer">
+            يتم عرض أحدث السجلات أولاً، مع الحفاظ على سجل العمليات السابقة.
+            {% if total_count > 500 %}
+                يتم عرض أول 500 سجل من نتائج البحث.
+            {% endif %}
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

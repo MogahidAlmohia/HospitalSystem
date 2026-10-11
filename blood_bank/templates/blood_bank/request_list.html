@@ -1,0 +1,356 @@
+{% extends "base.html" %}
+
+{% block title %}طلبات الدم{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-file-medical text-warning"></i>
+                طلبات الدم
+            </h2>
+
+            <p class="text-muted mb-0">
+                متابعة طلبات الدم ومراحل تجهيزها وصرفها
+            </p>
+        </div>
+
+        <div class="d-flex gap-2 mt-2 mt-md-0">
+
+            <a href="{% url 'blood_bank:dashboard' %}"
+               class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-right"></i>
+                بنك الدم
+            </a>
+
+            <a href="{% url 'blood_bank:request_create' %}"
+               class="btn btn-warning">
+                <i class="bi bi-file-plus"></i>
+                طلب دم جديد
+            </a>
+
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <form method="get" class="row g-2">
+
+                <div class="col-12 col-md-4">
+                    <label class="form-label">
+                        بحث
+                    </label>
+
+                    <input
+                        type="text"
+                        name="q"
+                        value="{{ request.GET.q|default:'' }}"
+                        class="form-control"
+                        placeholder="رقم الطلب أو اسم المريض..."
+                    >
+                </div>
+
+                <div class="col-6 col-md-2">
+
+                    <label class="form-label">
+                        الحالة
+                    </label>
+
+                    <select name="status" class="form-select">
+
+                        <option value="">
+                            كل الحالات
+                        </option>
+
+                        {% for value,label in statuses %}
+
+                            <option value="{{ value }}"
+                                {% if request.GET.status == value %}
+                                    selected
+                                {% endif %}>
+                                {{ label }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+                <div class="col-6 col-md-2">
+
+                    <label class="form-label">
+                        الأولوية
+                    </label>
+
+                    <select name="priority" class="form-select">
+
+                        <option value="">
+                            كل الأولويات
+                        </option>
+
+                        {% for value,label in priorities %}
+
+                            <option value="{{ value }}"
+                                {% if request.GET.priority == value %}
+                                    selected
+                                {% endif %}>
+                                {{ label }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+                <div class="col-12 col-md-4 d-flex align-items-end gap-2">
+
+                    <button type="submit"
+                            class="btn btn-primary flex-fill">
+
+                        <i class="bi bi-search"></i>
+                        بحث
+
+                    </button>
+
+                    <a href="{% url 'blood_bank:request_list' %}"
+                       class="btn btn-outline-secondary">
+
+                        <i class="bi bi-x-lg"></i>
+
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <!-- Requests -->
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header d-flex justify-content-between align-items-center">
+
+            <strong>
+                <i class="bi bi-list-check"></i>
+                قائمة طلبات الدم
+            </strong>
+
+            <span class="badge bg-warning text-dark">
+                {{ requests|length }} طلب
+            </span>
+
+        </div>
+
+        <div class="card-body p-0">
+
+            {% if requests %}
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead class="table-light">
+
+                        <tr>
+                            <th>رقم الطلب</th>
+                            <th>المريض</th>
+                            <th>الفصيلة</th>
+                            <th>المكوّن</th>
+                            <th>الوحدات</th>
+                            <th>الأولوية</th>
+                            <th>الحالة</th>
+                            <th>التاريخ</th>
+                            <th class="text-center">الإجراء</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                    {% for request in requests %}
+
+                    <tr>
+
+                        <td>
+                            <strong>
+                                {{ request.request_number }}
+                            </strong>
+                        </td>
+
+                        <td>
+                            <div class="fw-semibold">
+                                {{ request.patient.full_name }}
+                            </div>
+
+                            <small class="text-muted">
+                                {{ request.patient.patient_number }}
+                            </small>
+                        </td>
+
+                        <td>
+
+                            {% if request.patient_blood_group %}
+
+                                <span class="badge bg-dark fs-6">
+                                    {{ request.patient_blood_group }}
+                                </span>
+
+                            {% else %}
+
+                                <span class="text-muted">
+                                    غير محددة
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+                            {{ request.get_component_display }}
+                        </td>
+
+                        <td>
+                            <span class="badge bg-secondary">
+                                {{ request.units_requested }}
+                            </span>
+                        </td>
+
+                        <td>
+
+                            {% if request.priority == "STAT" %}
+
+                                <span class="badge bg-danger">
+                                    STAT
+                                </span>
+
+                            {% elif request.priority == "URGENT" %}
+
+                                <span class="badge bg-warning text-dark">
+                                    عاجل
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-secondary">
+                                    عادي
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {% if request.status == "REQUESTED" %}
+
+                                <span class="badge bg-warning text-dark">
+                                    مطلوب
+                                </span>
+
+                            {% elif request.status == "CROSSMATCH" %}
+
+                                <span class="badge bg-info text-dark">
+                                    Crossmatch
+                                </span>
+
+                            {% elif request.status == "READY" %}
+
+                                <span class="badge bg-primary">
+                                    جاهز
+                                </span>
+
+                            {% elif request.status == "ISSUED" %}
+
+                                <span class="badge bg-success">
+                                    تم الصرف
+                                </span>
+
+                            {% elif request.status == "COMPLETED" %}
+
+                                <span class="badge bg-dark">
+                                    مكتمل
+                                </span>
+
+                            {% elif request.status == "CANCELLED" %}
+
+                                <span class="badge bg-danger">
+                                    ملغي
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-secondary">
+                                    {{ request.get_status_display }}
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+                            {{ request.created_at|date:"Y-m-d H:i" }}
+                        </td>
+
+                        <td class="text-center">
+
+                            <a href="{% url 'blood_bank:request_detail' request.id %}"
+                               class="btn btn-sm btn-outline-primary">
+
+                                <i class="bi bi-eye"></i>
+                                التفاصيل
+
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            {% else %}
+
+            <div class="text-center py-5">
+
+                <i class="bi bi-file-medical fs-1 text-muted"></i>
+
+                <h5 class="mt-3">
+                    لا توجد طلبات دم
+                </h5>
+
+                <p class="text-muted">
+                    لم يتم العثور على طلبات مطابقة للبحث.
+                </p>
+
+                <a href="{% url 'blood_bank:request_create' %}"
+                   class="btn btn-warning">
+
+                    <i class="bi bi-file-plus"></i>
+                    إنشاء أول طلب دم
+
+                </a>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-3" dir="rtl">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3>💊 الأدوية</h3>
+            <p class="text-muted mb-0">إدارة الأدوية والمخزون</p>
+        </div>
+        <a href="{% url 'pharmacy:medicine_create' %}" class="btn btn-primary">
+            ➕ إضافة دواء
+        </a>
+    </div>
+
+    <form method="get" class="card shadow-sm mb-3">
+        <div class="card-body">
+            <div class="row g-2">
+                <div class="col-md-10">
+                    <input type="text" name="q" value="{{ q }}"
+                           class="form-control"
+                           placeholder="ابحث باسم الدواء أو الكود...">
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-primary w-100">🔎 بحث</button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-primary">
+                    <tr>
+                        <th>الكود</th>
+                        <th>الدواء</th>
+                        <th>الاسم الإنجليزي</th>
+                        <th>الشكل</th>
+                        <th>التركيز</th>
+                        <th>السعر</th>
+                        <th>المخزون</th>
+                        <th>الحالة</th>
+                        <th>إجراء</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for medicine in medicines %}
+                    <tr>
+                        <td>{{ medicine.code }}</td>
+                        <td><strong>{{ medicine.name_ar }}</strong></td>
+                        <td>{{ medicine.name_en }}</td>
+                        <td>{{ medicine.get_form_display }}</td>
+                        <td>{{ medicine.strength|default:"-" }}</td>
+                        <td>{{ medicine.price }}</td>
+                        <td>
+                            {% if medicine.stock_quantity <= 0 %}
+                                <span class="badge bg-danger">منتهٍ</span>
+                            {% elif medicine.stock_quantity <= medicine.reorder_level %}
+                                <span class="badge bg-warning text-dark">
+                                    {{ medicine.stock_quantity }}
+                                </span>
+                            {% else %}
+                                <span class="badge bg-success">
+                                    {{ medicine.stock_quantity }}
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if medicine.is_active %}
+                                <span class="badge bg-success">فعال</span>
+                            {% else %}
+                                <span class="badge bg-secondary">غير فعال</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'pharmacy:medicine_update' medicine.id %}"
+                               class="btn btn-sm btn-outline-primary">
+                                تعديل
+                            </a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center py-4">
+                            لا توجد أدوية.
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

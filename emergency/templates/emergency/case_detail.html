@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}حالة الطوارئ {{ case.case_number }}{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between mb-4">
+
+<div>
+<h2 class="page-title">
+🚑 {{ case.case_number }}
+</h2>
+
+<div class="text-muted">
+{{ case.patient.full_name }}
+-
+{{ case.patient.patient_number }}
+</div>
+</div>
+
+<div>
+
+<a href="{% url 'emergency:edit' case.id %}"
+   class="btn btn-primary">
+✏️ تعديل الحالة
+</a>
+
+<a href="{% url 'emergency:dashboard' %}"
+   class="btn btn-secondary">
+العودة
+</a>
+
+</div>
+
+</div>
+
+<div class="row g-4">
+
+<div class="col-lg-8">
+
+<div class="card mb-4">
+
+<div class="card-body">
+
+<h5>👤 بيانات المريض</h5>
+
+<div class="row">
+
+<div class="col-md-6">
+<strong>الاسم:</strong>
+{{ case.patient.full_name }}
+</div>
+
+<div class="col-md-6">
+<strong>رقم الملف:</strong>
+{{ case.patient.patient_number }}
+</div>
+
+<div class="col-md-6 mt-2">
+<strong>العمر:</strong>
+{{ case.patient.age|default:"-" }}
+</div>
+
+<div class="col-md-6 mt-2">
+<strong>الهاتف:</strong>
+{{ case.patient.phone|default:"-" }}
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="card mb-4">
+
+<div class="card-body">
+
+<h5>🩺 العلامات الحيوية</h5>
+
+<div class="table-responsive">
+
+<table class="table">
+
+<tr>
+<th>Temperature</th>
+<td>{{ case.temperature|default:"-" }}</td>
+
+<th>Pulse</th>
+<td>{{ case.pulse|default:"-" }}</td>
+</tr>
+
+<tr>
+<th>Respiratory Rate</th>
+<td>{{ case.respiratory_rate|default:"-" }}</td>
+
+<th>Blood Pressure</th>
+<td>
+{% if case.systolic_bp %}
+{{ case.systolic_bp }}/{{ case.diastolic_bp }}
+{% else %}
+-
+{% endif %}
+</td>
+</tr>
+
+<tr>
+<th>SpO₂</th>
+<td>{{ case.oxygen_saturation|default:"-" }}</td>
+
+<th>Pain Score</th>
+<td>{{ case.pain_score|default:"-" }}</td>
+</tr>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="card mb-4">
+
+<div class="card-body">
+
+<h5>📋 الحالة الطبية</h5>
+
+<h6>الشكوى الرئيسية</h6>
+<p>{{ case.chief_complaint|linebreaksbr }}</p>
+
+<h6>التاريخ المرضي</h6>
+<p>{{ case.history|default:"-"|linebreaksbr }}</p>
+
+<h6>التشخيص الأولي</h6>
+<p>{{ case.preliminary_diagnosis|default:"-"|linebreaksbr }}</p>
+
+<h6>العلاج والإجراءات</h6>
+<p>{{ case.treatment|default:"-"|linebreaksbr }}</p>
+
+<h6>الملاحظات</h6>
+<p>{{ case.clinical_notes|default:"-"|linebreaksbr }}</p>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-lg-4">
+
+<div class="card">
+
+<div class="card-body">
+
+<h5>📌 معلومات الحالة</h5>
+
+<hr>
+
+<p>
+<strong>الحالة:</strong><br>
+{{ case.get_status_display }}
+</p>
+
+<p>
+<strong>Triage:</strong><br>
+{{ case.get_triage_level_display }}
+</p>
+
+<p>
+<strong>الطبيب:</strong><br>
+
+{% if case.doctor %}
+د/ {{ case.doctor.full_name }}
+{% else %}
+-
+{% endif %}
+
+</p>
+
+<p>
+<strong>القسم:</strong><br>
+
+{% if case.department %}
+{{ case.department.name_ar }}
+{% else %}
+الطوارئ
+{% endif %}
+
+</p>
+
+<p>
+<strong>وقت الوصول:</strong><br>
+{{ case.arrival_at|date:"Y-m-d H:i" }}
+</p>
+
+<p>
+<strong>المستخدم المسجل:</strong><br>
+
+{% if case.registered_by %}
+{{ case.registered_by.username }}
+{% else %}
+-
+{% endif %}
+
+</p>
+
+{% if case.disposition %}
+
+<p>
+<strong>النتيجة:</strong><br>
+{{ case.get_disposition_display }}
+</p>
+
+{% endif %}
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}

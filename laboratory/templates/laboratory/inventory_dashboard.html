@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block content %}
+<style>.inventory-page{max-width:1600px;margin:auto}.card,.dashboard-card{border:1px solid #e5eaf1;box-shadow:0 8px 24px rgba(15,23,42,.06);border-radius:16px}.table tbody tr:hover{background:#f4f9ff}</style>
+<div dir="rtl" class="container-fluid py-4">
+
+<h2 class="mb-4">📦 مخزون الكواشف</h2>
+
+<a href="{% url 'laboratory:stock_create' %}" class="btn btn-primary mb-4">
++ إضافة دفعة مخزون
+</a>
+
+<div class="row g-3 mb-4">
+
+<div class="col-md-4">
+<div class="card border-danger shadow-sm">
+<div class="card-body">
+<h5>⚠️ مخزون منخفض</h5>
+<h2>{{ low_stock|length }}</h2>
+</div>
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="card border-warning shadow-sm">
+<div class="card-body">
+<h5>⏰ قريب الانتهاء</h5>
+<h2>{{ near_expiry|length }}</h2>
+</div>
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="card border-dark shadow-sm">
+<div class="card-body">
+<h5>❌ منتهي الصلاحية</h5>
+<h2>{{ expired|length }}</h2>
+</div>
+</div>
+</div>
+
+</div>
+
+<div class="table-responsive">
+<table class="table table-bordered table-hover align-middle">
+
+<thead class="table-dark">
+<tr>
+<th>الكاشف</th>
+<th>الجهاز</th>
+<th>Lot Number</th>
+<th>Expiry Date</th>
+<th>Quantity</th>
+<th>Minimum</th>
+<th>Supplier</th>
+<th>الحالة</th>
+<th>إجراءات</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for stock in stocks %}
+<tr>
+
+<td>{{ stock.reagent.name }}</td>
+
+<td>
+{% if stock.reagent.device %}
+{{ stock.reagent.device.name }}
+{% else %}
+-
+{% endif %}
+</td>
+
+<td>{{ stock.lot_number }}</td>
+
+<td>{{ stock.expiry_date }}</td>
+
+<td>{{ stock.quantity }}</td>
+
+<td>{{ stock.minimum_stock }}</td>
+
+<td>{{ stock.supplier|default:"-" }}</td>
+
+<td>
+{% if stock.expiry_date < today %}
+<span class="badge bg-danger">Expired</span>
+{% elif stock.expiry_date <= today|date:"Y-m-d" %}
+<span class="badge bg-warning text-dark">Near Expiry</span>
+{% elif stock.quantity <= stock.minimum_stock %}
+<span class="badge bg-danger">Low Stock</span>
+{% else %}
+<span class="badge bg-success">OK</span>
+{% endif %}
+</td>
+
+<td>
+<a href="{% url 'laboratory:stock_movement' stock.id %}"
+class="btn btn-sm btn-outline-primary">
+حركة المخزون
+</a>
+</td>
+
+</tr>
+
+{% empty %}
+
+<tr>
+<td colspan="9" class="text-center">
+لا توجد دفعات مخزون.
+</td>
+</tr>
+
+{% endfor %}
+
+</tbody>
+</table>
+</div>
+
+</div>
+{% endblock %}

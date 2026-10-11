@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+
+{% block title %}خروج المريض{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-8">
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-header bg-danger text-white py-3">
+                    <h4 class="mb-0">
+                        🚪 خروج المريض من التنويم
+                    </h4>
+                </div>
+
+                <div class="card-body p-4">
+
+                    <div class="alert alert-warning">
+
+                        <h5 class="mb-3">
+                            بيانات المريض
+                        </h5>
+
+                        <div class="row">
+
+                            <div class="col-md-6 mb-2">
+                                <strong>المريض:</strong><br>
+                                {{ admission.patient.full_name }}
+                            </div>
+
+                            <div class="col-md-6 mb-2">
+                                <strong>رقم المريض:</strong><br>
+                                {{ admission.patient.patient_number }}
+                            </div>
+
+                            <div class="col-md-6 mb-2">
+                                <strong>رقم التنويم:</strong><br>
+                                {{ admission.admission_number }}
+                            </div>
+
+                            <div class="col-md-6 mb-2">
+                                <strong>القسم:</strong><br>
+                                {{ admission.department.name_ar|default:"-" }}
+                            </div>
+
+                            <div class="col-md-6 mb-2">
+                                <strong>الغرفة:</strong><br>
+                                {{ admission.room.room_number|default:"-" }}
+                            </div>
+
+                            <div class="col-md-6 mb-2">
+                                <strong>السرير:</strong><br>
+                                {{ admission.bed.bed_number|default:"-" }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <form method="post" id="dischargeForm">
+
+                        {% csrf_token %}
+
+
+                        <div class="mb-4">
+
+                            <label class="form-label fw-bold">
+                                نوع الخروج
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <select
+                                name="discharge_type"
+                                class="form-select"
+                                required
+                            >
+
+                                <option value="HOME">
+                                    Discharged Home — خروج إلى المنزل
+                                </option>
+
+                                <option value="TRANSFER">
+                                    Transferred — تحويل
+                                </option>
+
+                                <option value="OBSERVATION">
+                                    Observation — تحت الملاحظة
+                                </option>
+
+                                <option value="LEFT">
+                                    Left Without Treatment — مغادرة بدون علاج
+                                </option>
+
+                                <option value="OTHER">
+                                    Other — أخرى
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="mb-4">
+
+                            <label class="form-label fw-bold">
+                                تشخيص الخروج النهائي
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <textarea
+                                name="discharge_diagnosis"
+                                class="form-control"
+                                rows="5"
+                                required
+                                placeholder="اكتب التشخيص النهائي للمريض عند الخروج..."
+                            ></textarea>
+
+                        </div>
+
+
+                        <div class="mb-4">
+
+                            <label class="form-label fw-bold">
+                                ملاحظات الخروج
+                            </label>
+
+                            <textarea
+                                name="discharge_notes"
+                                class="form-control"
+                                rows="5"
+                                placeholder="التعليمات، الأدوية، المتابعة، المواعيد، أو أي ملاحظات أخرى..."
+                            ></textarea>
+
+                        </div>
+
+
+                        <div class="alert alert-danger">
+
+                            <strong>
+                                ⚠️ تنبيه
+                            </strong>
+
+                            <p class="mb-0 mt-2">
+                                عند تأكيد الخروج سيتم:
+                            </p>
+
+                            <ul class="mb-0 mt-2">
+
+                                <li>
+                                    تحويل حالة التنويم إلى
+                                    <strong>DISCHARGED</strong>.
+                                </li>
+
+                                <li>
+                                    تسجيل تاريخ ووقت الخروج.
+                                </li>
+
+                                <li>
+                                    تسجيل المستخدم الذي نفذ الخروج.
+                                </li>
+
+                                <li>
+                                    تحرير السرير تلقائيًا ليصبح
+                                    <strong>AVAILABLE</strong>.
+                                </li>
+
+                                <li>
+                                    إكمال الزيارة المرتبطة بالتنويم.
+                                </li>
+
+                            </ul>
+
+                        </div>
+
+
+                        <div class="d-flex gap-2 mt-4">
+
+                            <button
+                                type="submit"
+                                class="btn btn-danger px-4"
+                                id="confirmDischarge"
+                            >
+                                🚪 تأكيد خروج المريض
+                            </button>
+
+                            <a
+                                href="{% url 'inpatient:admission_detail' admission.id %}"
+                                class="btn btn-secondary px-4"
+                            >
+                                إلغاء
+                            </a>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+document.getElementById("dischargeForm").addEventListener("submit", function(event) {
+
+    const diagnosis = document
+        .querySelector('[name="discharge_diagnosis"]')
+        .value
+        .trim();
+
+    if (!diagnosis) {
+        event.preventDefault();
+
+        alert("يرجى إدخال تشخيص الخروج النهائي.");
+
+        return;
+    }
+
+    const confirmed = confirm(
+        "هل أنت متأكد من تنفيذ خروج هذا المريض؟\\n\\n" +
+        "سيتم تحرير السرير وتحويل حالة التنويم إلى DISCHARGED."
+    );
+
+    if (!confirmed) {
+        event.preventDefault();
+        return;
+    }
+
+    const button = document.getElementById("confirmDischarge");
+
+    button.disabled = true;
+    button.innerHTML = "⏳ جارٍ تنفيذ الخروج...";
+
+});
+</script>
+
+{% endblock %}

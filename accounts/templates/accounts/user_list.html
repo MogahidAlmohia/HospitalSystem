@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إدارة المستخدمين والصلاحيات</title>
+<style>
+body{margin:0;background:#f4f7fb;font-family:Tahoma,Arial,sans-serif;color:#263238}
+.header{background:#123b5d;color:white;padding:18px 25px;display:flex;justify-content:space-between;align-items:center}
+.header h1{margin:0;font-size:22px}
+.container{max-width:1250px;margin:25px auto;padding:0 15px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-bottom:20px}
+.card{background:white;border-radius:12px;padding:20px;box-shadow:0 3px 12px #0001}
+.card strong{display:block;font-size:28px;color:#123b5d;margin-top:8px}
+.toolbar{background:white;padding:18px;border-radius:12px;margin-bottom:20px;box-shadow:0 3px 12px #0001}
+input,select{padding:11px;border:1px solid #ccd6df;border-radius:7px;width:100%;box-sizing:border-box}
+.filters{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px}
+button,.btn{border:0;border-radius:7px;padding:11px 16px;cursor:pointer;text-decoration:none;display:inline-block}
+.primary{background:#1677b8;color:white}
+.warning{background:#e67e22;color:white}
+.danger{background:#c0392b;color:white}
+.success{background:#198754;color:white}
+.tablebox{background:white;border-radius:12px;overflow:auto;box-shadow:0 3px 12px #0001}
+table{width:100%;border-collapse:collapse;min-width:900px}
+th,td{padding:13px;border-bottom:1px solid #edf0f2;text-align:right}
+th{background:#eef4f8}
+.badge{padding:5px 9px;border-radius:20px;background:#e8f0f7;font-size:12px}
+.active{color:#198754;font-weight:bold}
+.inactive{color:#c0392b;font-weight:bold}
+.actions{display:flex;gap:6px}
+.msg{padding:12px;background:#dff3e6;color:#176b36;border-radius:8px;margin-bottom:15px}
+@media(max-width:700px){.cards{grid-template-columns:1fr}.filters{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h1>👥 إدارة المستخدمين والصلاحيات</h1>
+    <a href="{% url 'accounts:logout' %}" style="color:white">تسجيل الخروج</a>
+</div>
+
+<div class="container">
+
+{% for message in messages %}
+<div class="msg">{{ message }}</div>
+{% endfor %}
+
+<div class="cards">
+    <div class="card">إجمالي المستخدمين<strong>{{ total_users }}</strong></div>
+    <div class="card">المستخدمون النشطون<strong>{{ active_users }}</strong></div>
+    <div class="card">ملفات الموظفين<strong>{{ staff_count }}</strong></div>
+</div>
+
+<div class="toolbar">
+<form method="get">
+<div class="filters">
+<input name="q" value="{{ query }}" placeholder="بحث بالاسم أو اسم المستخدم أو الرقم الوظيفي">
+
+<select name="role">
+<option value="">كل الصلاحيات</option>
+{% for value,label in roles %}
+<option value="{{ value }}" {% if selected_role == value %}selected{% endif %}>{{ label }}</option>
+{% endfor %}
+</select>
+
+<select name="department">
+<option value="">كل الأقسام</option>
+{% for department in departments %}
+<option value="{{ department.id }}" {% if selected_department == department.id|stringformat:"s" %}selected{% endif %}>
+{{ department.name_ar }} - {{ department.name_en }}
+</option>
+{% endfor %}
+</select>
+
+<button class="primary">بحث</button>
+</div>
+</form>
+
+<br>
+
+<a href="{% url 'accounts:user_create' %}" class="btn success">＋ إضافة مستخدم جديد</a>
+</div>
+
+<div class="tablebox">
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>اسم المستخدم</th>
+<th>اسم الموظف</th>
+<th>الرقم الوظيفي</th>
+<th>الصلاحية</th>
+<th>القسم</th>
+<th>الهاتف</th>
+<th>الحالة</th>
+<th>الإجراءات</th>
+</tr>
+</thead>
+<tbody>
+{% for u in users %}
+<tr>
+<td>{{ forloop.counter }}</td>
+<td><strong>{{ u.username }}</strong></td>
+<td>{{ u.staff_profile.full_name|default:"-" }}</td>
+<td>{{ u.staff_profile.employee_number|default:"-" }}</td>
+<td><span class="badge">{{ u.staff_profile.get_role_display|default:"-" }}</span></td>
+<td>{{ u.staff_profile.department.name_ar|default:"-" }}</td>
+<td>{{ u.staff_profile.phone|default:"-" }}</td>
+<td>
+{% if u.is_active %}
+<span class="active">● نشط</span>
+{% else %}
+<span class="inactive">● معطل</span>
+{% endif %}
+</td>
+<td>
+<div class="actions">
+<a class="btn warning" href="{% url 'accounts:user_edit' u.id %}">تعديل</a>
+<a class="btn" href="{% url 'accounts:user_permissions' u.id %}">🔐 الصلاحيات</a>
+
+{% if u.id != request.user.id %}
+<a class="btn {% if u.is_active %}danger{% else %}success{% endif %}"
+href="{% url 'accounts:user_toggle' u.id %}">
+{% if u.is_active %}تعطيل{% else %}تفعيل{% endif %}
+</a>
+{% endif %}
+</div>
+</td>
+</tr>
+{% empty %}
+<tr><td colspan="9" style="text-align:center;padding:30px">لا توجد مستخدمين.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+
+</div>
+</body>
+</html>

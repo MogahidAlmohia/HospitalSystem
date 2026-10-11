@@ -1,0 +1,849 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+.permissions-page {
+    direction: rtl;
+    max-width: 1400px;
+    margin: 20px auto;
+    padding: 0 15px;
+}
+
+.permissions-header {
+    background: linear-gradient(135deg, #0d6efd, #084298);
+    color: white;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 25px rgba(0,0,0,.12);
+}
+
+.permissions-header h1 {
+    margin: 0 0 10px;
+    font-size: 28px;
+}
+
+.user-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.info-badge {
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.25);
+    padding: 7px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.summary-card {
+    background: white;
+    border-radius: 14px;
+    padding: 18px;
+    text-align: center;
+    box-shadow: 0 3px 15px rgba(0,0,0,.08);
+    border: 1px solid #eee;
+}
+
+.summary-card .number {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.summary-card .label {
+    color: #666;
+    font-size: 14px;
+}
+
+.summary-role .number {
+    color: #6f42c1;
+}
+
+.summary-custom .number {
+    color: #0d6efd;
+}
+
+.summary-denied .number {
+    color: #dc3545;
+}
+
+.summary-effective .number {
+    color: #198754;
+}
+
+.toolbar {
+    background: white;
+    border-radius: 14px;
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 3px 15px rgba(0,0,0,.07);
+}
+
+.toolbar-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.search-box {
+    flex: 1;
+    min-width: 240px;
+}
+
+.search-box input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 11px 14px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 15px;
+}
+
+.btn {
+    border: 0;
+    border-radius: 9px;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-primary {
+    background: #0d6efd;
+    color: white;
+}
+
+.btn-success {
+    background: #198754;
+    color: white;
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-light {
+    background: #f1f3f5;
+    color: #333;
+}
+
+.permissions-group {
+    background: white;
+    border-radius: 16px;
+    margin-bottom: 18px;
+    box-shadow: 0 3px 15px rgba(0,0,0,.07);
+    border: 1px solid #eee;
+    overflow: hidden;
+}
+
+.group-header {
+    background: #f8f9fa;
+    padding: 15px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.group-title {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.group-count {
+    color: #6c757d;
+    font-size: 13px;
+}
+
+.group-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.permission-row {
+    display: grid;
+    grid-template-columns: 1fr 140px 140px;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 18px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.permission-row:last-child {
+    border-bottom: 0;
+}
+
+.permission-name {
+    font-weight: 600;
+}
+
+.permission-code {
+    display: block;
+    color: #888;
+    font-size: 12px;
+    direction: ltr;
+    text-align: right;
+    margin-top: 3px;
+}
+
+.check-cell {
+    text-align: center;
+}
+
+.check-cell label {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    font-size: 13px;
+}
+
+.allowed-check,
+.denied-check {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.role-permission {
+    background: #f3e8ff;
+    border-radius: 7px;
+    padding: 4px 8px;
+    color: #6f42c1;
+    font-size: 12px;
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.final-box {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 3px 15px rgba(0,0,0,.07);
+}
+
+.final-box h3 {
+    margin-top: 0;
+}
+
+.final-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.final-item {
+    background: #e8f7ee;
+    color: #146c43;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 13px;
+}
+
+.full-access {
+    background: #fff3cd;
+    color: #664d03;
+    border: 1px solid #ffecb5;
+    border-radius: 10px;
+    padding: 12px;
+}
+
+.action-bar {
+    position: sticky;
+    bottom: 0;
+    background: rgba(255,255,255,.96);
+    border-top: 1px solid #ddd;
+    padding: 15px;
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    z-index: 10;
+}
+
+.btn-save {
+    background: #198754;
+    color: white;
+    border: 0;
+    border-radius: 10px;
+    padding: 12px 25px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-back {
+    text-decoration: none;
+    background: #6c757d;
+    color: white;
+    border-radius: 10px;
+    padding: 12px 20px;
+}
+
+.no-results {
+    display: none;
+    text-align: center;
+    padding: 30px;
+    color: #777;
+}
+
+@media (max-width: 900px) {
+    .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .permission-row {
+        grid-template-columns: 1fr 100px 100px;
+    }
+}
+
+@media (max-width: 600px) {
+    .summary-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .summary-card {
+        padding: 12px 8px;
+    }
+
+    .summary-card .number {
+        font-size: 22px;
+    }
+
+    .permission-row {
+        grid-template-columns: 1fr 70px 70px;
+        padding: 10px;
+    }
+
+    .group-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .action-bar {
+        flex-direction: column;
+    }
+
+    .btn-back,
+    .btn-save {
+        text-align: center;
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
+</style>
+
+<div class="permissions-page">
+
+    <div class="permissions-header">
+        <h1>🔐 إدارة صلاحيات المستخدم</h1>
+
+        <div class="user-info">
+            <span class="info-badge">
+                👤 {{ target_user.username }}
+            </span>
+
+            <span class="info-badge">
+                🆔 {{ profile.employee_number }}
+            </span>
+
+            <span class="info-badge">
+                💼 {{ profile.get_role_display }}
+            </span>
+
+            {% if profile.department %}
+                <span class="info-badge">
+                    🏥 {{ profile.department.name }}
+                </span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="summary-grid">
+
+        <div class="summary-card summary-role">
+            <div class="number">
+                {% if is_full_access %}
+                    ⭐
+                {% else %}
+                    {{ role_permissions|length }}
+                {% endif %}
+            </div>
+            <div class="label">صلاحيات الدور</div>
+        </div>
+
+        <div class="summary-card summary-custom">
+            <div class="number">
+                {{ custom_permissions|length }}
+            </div>
+            <div class="label">صلاحيات إضافية</div>
+        </div>
+
+        <div class="summary-card summary-denied">
+            <div class="number">
+                {{ denied_permissions|length }}
+            </div>
+            <div class="label">صلاحيات ممنوعة</div>
+        </div>
+
+        <div class="summary-card summary-effective">
+            <div class="number">
+                {% if is_full_access %}
+                    ⭐
+                {% else %}
+                    {{ effective_permissions|length }}
+                {% endif %}
+            </div>
+            <div class="label">الصلاحيات النهائية</div>
+        </div>
+
+    </div>
+
+    {% if is_full_access %}
+        <div class="full-access">
+            ⭐ <strong>هذا المستخدم لديه وصول كامل حسب الدور.</strong>
+            <br>
+            يمكن استخدام قسم «الصلاحيات الممنوعة» لمنع صلاحية محددة.
+        </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="toolbar">
+
+            <div class="toolbar-row">
+
+                <div class="search-box">
+                    <input
+                        type="search"
+                        id="permissionSearch"
+                        placeholder="🔎 ابحث عن صلاحية أو مجموعة..."
+                        autocomplete="off"
+                    >
+                </div>
+
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    onclick="selectAllAllowed()">
+                    ✓ تحديد الكل
+                </button>
+
+                <button
+                    type="button"
+                    class="btn btn-light"
+                    onclick="clearAllAllowed()">
+                    إلغاء السماح
+                </button>
+
+                <button
+                    type="button"
+                    class="btn btn-danger"
+                    onclick="clearAllDenied()">
+                    إلغاء المنع
+                </button>
+
+            </div>
+
+        </div>
+
+        <div id="groupsContainer">
+
+        {% for group_key, group in permission_groups.items %}
+
+            <div
+                class="permissions-group"
+                data-group="{{ group.title|lower }}"
+            >
+
+                <div class="group-header">
+
+                    <div>
+                        <div class="group-title">
+                            {{ group.title }}
+                        </div>
+
+                        <div class="group-count">
+                            {{ group.permissions|length }} صلاحية
+                        </div>
+                    </div>
+
+                    <div class="group-actions">
+
+                        <button
+                            type="button"
+                            class="btn btn-success"
+                            onclick="selectGroupAllowed('{{ group_key }}')">
+                            ✓ سماح المجموعة
+                        </button>
+
+                        <button
+                            type="button"
+                            class="btn btn-danger"
+                            onclick="selectGroupDenied('{{ group_key }}')">
+                            ✕ منع المجموعة
+                        </button>
+
+                        <button
+                            type="button"
+                            class="btn btn-light"
+                            onclick="clearGroup('{{ group_key }}')">
+                            مسح المجموعة
+                        </button>
+
+                    </div>
+
+                </div>
+
+                {% for permission, label in group.permissions %}
+
+                    <div
+                        class="permission-row"
+                        data-permission-row
+                        data-search="{{ label|lower }} {{ permission|lower }} {{ group.title|lower }}"
+                    >
+
+                        <div class="permission-name">
+
+                            {{ label }}
+
+                            <span class="permission-code">
+                                {{ permission }}
+                            </span>
+
+                            {% if permission in role_permissions or is_full_access %}
+                                <span class="role-permission">
+                                    موروثة من الدور
+                                </span>
+                            {% endif %}
+
+                        </div>
+
+                        <div class="check-cell">
+
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    name="allowed_permissions"
+                                    value="{{ permission }}"
+                                    class="allowed-check"
+                                    data-group="{{ group_key }}"
+                                    {% if permission in custom_permissions %}
+                                        checked
+                                    {% endif %}
+                                >
+
+                                🟢 سماح
+                            </label>
+
+                        </div>
+
+                        <div class="check-cell">
+
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    name="denied_permissions"
+                                    value="{{ permission }}"
+                                    class="denied-check"
+                                    data-group="{{ group_key }}"
+                                    {% if permission in denied_permissions %}
+                                        checked
+                                    {% endif %}
+                                >
+
+                                🔴 منع
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+                <div class="no-results">
+                    لا توجد نتائج مطابقة.
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+        </div>
+
+        <div class="final-box">
+
+            <h3>📋 الصلاحيات النهائية الحالية</h3>
+
+            {% if is_full_access %}
+
+                <div class="full-access">
+                    ⭐ وصول كامل حسب الدور
+                </div>
+
+            {% elif effective_permissions %}
+
+                <div class="final-list">
+
+                    {% for permission in effective_permissions %}
+
+                        <span class="final-item">
+                            {{ permission }}
+                        </span>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <p>لا توجد صلاحيات نهائية.</p>
+
+            {% endif %}
+
+        </div>
+
+        <div class="action-bar">
+
+            <button
+                type="submit"
+                class="btn-save">
+                💾 حفظ الصلاحيات
+            </button>
+
+            <a
+                href="{% url 'accounts:user_list' %}"
+                class="btn-back">
+                ↩ العودة للمستخدمين
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+<script>
+
+function selectAllAllowed() {
+
+    document.querySelectorAll('.allowed-check').forEach(function (allowed) {
+
+        allowed.checked = true;
+
+        const denied = document.querySelector(
+            '.denied-check[value="' +
+            CSS.escape(allowed.value) +
+            '"]'
+        );
+
+        if (denied) {
+            denied.checked = false;
+        }
+
+    });
+
+}
+
+
+function clearAllAllowed() {
+
+    document.querySelectorAll('.allowed-check').forEach(function (item) {
+        item.checked = false;
+    });
+
+}
+
+
+function clearAllDenied() {
+
+    document.querySelectorAll('.denied-check').forEach(function (item) {
+        item.checked = false;
+    });
+
+}
+
+
+function selectGroupAllowed(groupKey) {
+
+    document.querySelectorAll(
+        '.allowed-check[data-group="' +
+        CSS.escape(groupKey) +
+        '"]'
+    ).forEach(function (allowed) {
+
+        allowed.checked = true;
+
+        const denied = document.querySelector(
+            '.denied-check[value="' +
+            CSS.escape(allowed.value) +
+            '"]'
+        );
+
+        if (denied) {
+            denied.checked = false;
+        }
+
+    });
+
+}
+
+
+function selectGroupDenied(groupKey) {
+
+    document.querySelectorAll(
+        '.denied-check[data-group="' +
+        CSS.escape(groupKey) +
+        '"]'
+    ).forEach(function (denied) {
+
+        denied.checked = true;
+
+        const allowed = document.querySelector(
+            '.allowed-check[value="' +
+            CSS.escape(denied.value) +
+            '"]'
+        );
+
+        if (allowed) {
+            allowed.checked = false;
+        }
+
+    });
+
+}
+
+
+function clearGroup(groupKey) {
+
+    document.querySelectorAll(
+        '.allowed-check[data-group="' +
+        CSS.escape(groupKey) +
+        '"]'
+    ).forEach(function (item) {
+        item.checked = false;
+    });
+
+    document.querySelectorAll(
+        '.denied-check[data-group="' +
+        CSS.escape(groupKey) +
+        '"]'
+    ).forEach(function (item) {
+        item.checked = false;
+    });
+
+}
+
+
+document.querySelectorAll('.allowed-check').forEach(function (allowed) {
+
+    allowed.addEventListener('change', function () {
+
+        if (!this.checked) {
+            return;
+        }
+
+        const denied = document.querySelector(
+            '.denied-check[value="' +
+            CSS.escape(this.value) +
+            '"]'
+        );
+
+        if (denied) {
+            denied.checked = false;
+        }
+
+    });
+
+});
+
+
+document.querySelectorAll('.denied-check').forEach(function (denied) {
+
+    denied.addEventListener('change', function () {
+
+        if (!this.checked) {
+            return;
+        }
+
+        const allowed = document.querySelector(
+            '.allowed-check[value="' +
+            CSS.escape(this.value) +
+            '"]'
+        );
+
+        if (allowed) {
+            allowed.checked = false;
+        }
+
+    });
+
+});
+
+
+const searchInput = document.getElementById('permissionSearch');
+
+searchInput.addEventListener('input', function () {
+
+    const query = this.value.trim().toLowerCase();
+
+    document.querySelectorAll('.permissions-group').forEach(function (group) {
+
+        let visibleRows = 0;
+
+        group.querySelectorAll('[data-permission-row]').forEach(function (row) {
+
+            const text = row.getAttribute('data-search') || '';
+
+            if (!query || text.includes(query)) {
+
+                row.style.display = 'grid';
+                visibleRows++;
+
+            } else {
+
+                row.style.display = 'none';
+
+            }
+
+        });
+
+        const noResults = group.querySelector('.no-results');
+
+        if (noResults) {
+            noResults.style.display =
+                visibleRows === 0 && query ? 'block' : 'none';
+        }
+
+        group.style.display =
+            visibleRows > 0 || !query ? 'block' : 'none';
+
+    });
+
+});
+
+</script>
+
+{% endblock %}

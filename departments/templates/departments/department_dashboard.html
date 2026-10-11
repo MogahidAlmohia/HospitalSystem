@@ -1,0 +1,2150 @@
+{% extends "base.html" %}
+
+{% block title %}{{ department.name_ar }} - مركز تشغيل القسم{% endblock %}
+
+{% block content %}
+{% comment %}
+=========================================================
+هوية لوحة القسم حسب كود القسم
+لا تغيّر أي بيانات أو وظائف حالية.
+=========================================================
+{% endcomment %}
+
+{% with code=department.code %}
+
+{% if code == "IM" %}
+    {% with dept_icon="🩺" dept_title="قسم الباطنية" dept_desc="إدارة ومتابعة مرضى الباطنية والزيارات والطلبات والنتائج المخبرية." %}
+        {% include "departments/_department_identity.html" %}
+    {% endwith %}
+{% elif code == "SURG" %}
+    {% with dept_icon="🔪" dept_title="قسم الجراحة العامة" dept_desc="إدارة ومتابعة مرضى الجراحة والزيارات والطلبات والنتائج." %}
+        {% include "departments/_department_identity.html" %}
+    {% endwith %}
+{% elif code == "PED" %}
+    {% with dept_icon="👶" dept_title="قسم طب الأطفال" dept_desc="إدارة ومتابعة مرضى الأطفال والزيارات والطلبات والنتائج." %}
+        {% include "departments/_department_identity.html" %}
+    {% endwith %}
+{% elif code == "OBGYN" %}
+    {% with dept_icon="🤰" dept_title="قسم النساء والولادة" dept_desc="إدارة ومتابعة خدمات النساء والولادة والزيارات والنتائج." %}
+        {% include "departments/_department_identity.html" %}
+    {% endwith %}
+{% elif code == "CARD" %}
+    {% with dept_icon="❤️" dept_title="قسم أمراض القلب" dept_desc="إدارة ومتابعة مرضى القلب والزيارات والفحوصات والنتائج." %}
+        {% include "departments/_department_identity.html" %}
+    {% endwith %}
+{% elif code == "ICU" %}
+    {% with dept_icon="🏥" dept_title="قسم العناية المركزة" dept_desc="متابعة الحالات الحرجة والمرضى والعلامات والنتائج." %}
+        {% include "departments/_department_identity.html" %}
+    {% endwith %}
+{% elif code == "NEPH" %}
+    {% with dept_icon="🫘" dept_title="قسم أمراض الكلى والغسيل" dept_desc="إدارة ومتابعة مرضى الكلى والغسيل والطلبات والنتائج." %}
+        {% include "departments/_department_identity.html" %}
+    {% endwith %}
+{% elif code == "URO" %}
+    {% with dept_icon="🩺" dept_title="قسم المسالك البولية" dept_desc="إدارة ومتابعة مرضى المسالك البولية والزيارات والفحوصات." %}
+        {% include "departments/_department_identity.html" %}
+    {% endwith %}
+{% elif code == "ORTHO" %}
+    {% with dept_icon="🦴" dept_title="قسم العظام" dept_desc="إدارة ومتابعة حالات العظام والإصابات والزيارات والفحوصات." %}
+        {% include "departments/_department_identity.html" %}
+    {% endwith %}
+{% elif code == "NEURO" %}
+    {% with dept_icon="🧠" dept_title="قسم الأعصاب" dept_desc="إدارة ومتابعة مرضى الأعصاب والزيارات والنتائج." %}
+        {% include "departments/_department_identity.html" %}
+    {% endwith %}
+{% elif code == "ENT" %}
+    {% with dept_icon="👂" dept_title="قسم الأنف والأذن والحنجرة" dept_desc="إدارة ومتابعة حالات الأنف والأذن والحنجرة." %}
+        {% include "departments/_department_identity.html" %}
+    {% endwith %}
+{% elif code == "OPH" %}
+    {% with dept_icon="👁️" dept_title="قسم العيون" dept_desc="إدارة ومتابعة مرضى العيون والزيارات والفحوصات." %}
+        {% include "departments/_department_identity.html" %}
+    {% endwith %}
+{% elif code == "DERM" %}
+    {% with dept_icon="🧴" dept_title="قسم الجلدية" dept_desc="إدارة ومتابعة الحالات الجلدية والزيارات والنتائج." %}
+        {% include "departments/_department_identity.html" %}
+    {% endwith %}
+{% elif code == "ONCO" %}
+    {% with dept_icon="🎗️" dept_title="قسم الأورام" dept_desc="إدارة ومتابعة مرضى الأورام والزيارات والفحوصات والنتائج." %}
+        {% include "departments/_department_identity.html" %}
+    {% endwith %}
+{% elif code == "INF" %}
+    {% with dept_icon="🦠" dept_title="قسم الأمراض المعدية" dept_desc="إدارة ومتابعة الحالات المعدية والزيارات والنتائج." %}
+        {% include "departments/_department_identity.html" %}
+    {% endwith %}
+{% elif code == "ENDO" %}
+    {% with dept_icon="🧬" dept_title="قسم الغدد الصماء" dept_desc="إدارة ومتابعة مرضى الغدد والزيارات والفحوصات." %}
+        {% include "departments/_department_identity.html" %}
+    {% endwith %}
+{% elif code == "GASTRO" %}
+    {% with dept_icon="🩺" dept_title="قسم الجهاز الهضمي" dept_desc="إدارة ومتابعة أمراض الجهاز الهضمي والزيارات والفحوصات." %}
+        {% include "departments/_department_identity.html" %}
+    {% endwith %}
+{% elif code == "PULM" %}
+    {% with dept_icon="🫁" dept_title="قسم أمراض الصدر والجهاز التنفسي" dept_desc="إدارة ومتابعة أمراض الجهاز التنفسي والزيارات والفحوصات." %}
+        {% include "departments/_department_identity.html" %}
+    {% endwith %}
+{% elif code == "RHEUM" %}
+    {% with dept_icon="🦴" dept_title="قسم الروماتيزم" dept_desc="إدارة ومتابعة مرضى الروماتيزم والزيارات والنتائج." %}
+        {% include "departments/_department_identity.html" %}
+    {% endwith %}
+{% elif code == "DENT" %}
+    {% with dept_icon="🦷" dept_title="قسم طب الأسنان" dept_desc="إدارة ومتابعة مرضى الأسنان والزيارات والعلاجات." %}
+        {% include "departments/_department_identity.html" %}
+    {% endwith %}
+{% elif code == "PSY" %}
+    {% with dept_icon="🧠" dept_title="قسم الطب النفسي" dept_desc="إدارة ومتابعة المرضى النفسيين والزيارات والمتابعة." %}
+        {% include "departments/_department_identity.html" %}
+    {% endwith %}
+{% elif code == "BURNS" %}
+    {% with dept_icon="🔥" dept_title="وحدة الحروق" dept_desc="إدارة ومتابعة حالات الحروق والعلاج والمتابعة." %}
+        {% include "departments/_department_identity.html" %}
+    {% endwith %}
+{% elif code == "NICU" %}
+    {% with dept_icon="👶" dept_title="العناية المركزة لحديثي الولادة" dept_desc="متابعة حديثي الولادة والحالات الحرجة والعناية المتخصصة." %}
+        {% include "departments/_department_identity.html" %}
+    {% endwith %}
+{% elif code == "PICU" %}
+    {% with dept_icon="👶" dept_title="العناية المركزة للأطفال" dept_desc="متابعة الأطفال في الحالات الحرجة والعناية المتخصصة." %}
+        {% include "departments/_department_identity.html" %}
+    {% endwith %}
+{% elif code == "ER" %}
+    {% with dept_icon="🚑" dept_title="قسم الطوارئ" dept_desc="إدارة ومتابعة حالات الطوارئ." %}
+        {% include "departments/_department_identity.html" %}
+    {% endwith %}
+{% elif code == "INPATIENT" %}
+    {% with dept_icon="🛏️" dept_title="قسم التنويم" dept_desc="إدارة ومتابعة المرضى المنومين والأسرة والزيارات." %}
+        {% include "departments/_department_identity.html" %}
+    {% endwith %}
+{% elif code == "OR" %}
+    {% with dept_icon="⚕️" dept_title="غرف العمليات" dept_desc="إدارة ومتابعة العمليات والإجراءات الجراحية." %}
+        {% include "departments/_department_identity.html" %}
+    {% endwith %}
+{% elif code == "NURSING" %}
+    {% with dept_icon="👩‍⚕️" dept_title="قسم التمريض" dept_desc="إدارة ومتابعة خدمات التمريض ورعاية المرضى." %}
+        {% include "departments/_department_identity.html" %}
+    {% endwith %}
+{% else %}
+    {% with dept_icon="🏥" dept_title=department.name_ar dept_desc=department.name_en %}
+        {% include "departments/_department_identity.html" %}
+    {% endwith %}
+{% endif %}
+
+{% endwith %}
+
+
+<style>
+    :root {
+        --his-primary: #0d6efd;
+        --his-primary-dark: #084298;
+        --his-bg: #f5f8fc;
+        --his-border: #e4e9f0;
+        --his-text: #172033;
+        --his-muted: #6b7280;
+        --his-success: #198754;
+        --his-warning: #f59f00;
+        --his-danger: #dc3545;
+        --his-info: #0dcaf0;
+    }
+
+    .department-page {
+        background: var(--his-bg);
+        min-height: 100vh;
+        padding-bottom: 30px;
+    }
+
+    /* =========================
+       HEADER
+       ========================= */
+
+    /* =========================
+       KPI
+       ========================= */
+
+    .kpi-card {
+        background: #fff;
+        border: 1px solid var(--his-border);
+        border-radius: 18px;
+        padding: 17px;
+        height: 100%;
+        box-shadow: 0 5px 18px rgba(0,0,0,.045);
+        transition: .2s;
+    }
+
+    .kpi-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0,0,0,.08);
+    }
+
+    .kpi-icon {
+        font-size: 25px;
+        margin-bottom: 7px;
+    }
+
+    .kpi-number {
+        font-size: 27px;
+        font-weight: 900;
+        color: var(--his-text);
+        line-height: 1.1;
+    }
+
+    .kpi-label {
+        color: var(--his-muted);
+        font-size: 11px;
+        margin-top: 5px;
+    }
+
+    .kpi-danger {
+        border-top: 4px solid var(--his-danger);
+    }
+
+    .kpi-warning {
+        border-top: 4px solid var(--his-warning);
+    }
+
+    .kpi-success {
+        border-top: 4px solid var(--his-success);
+    }
+
+    .kpi-primary {
+        border-top: 4px solid var(--his-primary);
+    }
+
+    /* =========================
+       SECTION
+       ========================= */
+
+    .section-title {
+        font-size: 18px;
+        font-weight: 900;
+        color: var(--his-text);
+        margin: 0;
+    }
+
+    .section-subtitle {
+        color: var(--his-muted);
+        font-size: 11px;
+        margin-top: 3px;
+    }
+
+    .panel {
+        background: #fff;
+        border: 1px solid var(--his-border);
+        border-radius: 19px;
+        overflow: hidden;
+        box-shadow: 0 5px 18px rgba(0,0,0,.035);
+        height: 100%;
+    }
+
+    .panel-header {
+        padding: 16px 18px;
+        border-bottom: 1px solid var(--his-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .panel-body {
+        padding: 16px;
+    }
+
+    /* =========================
+       QUICK ACTIONS
+       ========================= */
+
+    .action-card {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        background: #fff;
+        border: 1px solid var(--his-border);
+        border-radius: 17px;
+        padding: 18px 14px;
+        text-align: center;
+        height: 100%;
+        transition: .2s;
+        box-shadow: 0 4px 15px rgba(0,0,0,.035);
+    }
+
+    .action-card:hover {
+        color: inherit;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0,0,0,.08);
+        border-color: rgba(13,110,253,.35);
+    }
+
+    .action-icon {
+        font-size: 30px;
+        margin-bottom: 9px;
+    }
+
+    .action-title {
+        font-weight: 800;
+        font-size: 13px;
+    }
+
+    .action-text {
+        color: var(--his-muted);
+        font-size: 10px;
+        margin-top: 4px;
+    }
+
+    .action-count {
+        display: inline-block;
+        margin-top: 9px;
+        min-width: 30px;
+        padding: 3px 8px;
+        border-radius: 20px;
+        background: #eef5ff;
+        color: var(--his-primary);
+        font-weight: 800;
+        font-size: 11px;
+    }
+
+    /* =========================
+       ALERTS
+       ========================= */
+
+    .alert-card {
+        border-radius: 15px;
+        padding: 13px;
+        border: 1px solid var(--his-border);
+        background: #fff;
+        height: 100%;
+    }
+
+    .alert-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 21px;
+        flex-shrink: 0;
+    }
+
+    .alert-title {
+        font-weight: 800;
+        font-size: 13px;
+    }
+
+    .alert-value {
+        font-size: 22px;
+        font-weight: 900;
+        margin-top: 2px;
+    }
+
+    .alert-text {
+        font-size: 10px;
+        color: var(--his-muted);
+    }
+
+    .alert-danger .alert-icon {
+        background: #fde8ea;
+        color: var(--his-danger);
+    }
+
+    .alert-warning .alert-icon {
+        background: #fff3cd;
+        color: #996c00;
+    }
+
+    .alert-info .alert-icon {
+        background: #e3f7fb;
+        color: #087990;
+    }
+
+    .alert-success .alert-icon {
+        background: #e4f6ec;
+        color: #146c43;
+    }
+
+    /* =========================
+       TABLE
+       ========================= */
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table th {
+        font-size: 10px;
+        color: var(--his-muted);
+        white-space: nowrap;
+        background: #fafbfd;
+        border-bottom-width: 1px;
+    }
+
+    .table td {
+        font-size: 11px;
+        vertical-align: middle;
+    }
+
+    .patient-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 11px;
+        background: #eef5ff;
+        color: var(--his-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 17px;
+        flex-shrink: 0;
+    }
+
+    .patient-name {
+        font-weight: 800;
+        color: var(--his-text);
+    }
+
+    .patient-number {
+        color: var(--his-muted);
+        font-size: 9px;
+    }
+
+    .status-badge {
+        border-radius: 20px;
+        padding: 4px 8px;
+        font-size: 9px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .status-success {
+        background: #e6f6ed;
+        color: #146c43;
+    }
+
+    .status-warning {
+        background: #fff3cd;
+        color: #8a6500;
+    }
+
+    .status-danger {
+        background: #fde8ea;
+        color: #b02a37;
+    }
+
+    .status-info {
+        background: #e3f7fb;
+        color: #087990;
+    }
+
+    .status-muted {
+        background: #eef0f3;
+        color: #59636e;
+    }
+
+    /* =========================
+       ACHIEVEMENTS
+       ========================= */
+
+    .achievement {
+        background: linear-gradient(
+            135deg,
+            #f8fbff,
+            #ffffff
+        );
+        border: 1px solid var(--his-border);
+        border-radius: 16px;
+        padding: 16px;
+        text-align: center;
+        height: 100%;
+    }
+
+    .achievement-icon {
+        font-size: 28px;
+        margin-bottom: 5px;
+    }
+
+    .achievement-number {
+        font-size: 24px;
+        font-weight: 900;
+    }
+
+    .achievement-label {
+        font-size: 10px;
+        color: var(--his-muted);
+    }
+
+    /* =========================
+       MOBILE
+       ========================= */
+
+    @media (max-width: 768px) {
+
+        .dept-hero {
+            padding: 18px;
+            border-radius: 18px;
+        }
+
+        .dept-title {
+            font-size: 21px;
+        }
+
+        .dept-icon {
+            width: 55px;
+            height: 55px;
+            font-size: 28px;
+        }
+
+        .kpi-card {
+            padding: 14px;
+        }
+
+        .kpi-number {
+            font-size: 23px;
+        }
+
+        .table-responsive {
+            border-radius: 0;
+        }
+
+        .action-card {
+            padding: 14px 8px;
+        }
+
+        .action-icon {
+            font-size: 25px;
+        }
+    }
+</style>
+
+
+
+{% if department.code == "IM" %}
+<div class="specialized-dept-panel mb-4">
+    <div class="specialized-dept-header">
+        <div>
+            <h3>🩺 لوحة قسم الباطنية</h3>
+            <p>المؤشرات السريرية الأساسية ومتابعة حركة المرضى والزيارات</p>
+        </div>
+        <span class="specialized-dept-badge">INTERNAL MEDICINE</span>
+    </div>
+
+    <div class="specialized-kpi-grid">
+        <div class="specialized-kpi">
+            <div class="specialized-kpi-icon">👥</div>
+            <div>
+                <div class="specialized-kpi-label">مرضى القسم</div>
+                <div class="specialized-kpi-value">{{ patient_count }}</div>
+            </div>
+        </div>
+
+        <div class="specialized-kpi">
+            <div class="specialized-kpi-icon">📋</div>
+            <div>
+                <div class="specialized-kpi-label">إجمالي الزيارات</div>
+                <div class="specialized-kpi-value">{{ visit_count }}</div>
+            </div>
+        </div>
+
+        <div class="specialized-kpi">
+            <div class="specialized-kpi-icon">🩺</div>
+            <div>
+                <div class="specialized-kpi-label">زيارات العيادات OPD</div>
+                <div class="specialized-kpi-value">{{ opd_visit_count }}</div>
+            </div>
+        </div>
+
+        <div class="specialized-kpi">
+            <div class="specialized-kpi-icon">🚑</div>
+            <div>
+                <div class="specialized-kpi-label">زيارات الطوارئ</div>
+                <div class="specialized-kpi-value">{{ er_visit_count }}</div>
+            </div>
+        </div>
+
+        <div class="specialized-kpi">
+            <div class="specialized-kpi-icon">🔄</div>
+            <div>
+                <div class="specialized-kpi-label">زيارات المتابعة</div>
+                <div class="specialized-kpi-value">{{ followup_visit_count }}</div>
+            </div>
+        </div>
+
+        <div class="specialized-kpi">
+            <div class="specialized-kpi-icon">👨</div>
+            <div>
+                <div class="specialized-kpi-label">المرضى الذكور</div>
+                <div class="specialized-kpi-value">{{ male_patient_count }}</div>
+            </div>
+        </div>
+
+        <div class="specialized-kpi">
+            <div class="specialized-kpi-icon">👩</div>
+            <div>
+                <div class="specialized-kpi-label">المرضى الإناث</div>
+                <div class="specialized-kpi-value">{{ female_patient_count }}</div>
+            </div>
+        </div>
+
+        <div class="specialized-kpi">
+            <div class="specialized-kpi-icon">🧪</div>
+            <div>
+                <div class="specialized-kpi-label">طلبات المختبر اليوم</div>
+                <div class="specialized-kpi-value">{{ today_order_count }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.specialized-dept-panel {
+    background: #ffffff;
+    border: 1px solid #dce6f0;
+    border-radius: 20px;
+    padding: 22px;
+    box-shadow: 0 8px 24px rgba(15, 55, 95, 0.08);
+}
+
+.specialized-dept-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.specialized-dept-header h3 {
+    margin: 0;
+    color: #123b63;
+    font-weight: 800;
+}
+
+.specialized-dept-header p {
+    margin: 5px 0 0;
+    color: #6b7c8f;
+}
+
+.specialized-dept-badge {
+    background: #e8f2ff;
+    color: #1769aa;
+    border: 1px solid #cfe2f5;
+    border-radius: 999px;
+    padding: 7px 13px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.specialized-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.specialized-kpi {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 92px;
+    padding: 15px;
+    background: #f8fbfe;
+    border: 1px solid #e3edf5;
+    border-radius: 16px;
+}
+
+.specialized-kpi-icon {
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 13px;
+    background: #e8f2ff;
+    font-size: 22px;
+}
+
+.specialized-kpi-label {
+    color: #718096;
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+.specialized-kpi-value {
+    color: #123b63;
+    font-size: 25px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+@media (max-width: 992px) {
+    .specialized-kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 576px) {
+    .specialized-dept-panel {
+        padding: 15px;
+    }
+
+    .specialized-dept-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .specialized-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endif %}
+
+<div class="department-page">
+
+    <!-- =====================================================
+         DEPARTMENT HEADER
+         ===================================================== -->
+
+
+
+    <!-- =====================================================
+         KPI SECTION
+         ===================================================== -->
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-6 col-md-4 col-xl-3">
+            <div class="kpi-card kpi-primary">
+                <div class="kpi-icon">👥</div>
+                <div class="kpi-number">
+                    {{ patient_count }}
+                </div>
+                <div class="kpi-label">
+                    إجمالي مرضى القسم
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-6 col-md-4 col-xl-3">
+            <div class="kpi-card kpi-primary">
+                <div class="kpi-icon">📅</div>
+                <div class="kpi-number">
+                    {{ today_visit_count }}
+                </div>
+                <div class="kpi-label">
+                    زيارات اليوم
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-6 col-md-4 col-xl-3">
+            <div class="kpi-card kpi-primary">
+                <div class="kpi-icon">🧪</div>
+                <div class="kpi-number">
+                    {{ today_order_count }}
+                </div>
+                <div class="kpi-label">
+                    طلبات التحاليل اليوم
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-6 col-md-4 col-xl-3">
+            <div class="kpi-card kpi-warning">
+                <div class="kpi-icon">⏳</div>
+                <div class="kpi-number">
+                    {{ pending_result_count }}
+                </div>
+                <div class="kpi-label">
+                    نتائج قيد العمل
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-6 col-md-4 col-xl-3">
+            <div class="kpi-card kpi-warning">
+                <div class="kpi-icon">⚠️</div>
+                <div class="kpi-number">
+                    {{ unverified_result_count }}
+                </div>
+                <div class="kpi-label">
+                    نتائج تحتاج اعتماد
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-6 col-md-4 col-xl-3">
+            <div class="kpi-card kpi-danger">
+                <div class="kpi-icon">🚨</div>
+                <div class="kpi-number">
+                    {{ critical_result_count }}
+                </div>
+                <div class="kpi-label">
+                    نتائج حرجة غير معتمدة
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-6 col-md-4 col-xl-3">
+            <div class="kpi-card kpi-info">
+                <div class="kpi-icon">📥</div>
+                <div class="kpi-number">
+                    {{ pending_delivery_count }}
+                </div>
+                <div class="kpi-label">
+                    نتائج لم يتم استلامها
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-6 col-md-4 col-xl-3">
+            <div class="kpi-card kpi-success">
+                <div class="kpi-icon">✅</div>
+                <div class="kpi-number">
+                    {{ today_completed }}
+                </div>
+                <div class="kpi-label">
+                    نتائج مكتملة اليوم
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         QUICK OPERATIONS
+         ===================================================== -->
+
+    <div class="mb-4">
+
+        <div class="mb-3">
+            <h2 class="section-title">
+                ⚡ مركز تشغيل القسم
+            </h2>
+
+            <div class="section-subtitle">
+                الوصول السريع إلى جميع العمليات اليومية للقسم
+            </div>
+        </div>
+
+
+        <div class="row g-3">
+
+            <div class="col-6 col-md-3">
+                <a
+                    href="{% url 'departments:patients' department.id %}"
+                    class="action-card"
+                >
+                    <div class="action-icon">👥</div>
+                    <div class="action-title">
+                        المرضى
+                    </div>
+                    <div class="action-text">
+                        ملفات مرضى القسم
+                    </div>
+                    <span class="action-count">
+                        {{ patient_count }}
+                    </span>
+                </a>
+            </div>
+
+
+            <div class="col-6 col-md-3">
+                <a
+                    href="{% url 'departments:visits' department.id %}"
+                    class="action-card"
+                >
+                    <div class="action-icon">🩺</div>
+                    <div class="action-title">
+                        الزيارات
+                    </div>
+                    <div class="action-text">
+                        الزيارات والفحوصات
+                    </div>
+                    <span class="action-count">
+                        {{ visit_count }}
+                    </span>
+                </a>
+            </div>
+
+
+            <div class="col-6 col-md-3">
+                <a
+                    href="{% url 'departments:lab_orders' department.id %}"
+                    class="action-card"
+                >
+                    <div class="action-icon">🧪</div>
+                    <div class="action-title">
+                        طلبات التحاليل
+                    </div>
+                    <div class="action-text">
+                        طلبات المختبر
+                    </div>
+                    <span class="action-count">
+                        {{ order_count }}
+                    </span>
+                </a>
+            </div>
+
+
+            <div class="col-6 col-md-3">
+                <a
+                    href="{% url 'departments:results' department.id %}"
+                    class="action-card"
+                >
+                    <div class="action-icon">📊</div>
+                    <div class="action-title">
+                        النتائج
+                    </div>
+                    <div class="action-text">
+                        متابعة نتائج المختبر
+                    </div>
+                    <span class="action-count">
+                        {{ pending_result_count }}
+                    </span>
+                </a>
+            </div>
+
+
+            <div class="col-6 col-md-3">
+                <a
+                    href="{% url 'departments:required_results' department.id %}"
+                    class="action-card"
+                >
+                    <div class="action-icon">📥</div>
+                    <div class="action-title">
+                        النتائج المطلوبة
+                    </div>
+                    <div class="action-text">
+                        نتائج أرسلها المختبر
+                    </div>
+                    <span class="action-count">
+                        {{ pending_delivery_count }}
+                    </span>
+                </a>
+            </div>
+
+
+            <div class="col-6 col-md-3">
+                <a
+                    href="{% url 'departments:achievements' department.id %}"
+                    class="action-card"
+                >
+                    <div class="action-icon">🏆</div>
+                    <div class="action-title">
+                        الإنجازات
+                    </div>
+                    <div class="action-text">
+                        أداء القسم وإحصائياته
+                    </div>
+                </a>
+            </div>
+
+
+            <div class="col-6 col-md-3">
+                <a
+                    href="{% url 'laboratory:dashboard' %}"
+                    class="action-card"
+                >
+                    <div class="action-icon">🔬</div>
+                    <div class="action-title">
+                        مركز المختبر
+                    </div>
+                    <div class="action-text">
+                        متابعة عمليات المختبر
+                    </div>
+                </a>
+            </div>
+
+
+            <div class="col-6 col-md-3">
+                <a
+                    href="{% url 'patients:search' %}"
+                    class="action-card"
+                >
+                    <div class="action-icon">🔎</div>
+                    <div class="action-title">
+                        بحث المرضى
+                    </div>
+                    <div class="action-text">
+                        البحث في ملفات المرضى
+                    </div>
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ALERT CENTER
+         ===================================================== -->
+
+    <div class="mb-4">
+
+        <div class="mb-3">
+
+            <h2 class="section-title">
+                🔔 مركز التنبيهات والمتابعة
+            </h2>
+
+            <div class="section-subtitle">
+                الحالات التي تحتاج إلى إجراء من القسم
+            </div>
+
+        </div>
+
+
+        <div class="row g-3">
+
+            <div class="col-12 col-md-6 col-xl-3">
+
+                <a
+                    href="{% url 'departments:results' department.id %}"
+                    class="text-decoration-none"
+                >
+
+                    <div class="alert-card alert-danger">
+
+                        <div class="d-flex align-items-center gap-3">
+
+                            <div class="alert-icon">
+                                🚨
+                            </div>
+
+                            <div>
+
+                                <div class="alert-title">
+                                    النتائج الحرجة
+                                </div>
+
+                                <div class="alert-value">
+                                    {{ critical_result_count }}
+                                </div>
+
+                                <div class="alert-text">
+                                    تحتاج متابعة واعتماد
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+
+            <div class="col-12 col-md-6 col-xl-3">
+
+                <a
+                    href="{% url 'departments:results' department.id %}"
+                    class="text-decoration-none"
+                >
+
+                    <div class="alert-card alert-warning">
+
+                        <div class="d-flex align-items-center gap-3">
+
+                            <div class="alert-icon">
+                                ⚠️
+                            </div>
+
+                            <div>
+
+                                <div class="alert-title">
+                                    نتائج غير معتمدة
+                                </div>
+
+                                <div class="alert-value">
+                                    {{ unverified_result_count }}
+                                </div>
+
+                                <div class="alert-text">
+                                    تحتاج مراجعة
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+
+            <div class="col-12 col-md-6 col-xl-3">
+
+                <a
+                    href="{% url 'departments:required_results' department.id %}"
+                    class="text-decoration-none"
+                >
+
+                    <div class="alert-card alert-info">
+
+                        <div class="d-flex align-items-center gap-3">
+
+                            <div class="alert-icon">
+                                📥
+                            </div>
+
+                            <div>
+
+                                <div class="alert-title">
+                                    نتائج بانتظار الاستلام
+                                </div>
+
+                                <div class="alert-value">
+                                    {{ pending_delivery_count }}
+                                </div>
+
+                                <div class="alert-text">
+                                    أرسلها المختبر للقسم
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+
+            <div class="col-12 col-md-6 col-xl-3">
+
+                <a
+                    href="{% url 'departments:lab_orders' department.id %}"
+                    class="text-decoration-none"
+                >
+
+                    <div class="alert-card alert-success">
+
+                        <div class="d-flex align-items-center gap-3">
+
+                            <div class="alert-icon">
+                                🧪
+                            </div>
+
+                            <div>
+
+                                <div class="alert-title">
+                                    طلبات قيد العمل
+                                </div>
+
+                                <div class="alert-value">
+                                    {{ pending_result_count }}
+                                </div>
+
+                                <div class="alert-text">
+                                    تحت المعالجة في المختبر
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ACHIEVEMENTS
+         ===================================================== -->
+
+    <div class="panel mb-4">
+
+        <div class="panel-header">
+
+            <div>
+                <div class="section-title">
+                    🏆 إنجازات القسم اليوم
+                </div>
+
+                <div class="section-subtitle">
+                    مؤشرات العمل المنجز خلال اليوم
+                </div>
+            </div>
+
+            <a
+                href="{% url 'departments:achievements' department.id %}"
+                class="btn btn-sm btn-outline-primary"
+            >
+                عرض التفاصيل
+            </a>
+
+        </div>
+
+
+        <div class="panel-body">
+
+            <div class="row g-3">
+
+                <div class="col-6 col-md-3">
+
+                    <div class="achievement">
+
+                        <div class="achievement-icon">
+                            👥
+                        </div>
+
+                        <div class="achievement-number">
+                            {{ today_visit_count }}
+                        </div>
+
+                        <div class="achievement-label">
+                            زيارات اليوم
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-6 col-md-3">
+
+                    <div class="achievement">
+
+                        <div class="achievement-icon">
+                            🧪
+                        </div>
+
+                        <div class="achievement-number">
+                            {{ today_order_count }}
+                        </div>
+
+                        <div class="achievement-label">
+                            طلبات تحاليل اليوم
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-6 col-md-3">
+
+                    <div class="achievement">
+
+                        <div class="achievement-icon">
+                            ✅
+                        </div>
+
+                        <div class="achievement-number">
+                            {{ today_completed }}
+                        </div>
+
+                        <div class="achievement-label">
+                            نتائج مكتملة اليوم
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-6 col-md-3">
+
+                    <div class="achievement">
+
+                        <div class="achievement-icon">
+                            📤
+                        </div>
+
+                        <div class="achievement-number">
+                            {{ today_deliveries }}
+                        </div>
+
+                        <div class="achievement-label">
+                            نتائج أرسلت اليوم
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         LATEST PATIENTS + LAB ORDERS
+         ===================================================== -->
+
+    <div class="row g-4 mb-4">
+
+
+        <!-- PATIENTS -->
+
+        <div class="col-12 col-xl-6">
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <div class="section-title">
+                            👥 آخر مرضى القسم
+                        </div>
+
+                        <div class="section-subtitle">
+                            أحدث المرضى المرتبطين بالقسم
+                        </div>
+
+                    </div>
+
+                    <a
+                        href="{% url 'departments:patients' department.id %}"
+                        class="btn btn-sm btn-outline-primary"
+                    >
+                        كل المرضى
+                    </a>
+
+                </div>
+
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    المريض
+                                </th>
+
+                                <th>
+                                    الهاتف
+                                </th>
+
+                                <th>
+                                    آخر زيارة
+                                </th>
+
+                                <th>
+                                    إجراء
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                        {% for patient in patients %}
+
+                            <tr>
+
+                                <td>
+
+                                    <div class="d-flex align-items-center gap-2">
+
+                                        <div class="patient-avatar">
+                                            👤
+                                        </div>
+
+                                        <div>
+
+                                            <div class="patient-name">
+                                                {{ patient.full_name }}
+                                            </div>
+
+                                            <div class="patient-number">
+                                                {{ patient.patient_number }}
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+
+                                <td>
+                                    {{ patient.phone|default:"—" }}
+                                </td>
+
+
+                                <td>
+
+                                    {% with patient.visits.all|first as visit %}
+
+                                        {% if visit %}
+                                            {{ visit.created_at|date:"Y-m-d H:i" }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+
+                                    {% endwith %}
+
+                                </td>
+
+
+                                <td>
+                                    {% with action_visit=patient.visits.all|first %}
+                                    <div class="d-flex flex-wrap gap-1 justify-content-end">
+                                        <a
+                                            href="{% url 'patients:detail' patient.id %}"
+                                            class="btn btn-sm btn-outline-primary">
+                                            📁 الملف
+                                        </a>
+
+                                        <a
+                                            href="{% url 'patients:visit_create' patient.id %}?department_id={{ department.id }}"
+                                            class="btn btn-sm btn-outline-info">
+                                            ➕ زيارة جديدة
+                                        </a>
+
+                                        {% if action_visit %}
+                                        <a
+                                            href="{% url 'patients:diagnosis_create' action_visit.id %}"
+                                            class="btn btn-sm btn-outline-danger">
+                                            🩺 تشخيص
+                                        </a>
+
+                                        <a
+                                            href="{% url 'laboratory:create_order' action_visit.id %}"
+                                            class="btn btn-sm btn-outline-success">
+                                            🧪 فحوصات
+                                        </a>
+                                        {% endif %}
+
+                                        <a
+                                            href="{% url 'reports:patient_file_pdf' patient.id %}"
+                                            target="_blank"
+                                            class="btn btn-sm btn-outline-dark">
+                                            🖨️ طباعة
+                                        </a>
+                                    </div>
+                                    {% endwith %}
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+
+                                <td
+                                    colspan="4"
+                                    class="text-center text-muted py-4"
+                                >
+                                    لا توجد بيانات مرضى حتى الآن.
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- LAB ORDERS -->
+
+        <div class="col-12 col-xl-6">
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <div class="section-title">
+                            🧪 آخر طلبات التحاليل
+                        </div>
+
+                        <div class="section-subtitle">
+                            أحدث طلبات المختبر للقسم
+                        </div>
+
+                    </div>
+
+                    <a
+                        href="{% url 'departments:lab_orders' department.id %}"
+                        class="btn btn-sm btn-outline-primary"
+                    >
+                        كل الطلبات
+                    </a>
+
+                </div>
+
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    الطلب
+                                </th>
+
+                                <th>
+                                    المريض
+                                </th>
+
+                                <th>
+                                    الأولوية
+                                </th>
+
+                                <th>
+                                    الحالة
+                                </th>
+
+                                <th>
+                                    فتح
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                        {% for order in orders %}
+
+                            <tr>
+
+                                <td>
+
+                                    <strong>
+                                        {{ order.order_number }}
+                                    </strong>
+
+                                    <div class="text-muted small">
+                                        {{ order.requested_at|date:"Y-m-d H:i" }}
+                                    </div>
+
+                                </td>
+
+
+                                <td>
+
+                                    <div class="patient-name">
+                                        {{ order.patient.full_name }}
+                                    </div>
+
+                                    <div class="patient-number">
+                                        {{ order.patient.patient_number }}
+                                    </div>
+
+                                </td>
+
+
+                                <td>
+
+                                    {% if order.priority == "STAT" %}
+
+                                        <span class="status-badge status-danger">
+                                            STAT
+                                        </span>
+
+                                    {% elif order.priority == "URGENT" %}
+
+                                        <span class="status-badge status-warning">
+                                            URGENT
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="status-badge status-info">
+                                            NORMAL
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <td>
+
+                                    {% if order.status == "COMPLETED" %}
+
+                                        <span class="status-badge status-success">
+                                            مكتمل
+                                        </span>
+
+                                    {% elif order.status == "CANCELLED" %}
+
+                                        <span class="status-badge status-danger">
+                                            ملغي
+                                        </span>
+
+                                    {% elif order.status == "PROCESSING" %}
+
+                                        <span class="status-badge status-warning">
+                                            قيد المعالجة
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="status-badge status-info">
+                                            {{ order.get_status_display }}
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <td>
+
+                                    <a
+                                        href="{% url 'laboratory:order_detail' order.id %}"
+                                        class="btn btn-sm btn-outline-primary"
+                                    >
+                                        فتح
+                                    </a>
+
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+
+                                <td
+                                    colspan="5"
+                                    class="text-center text-muted py-4"
+                                >
+                                    لا توجد طلبات تحاليل حتى الآن.
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         CRITICAL + UNVERIFIED RESULTS
+         ===================================================== -->
+
+    <div class="row g-4 mb-4">
+
+
+        <!-- CRITICAL RESULTS -->
+
+        <div class="col-12 col-xl-6">
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <div class="section-title">
+                            🚨 النتائج الحرجة
+                        </div>
+
+                        <div class="section-subtitle">
+                            نتائج تحتاج متابعة عاجلة
+                        </div>
+
+                    </div>
+
+                    <a
+                        href="{% url 'departments:results' department.id %}"
+                        class="btn btn-sm btn-outline-danger"
+                    >
+                        عرض النتائج
+                    </a>
+
+                </div>
+
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    المريض
+                                </th>
+
+                                <th>
+                                    الفحص
+                                </th>
+
+                                <th>
+                                    النتيجة
+                                </th>
+
+                                <th>
+                                    الحالة
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                        {% for item in critical_results %}
+
+                            <tr>
+
+                                <td>
+                                    {{ item.order.patient.full_name }}
+                                </td>
+
+                                <td>
+
+                                    <strong>
+                                        {{ item.test.code }}
+                                    </strong>
+
+                                    <div class="text-muted">
+                                        {{ item.test.name_en }}
+                                    </div>
+
+                                </td>
+
+                                <td>
+
+                                    {% if item.result_numeric %}
+                                        {{ item.result_numeric }}
+                                    {% else %}
+                                        {{ item.result|default:"—" }}
+                                    {% endif %}
+
+                                </td>
+
+                                <td>
+
+                                    {% if item.critical_status == "CRITICAL_LOW" %}
+
+                                        <span class="status-badge status-danger">
+                                            CRITICAL LOW
+                                        </span>
+
+                                    {% elif item.critical_status == "CRITICAL_HIGH" %}
+
+                                        <span class="status-badge status-danger">
+                                            CRITICAL HIGH
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="status-badge status-warning">
+                                            مراجعة
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+
+                                <td
+                                    colspan="4"
+                                    class="text-center text-success py-4"
+                                >
+                                    ✅ لا توجد نتائج حرجة غير معالجة.
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- UNVERIFIED RESULTS -->
+
+        <div class="col-12 col-xl-6">
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <div class="section-title">
+                            ⚠️ نتائج تحتاج اعتماد
+                        </div>
+
+                        <div class="section-subtitle">
+                            نتائج مكتملة ولكن لم يتم اعتمادها
+                        </div>
+
+                    </div>
+
+                    <a
+                        href="{% url 'departments:results' department.id %}"
+                        class="btn btn-sm btn-outline-warning"
+                    >
+                        متابعة
+                    </a>
+
+                </div>
+
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    المريض
+                                </th>
+
+                                <th>
+                                    الفحص
+                                </th>
+
+                                <th>
+                                    النتيجة
+                                </th>
+
+                                <th>
+                                    فتح
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                        {% for item in unverified_results %}
+
+                            <tr>
+
+                                <td>
+                                    {{ item.order.patient.full_name }}
+                                </td>
+
+                                <td>
+
+                                    <strong>
+                                        {{ item.test.code }}
+                                    </strong>
+
+                                    <div class="text-muted">
+                                        {{ item.test.name_en }}
+                                    </div>
+
+                                </td>
+
+                                <td>
+
+                                    {% if item.result_numeric %}
+                                        {{ item.result_numeric }}
+                                    {% else %}
+                                        {{ item.result|default:"—" }}
+                                    {% endif %}
+
+                                </td>
+
+                                <td>
+
+                                    <a
+                                        href="{% url 'laboratory:order_detail' item.order.id %}"
+                                        class="btn btn-sm btn-outline-primary"
+                                    >
+                                        الطلب
+                                    </a>
+
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+
+                                <td
+                                    colspan="4"
+                                    class="text-center text-success py-4"
+                                >
+                                    ✅ لا توجد نتائج بانتظار الاعتماد.
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         PENDING RESULT DELIVERIES
+         ===================================================== -->
+
+    <div class="panel mb-4">
+
+        <div class="panel-header">
+
+            <div>
+
+                <div class="section-title">
+                    📥 النتائج المرسلة إلى القسم
+                </div>
+
+                <div class="section-subtitle">
+                    نتائج المختبر التي لم يتم تأكيد استلامها
+                </div>
+
+            </div>
+
+            <a
+                href="{% url 'departments:required_results' department.id %}"
+                class="btn btn-sm btn-outline-primary"
+            >
+                النتائج المطلوبة
+            </a>
+
+        </div>
+
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            المريض
+                        </th>
+
+                        <th>
+                            رقم الطلب
+                        </th>
+
+                        <th>
+                            الطبيب
+                        </th>
+
+                        <th>
+                            تاريخ الإرسال
+                        </th>
+
+                        <th>
+                            الإجراء
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                {% for delivery in pending_deliveries %}
+
+                    <tr>
+
+                        <td>
+
+                            <div class="patient-name">
+                                {{ delivery.order.patient.full_name }}
+                            </div>
+
+                            <div class="patient-number">
+                                {{ delivery.order.patient.patient_number }}
+                            </div>
+
+                        </td>
+
+
+                        <td>
+                            {{ delivery.order.order_number }}
+                        </td>
+
+
+                        <td>
+
+                            {% if delivery.doctor %}
+                                {{ delivery.doctor.full_name }}
+                            {% else %}
+                                القسم
+                            {% endif %}
+
+                        </td>
+
+
+                        <td>
+
+                            {% if delivery.sent_at %}
+                                {{ delivery.sent_at|date:"Y-m-d H:i" }}
+                            {% else %}
+                                —
+                            {% endif %}
+
+                        </td>
+
+
+                        <td>
+
+                            <a
+                                href="{% url 'laboratory:laboratory_report' delivery.order.id %}"
+                                class="btn btn-sm btn-outline-primary"
+                            >
+                                📄 التقرير
+                            </a>
+
+                            <a
+                                href="{% url 'laboratory:order_detail' delivery.order.id %}"
+                                class="btn btn-sm btn-outline-secondary"
+                            >
+                                الطلب
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+
+                        <td
+                            colspan="5"
+                            class="text-center text-success py-4"
+                        >
+                            ✅ لا توجد نتائج بانتظار الاستلام.
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         FOOTER STATUS
+         ===================================================== -->
+
+    <div class="panel">
+
+        <div class="panel-body">
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+
+                <div>
+
+                    <div class="section-title">
+                        🏥 حالة تشغيل القسم
+                    </div>
+
+                    <div class="section-subtitle">
+                        نظام إدارة المستشفى HIS / LIS
+                    </div>
+
+                </div>
+
+
+                <div class="d-flex gap-2 flex-wrap">
+
+                    <span class="status-badge status-success">
+                        ● القسم نشط
+                    </span>
+
+                    <span class="status-badge status-info">
+                        HIS
+                    </span>
+
+                    <span class="status-badge status-info">
+                        LIS
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

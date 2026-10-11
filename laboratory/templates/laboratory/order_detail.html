@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>طلب المختبر {{ order.order_number }}</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: "Cairo", Tahoma, Arial, sans-serif;
+            background: radial-gradient(circle at 100% 0%, rgba(13,110,253,.08), transparent 30rem), #f1f5f9;
+            color: #1e293b;
+        }
+
+        .card { border: 1px solid #e5eaf1; box-shadow: 0 10px 28px rgba(15,23,42,.07); }
+        .main-header { border-top: 4px solid #0d6efd; }
+        .btn { transition: transform .18s ease, box-shadow .18s ease; }
+        .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(15,23,42,.10); }
+        @media (max-width: 640px) { body { padding: 10px; } .title { font-size: 21px; } }
+
+        .container {
+            max-width: 1350px;
+            margin: auto;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 22px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 18px rgba(15, 23, 42, .08);
+        }
+
+        /* Header */
+        .main-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .title {
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .order-number {
+            font-size: 21px;
+            font-weight: 800;
+            background: #eff6ff;
+            color: #1d4ed8;
+            padding: 12px 18px;
+            border-radius: 12px;
+        }
+
+        /* Status */
+        .status-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .status-label {
+            font-weight: bold;
+            color: #475569;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 15px;
+            border-radius: 30px;
+            font-weight: 800;
+            font-size: 14px;
+        }
+
+        .status-requested {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .status-received {
+            background: #e0e7ff;
+            color: #4338ca;
+        }
+
+        .status-collected {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-processing {
+            background: #ede9fe;
+            color: #6d28d9;
+        }
+
+        .status-completed {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* Workflow */
+        .workflow {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0;
+            margin-top: 25px;
+            overflow-x: auto;
+            padding: 5px 0 12px;
+        }
+
+        .step {
+            min-width: 125px;
+            text-align: center;
+            position: relative;
+            flex: 1;
+        }
+
+        .step:not(:last-child)::after {
+            content: "";
+            position: absolute;
+            top: 20px;
+            right: -50%;
+            width: 100%;
+            height: 3px;
+            background: #e2e8f0;
+            z-index: 0;
+        }
+
+        .step.done:not(:last-child)::after {
+            background: #22c55e;
+        }
+
+        .step-circle {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: auto;
+            background: #e2e8f0;
+            color: #64748b;
+            font-weight: 800;
+            position: relative;
+            z-index: 2;
+            border: 3px solid #fff;
+        }
+
+        .step.done .step-circle {
+            background: #22c55e;
+            color: #fff;
+        }
+
+        .step.active .step-circle {
+            background: #2563eb;
+            color: #fff;
+            box-shadow: 0 0 0 5px #dbeafe;
+        }
+
+        .step.cancelled .step-circle {
+            background: #dc2626;
+            color: #fff;
+        }
+
+        .step-title {
+            font-size: 13px;
+            font-weight: 700;
+            margin-top: 9px;
+        }
+
+        .step-desc {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 3px;
+        }
+
+        /* Patient information */
+        .section-title {
+            margin: 0 0 18px;
+            font-size: 19px;
+            font-weight: 800;
+        }
+
+        .patient-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 12px;
+        }
+
+        .info {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 14px;
+            border-radius: 11px;
+        }
+
+        .label {
+            color: #64748b;
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .value {
+            font-weight: 800;
+            font-size: 15px;
+        }
+
+        /* Messages */
+        .message {
+            padding: 13px 16px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        /* Table */
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            min-width: 1050px;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: right;
+            vertical-align: middle;
+        }
+
+        th {
+            background: #f8fafc;
+            color: #334155;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        tr:hover td {
+            background: #fafafa;
+        }
+
+        .test-en {
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .test-ar {
+            color: #64748b;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 9px 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-family: inherit;
+            background: #fff;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px #dbeafe;
+        }
+
+        textarea {
+            min-height: 55px;
+            resize: vertical;
+        }
+
+        .result-normal {
+            color: #15803d;
+            font-weight: 800;
+        }
+
+        .flag-H {
+            color: #dc2626;
+            background: #fee2e2;
+            padding: 5px 9px;
+            border-radius: 7px;
+            font-weight: 800;
+        }
+
+        .flag-L {
+            color: #1d4ed8;
+            background: #dbeafe;
+            padding: 5px 9px;
+            border-radius: 7px;
+            font-weight: 800;
+        }
+
+        .flag-NORMAL {
+            color: #15803d;
+            background: #dcfce7;
+            padding: 5px 9px;
+            border-radius: 7px;
+            font-weight: 800;
+        }
+
+        .verified {
+            display: inline-block;
+            color: #166534;
+            background: #dcfce7;
+            padding: 6px 10px;
+            border-radius: 7px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .pending {
+            display: inline-block;
+            color: #92400e;
+            background: #fef3c7;
+            padding: 6px 10px;
+            border-radius: 7px;
+            font-weight: 700;
+        }
+
+        /* Buttons */
+        .buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        button,
+        .btn {
+            border: 0;
+            padding: 11px 17px;
+            border-radius: 9px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 800;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-success {
+            background: #16a34a;
+            color: #fff;
+        }
+
+        .btn-success:hover {
+            background: #15803d;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: #fff;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background: #475569;
+            color: #fff;
+        }
+
+        .btn-light {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+
+        .action-description {
+            color: #64748b;
+            margin: -8px 0 15px;
+            font-size: 13px;
+        }
+
+        /* Final report */
+        .completed-box {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 12px;
+            padding: 18px;
+            margin-top: 18px;
+        }
+
+        .completed-title {
+            color: #166534;
+            font-weight: 800;
+            font-size: 17px;
+        }
+
+        .completed-text {
+            color: #166534;
+            font-size: 13px;
+            margin-top: 6px;
+        }
+
+        /* Empty */
+        .empty {
+            text-align: center;
+            padding: 30px;
+            color: #64748b;
+        }
+
+        /* Mobile */
+        @media(max-width: 700px) {
+            body {
+                padding: 8px;
+            }
+
+            .card {
+                padding: 14px;
+                border-radius: 12px;
+            }
+
+            .title {
+                font-size: 21px;
+            }
+
+            .order-number {
+                font-size: 16px;
+                width: 100%;
+                text-align: center;
+            }
+
+            .workflow {
+                justify-content: flex-start;
+            }
+
+            .step {
+                min-width: 110px;
+            }
+
+            .step:not(:last-child)::after {
+                right: -50%;
+            }
+
+            .patient-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            .buttons .btn,
+            .buttons button,
+            .buttons form {
+                width: 100%;
+            }
+
+            .buttons form button {
+                width: 100%;
+            }
+        }
+
+        /* Print */
+        @media print {
+            body {
+                background: #fff;
+                padding: 0;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .card {
+                box-shadow: none;
+                border: 0;
+                padding: 10px 0;
+                margin-bottom: 10px;
+            }
+
+            .workflow {
+                overflow: visible;
+            }
+
+            table {
+                min-width: 0;
+                font-size: 11px;
+            }
+
+            th,
+            td {
+                padding: 7px;
+            }
+
+            input,
+            textarea {
+                border: 0;
+                padding: 0;
+                background: transparent;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    {% if messages %}
+        <div class="no-print">
+            {% for message in messages %}
+                <div class="message">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- ================================================= -->
+    <!-- Header -->
+    <!-- ================================================= -->
+
+    <div class="card">
+
+        <div class="main-header">
+
+            <div>
+                <div class="title">
+                    🧪 طلب المختبر
+                </div>
+
+                <div class="subtitle">
+                    Laboratory Information System — LIS
+                </div>
+            </div>
+
+            <div class="order-number">
+                {{ order.order_number }}
+            </div>
+
+        </div>
+
+        <!-- Current status -->
+
+        <div class="status-box">
+
+            <span class="status-label">
+                حالة الطلب:
+            </span>
+
+            {% if order.status == "REQUESTED" %}
+                <span class="status status-requested">
+                    📋 طلب جديد
+                </span>
+
+            {% elif order.status == "RECEIVED" %}
+                <span class="status status-received">
+                    📥 تم استلام الطلب
+                </span>
+
+            {% elif order.status == "COLLECTED" %}
+                <span class="status status-collected">
+                    🧪 تم سحب العينة
+                </span>
+
+            {% elif order.status == "PROCESSING" %}
+                <span class="status status-processing">
+                    🔬 قيد المعالجة
+                </span>
+
+            {% elif order.status == "COMPLETED" %}
+                <span class="status status-completed">
+                    ✅ مكتمل ومعتمد
+                </span>
+
+            {% elif order.status == "CANCELLED" %}
+                <span class="status status-cancelled">
+                    🚫 ملغى
+                </span>
+
+            {% endif %}
+
+        </div>
+
+        <!-- ================================================= -->
+        <!-- Workflow -->
+        <!-- ================================================= -->
+
+        <div class="workflow">
+
+            <!-- 1 -->
+            <div class="step
+                {% if order.status != 'CANCELLED' %}done{% endif %}
+                {% if order.status == 'REQUESTED' %}active{% endif %}">
+
+                <div class="step-circle">
+                    {% if order.status == "REQUESTED" %}
+                        1
+                    {% else %}
+                        ✓
+                    {% endif %}
+                </div>
+
+                <div class="step-title">
+                    طلب الفحص
+                </div>
+
+                <div class="step-desc">
+                    Laboratory Request
+                </div>
+
+            </div>
+
+            <!-- 2 -->
+            <div class="step
+                {% if order.status == 'RECEIVED' or order.status == 'COLLECTED' or order.status == 'PROCESSING' or order.status == 'COMPLETED' %}done{% endif %}
+                {% if order.status == 'RECEIVED' %}active{% endif %}">
+
+                <div class="step-circle">
+                    {% if order.status == "REQUESTED" %}
+                        2
+                    {% else %}
+                        ✓
+                    {% endif %}
+                </div>
+
+                <div class="step-title">
+                    استلام الطلب
+                </div>
+
+                <div class="step-desc">
+                    Receive
+                </div>
+
+            </div>
+
+            <!-- 3 -->
+            <div class="step
+                {% if order.status == 'COLLECTED' or order.status == 'PROCESSING' or order.status == 'COMPLETED' %}done{% endif %}
+                {% if order.status == 'COLLECTED' %}active{% endif %}">
+
+                <div class="step-circle">
+                    {% if order.status == "REQUESTED" or order.status == "RECEIVED" %}
+                        3
+                    {% else %}
+                        ✓
+                    {% endif %}
+                </div>
+
+                <div class="step-title">
+                    سحب العينة
+                </div>
+
+                <div class="step-desc">
+                    Collection
+                </div>
+
+            </div>
+
+            <!-- 4 -->
+            <div class="step
+                {% if order.status == 'PROCESSING' or order.status == 'COMPLETED' %}done{% endif %}
+                {% if order.status == 'PROCESSING' %}active{% endif %}">
+
+                <div class="step-circle">
+                    {% if order.status == "REQUESTED" or order.status == "RECEIVED" or order.status == "COLLECTED" %}
+                        4
+                    {% else %}
+                        ✓
+                    {% endif %}
+                </div>
+
+                <div class="step-title">
+                    المعالجة
+                </div>
+
+                <div class="step-desc">
+                    Processing
+                </div>
+
+            </div>
+
+            <!-- 5 -->
+            <div class="step
+                {% if order.status == 'COMPLETED' %}done{% endif %}
+                {% if order.status == 'PROCESSING' %}active{% endif %}">
+
+                <div class="step-circle">
+                    {% if order.status == "COMPLETED" %}
+                        ✓
+                    {% else %}
+                        5
+                    {% endif %}
+                </div>
+
+                <div class="step-title">
+                    النتائج
+                </div>
+
+                <div class="step-desc">
+                    Results
+                </div>
+
+            </div>
+
+            <!-- 6 -->
+            <div class="step
+                {% if order.status == 'COMPLETED' %}done{% endif %}
+                {% if order.status == 'PROCESSING' %}active{% endif %}">
+
+                <div class="step-circle">
+                    {% if order.status == "COMPLETED" %}
+                        ✓
+                    {% else %}
+                        6
+                    {% endif %}
+                </div>
+
+                <div class="step-title">
+                    الاعتماد
+                </div>
+
+                <div class="step-desc">
+                    Verification
+                </div>
+
+            </div>
+
+            <!-- 7 -->
+            <div class="step
+                {% if order.status == 'COMPLETED' %}done{% endif %}">
+
+                <div class="step-circle">
+                    {% if order.status == "COMPLETED" %}
+                        ✓
+                    {% else %}
+                        7
+                    {% endif %}
+                </div>
+
+                <div class="step-title">
+                    التقرير
+                </div>
+
+                <div class="step-desc">
+                    Final Report
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- Patient Information -->
+    <!-- ================================================= -->
+
+    <div class="card">
+
+        <h2 class="section-title">
+            👤 بيانات المريض وطلب الفحص
+        </h2>
+
+        <div class="patient-grid">
+
+            <div class="info">
+                <div class="label">
+                    اسم المريض
+                </div>
+                <div class="value">
+                    {{ order.patient.full_name }}
+                </div>
+            </div>
+
+            <div class="info">
+                <div class="label">
+                    رقم الملف
+                </div>
+                <div class="value">
+                    {{ order.patient.patient_number }}
+                </div>
+            </div>
+
+            <div class="info">
+                <div class="label">
+                    رقم الزيارة
+                </div>
+                <div class="value">
+                    {% if order.visit %}
+                        {{ order.visit.id }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if order.admission %}
+                <div class="info">
+                    <div class="label">
+                        رقم التنويم
+                    </div>
+                    <div class="value">
+                        {{ order.admission.admission_number }}
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="info">
+                <div class="label">
+                    القسم الطالب
+                </div>
+                <div class="value">
+                    {% if order.requesting_department %}
+                        {{ order.requesting_department.name_ar }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="info">
+                <div class="label">
+                    الطبيب الطالب
+                </div>
+                <div class="value">
+                    {% if order.requesting_doctor %}
+                        {{ order.requesting_doctor.full_name }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="info">
+                <div class="label">
+                    الأولوية
+                </div>
+                <div class="value">
+                    {{ order.get_priority_display }}
+                </div>
+            </div>
+
+            <div class="info">
+                <div class="label">
+                    تاريخ الطلب
+                </div>
+                <div class="value">
+                    {{ order.requested_at|date:"Y-m-d H:i" }}
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- Laboratory Results -->
+    <!-- ================================================= -->
+
+    <div class="card">
+
+        <h2 class="section-title">
+            🧬 نتائج الفحوصات
+        </h2>
+
+        <div>
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                    <tr>
+                        <th>#</th>
+                        <th>Test</th>
+                        <th>Sample</th>
+                        <th>Unit</th>
+                        <th>Reference Range</th>
+                        <th>Result</th>
+                        <th>Numeric</th>
+                        <th>Flag</th>
+                        <th>Notes</th>
+                        <th>Status</th>
+                    </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                    {% for item in items %}
+
+                        <tr>
+
+                            <td>
+                                {{ forloop.counter }}
+                            </td>
+
+                            <td>
+
+                                <div class="test-en">
+                                    {{ item.test.name_en }}
+                                </div>
+
+                                {% if item.test.name_ar %}
+                                    <div class="test-ar">
+                                        {{ item.test.name_ar }}
+                                    </div>
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+                                {{ item.test.get_sample_type_display }}
+                            </td>
+
+                            <td>
+                                {{ item.test.unit|default:"—" }}
+                            </td>
+
+                            <td>
+                                {{ item.test.reference_range|default:"—" }}
+                            </td>
+
+                            <td>
+
+                                {% if item.result %}
+
+                                    {% if item.verified %}
+                                        <strong>{{ item.result }}</strong>
+                                    {% else %}
+                                        {{ item.result }}
+                                    {% endif %}
+
+                                {% else %}
+
+                                    <span class="text-muted">لم تُدخل بعد</span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {% if item.result_numeric is not None %}
+                                    {{ item.result_numeric }}
+                                {% else %}
+                                    —
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {% if item.result_flag == "H" %}
+
+                                    <span class="flag-H">
+                                        H ↑
+                                    </span>
+
+                                {% elif item.result_flag == "L" %}
+
+                                    <span class="flag-L">
+                                        L ↓
+                                    </span>
+
+                                {% elif item.result_flag == "NORMAL" %}
+
+                                    <span class="flag-NORMAL">
+                                        Normal
+                                    </span>
+
+                                {% else %}
+
+                                    —
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {% if item.verified %}
+
+                                    {{ item.examiner_notes|default:"—" }}
+
+                                {% elif order.status != "COMPLETED" and order.status != "CANCELLED" %}
+
+                                    <textarea
+                                        name="examiner_notes_{{ item.id }}"
+                                        placeholder="Examiner notes"
+                                    >{{ item.examiner_notes }}</textarea>
+
+                                {% else %}
+
+                                    {{ item.examiner_notes|default:"—" }}
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {% if item.verified %}
+
+                                    <span class="verified">
+                                        ✓ Verified
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="pending">
+                                        {{ item.get_status_display }}
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                    {% empty %}
+
+                        <tr>
+                            <td colspan="10" class="empty">
+                                لا توجد فحوصات في هذا الطلب.
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            {% if order.status != "COMPLETED" and order.status != "CANCELLED" %}
+
+                <div class="buttons no-print">
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        💾 حفظ النتائج
+                    </button>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- Workflow Actions -->
+    <!-- ================================================= -->
+
+    <div class="card no-print">
+
+        <h2 class="section-title">
+            ⚙️ إجراءات المختبر
+        </h2>
+
+        <div class="action-description">
+
+            {% if order.status == "REQUESTED" %}
+                الطلب جديد وينتظر استلامه من المختبر.
+            {% elif order.status == "RECEIVED" %}
+                تم استلام الطلب وينتظر سحب العينات.
+            {% elif order.status == "COLLECTED" %}
+                تم سحب العينات. يمكن بدء المعالجة وإدخال النتائج.
+            {% elif order.status == "PROCESSING" %}
+                الطلب قيد المعالجة ويمكن إدخال النتائج أو اعتماد النتائج المكتملة.
+            {% elif order.status == "COMPLETED" %}
+                تم اعتماد جميع النتائج. التقرير النهائي جاهز.
+            {% elif order.status == "CANCELLED" %}
+                تم إلغاء هذا الطلب ولا يمكن إجراء تعديلات عليه.
+            {% endif %}
+
+        </div>
+
+
+        <div class="buttons">
+
+            <!-- ================================================= -->
+            <!-- REQUESTED -->
+            <!-- ================================================= -->
+
+            {% if order.status == "REQUESTED" %}
+
+                <a
+                    href="{% url 'laboratory:sample_reception' %}"
+                    class="btn btn-primary"
+                >
+                    📥 فتح استقبال العينات
+                </a>
+
+            {% endif %}
+
+
+            <!-- ================================================= -->
+            <!-- RECEIVED -->
+            <!-- ================================================= -->
+
+            {% if order.status == "RECEIVED" %}
+
+                <a
+                    href="{% url 'laboratory:sample_reception' %}"
+                    class="btn btn-warning"
+                >
+                    🧪 فتح استقبال العينات لسحب العينة
+                </a>
+
+            {% endif %}
+
+
+            <!-- ================================================= -->
+            <!-- COLLECTED -->
+            <!-- ================================================= -->
+
+            {% if order.status == "COLLECTED" %}
+
+                <a
+                    href="{% url 'laboratory:enter_results' order.id %}"
+                    class="btn btn-primary"
+                >
+                    📝 إدخال النتائج
+                </a>
+
+                <div class="action-hint">
+                    تم سحب العينات بنجاح. عند إدخال النتائج تبدأ معالجة
+                    الفحوصات تلقائيًا وتتحول حالة الطلب إلى قيد المعالجة.
+                </div>
+
+            {% endif %}
+
+
+            <!-- ================================================= -->
+            <!-- PROCESSING -->
+            <!-- ================================================= -->
+
+            {% if order.status == "PROCESSING" %}
+
+                <a
+                    href="{% url 'laboratory:enter_results' order.id %}"
+                    class="btn btn-primary"
+                >
+                    📝 إدخال / تعديل النتائج
+                </a>
+
+                <form
+                    method="post"
+                    action="{% url 'laboratory:verify_results' order.id %}"
+                >
+
+                    {% csrf_token %}
+
+                    <button
+                        type="submit"
+                        class="btn btn-success"
+                        onclick="return confirm('هل أنت متأكد من اعتماد النتائج؟ لن يكتمل الطلب إلا بعد اعتماد جميع الفحوصات النشطة التي لها نتائج.');"
+                    >
+                        ✅ اعتماد النتائج
+                    </button>
+
+                </form>
+
+                <div class="action-hint">
+                    يجب إدخال النتائج المطلوبة أولًا، ثم اعتماد النتائج.
+                    إذا كانت هناك فحوصات غير مكتملة فسيمنع النظام إغلاق الطلب.
+                </div>
+
+            {% endif %}
+
+
+            <!-- ================================================= -->
+            <!-- COMPLETED -->
+            <!-- ================================================= -->
+
+            {% if order.status == "COMPLETED" %}
+
+                <a
+                    href="{% url 'laboratory:laboratory_report' order.id %}"
+                    class="btn btn-success"
+                >
+                    📄 التقرير النهائي
+                </a>
+
+                <a
+                    href="{% url 'laboratory:laboratory_report_pdf' order.id %}"
+                    class="btn btn-secondary"
+                >
+                    📥 PDF
+                </a>
+
+                <button
+                    type="button"
+                    class="btn btn-light"
+                    onclick="window.print()"
+                >
+                    🖨️ طباعة
+                </button>
+
+            {% endif %}
+
+
+            <!-- ================================================= -->
+            <!-- CANCELLED -->
+            <!-- ================================================= -->
+
+            {% if order.status == "CANCELLED" %}
+
+                <div class="action-hint">
+                    🚫 هذا الطلب ملغى وغير قابل للتعديل.
+                </div>
+
+            {% endif %}
+
+
+            <!-- ================================================= -->
+            <!-- SCREEN PRINT -->
+            <!-- ================================================= -->
+
+            {% if order.status != "COMPLETED" %}
+
+                <button
+                    type="button"
+                    class="btn btn-light"
+                    onclick="window.print()"
+                >
+                    🖨️ طباعة الشاشة
+                </button>
+
+            {% endif %}
+
+        </div>
+
+
+        </div>
+
+
+        {% if order.status == "COMPLETED" %}
+
+            <div class="completed-box">
+
+                <div class="completed-title">
+                    ✅ تم اعتماد الطلب بالكامل
+                </div>
+
+                <div class="completed-text">
+                    جميع الفحوصات النشطة في الطلب تم اعتمادها.
+                    يمكنك الآن فتح التقرير النهائي أو حفظه بصيغة PDF.
+                </div>
+
+            </div>
+
+        {% endif %}
+
+
+        {% if order.status == "CANCELLED" %}
+
+            <div class="completed-box" style="background:#fff1f2;border-color:#fecdd3;">
+
+                <div class="completed-title" style="color:#9f1239;">
+                    🚫 الطلب ملغى
+                </div>
+
+                <div class="completed-text" style="color:#9f1239;">
+                    هذا الطلب غير قابل للتعديل.
+                </div>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+</body>
+</html>

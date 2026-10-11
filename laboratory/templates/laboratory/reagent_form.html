@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block content %}
+<style>.form-page{max-width:1000px;margin:auto}.card,.form-card{border:1px solid #e5eaf1;box-shadow:0 8px 24px rgba(15,23,42,.06);border-radius:16px}</style>
+<div dir="rtl" class="container py-4">
+
+<h2 class="mb-4">{{ title }}</h2>
+
+<form method="post" class="card shadow-sm p-4">
+{% csrf_token %}
+
+<div class="row g-3">
+
+<div class="col-md-6">
+<label class="form-label">اسم الكاشف</label>
+<input name="name" class="form-control"
+value="{{ reagent.name|default:'' }}" required>
+</div>
+
+<div class="col-md-6">
+<label class="form-label">الشركة المصنعة</label>
+<input name="manufacturer" class="form-control"
+value="{{ reagent.manufacturer|default:'' }}">
+</div>
+
+<div class="col-md-6">
+<label class="form-label">Catalog Number</label>
+<input name="catalog_number" class="form-control"
+value="{{ reagent.catalog_number|default:'' }}">
+</div>
+
+<div class="col-md-6">
+<label class="form-label">الجهاز</label>
+<select name="device" class="form-select">
+<option value="">-- اختر الجهاز --</option>
+{% for device in devices %}
+<option value="{{ device.id }}"
+{% if reagent.device_id == device.id %}selected{% endif %}>
+{{ device.name }}{% if device.model %} - {{ device.model }}{% endif %}
+</option>
+{% endfor %}
+</select>
+</div>
+
+<div class="col-md-6">
+<label class="form-label">الوحدة</label>
+<input name="unit" class="form-control"
+value="{{ reagent.unit|default:'' }}"
+placeholder="mL / Test / Kit">
+</div>
+
+<div class="col-12">
+<label class="form-label">الفحوصات المرتبطة</label>
+<select name="tests" class="form-select" multiple size="10">
+{% for test in tests %}
+<option value="{{ test.id }}"
+{% if reagent and test in reagent.tests.all %}selected{% endif %}>
+{{ test.code }} — {{ test.name_en }}
+</option>
+{% endfor %}
+</select>
+<small class="text-muted">
+يمكن اختيار أكثر من فحص باستخدام الضغط المطول في الهاتف.
+</small>
+</div>
+
+<div class="col-12">
+<label class="form-label">ملاحظات</label>
+<textarea name="notes" class="form-control" rows="3">{{ reagent.notes|default:'' }}</textarea>
+</div>
+
+<div class="col-12">
+<div class="form-check">
+<input type="checkbox" name="is_active" class="form-check-input"
+{% if not reagent or reagent.is_active %}checked{% endif %}>
+<label class="form-check-label">الكاشف نشط</label>
+</div>
+</div>
+
+</div>
+
+<div class="mt-4">
+<button class="btn btn-success">حفظ</button>
+<a href="{% url 'laboratory:reagent_list' %}" class="btn btn-secondary">إلغاء</a>
+</div>
+
+</form>
+</div>
+{% endblock %}

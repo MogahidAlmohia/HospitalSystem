@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+    <div class="mb-3">
+        <h4>استلام مشتريات</h4>
+
+        <div class="text-muted small">
+            أمر الشراء:
+            <strong>{{ purchase.purchase_number }}</strong>
+        </div>
+    </div>
+
+
+    <div class="row g-3 mb-3">
+
+        <div class="col-12 col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">
+                        الصنف
+                    </div>
+
+                    <div class="fw-semibold">
+                        {{ purchase_item.item.name_ar }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-6 col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">
+                        الكمية المطلوبة
+                    </div>
+
+                    <div class="fw-semibold">
+                        {{ purchase_item.quantity }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-6 col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">
+                        الكمية المتبقية
+                    </div>
+
+                    <div class="fw-semibold text-success">
+                        {{ remaining }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="card shadow-sm">
+
+        <div class="card-header">
+            <strong>بيانات الاستلام</strong>
+        </div>
+
+        <div class="card-body">
+
+            <form method="post">
+
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+
+                {% for field in form %}
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            {{ field.label }}
+                        </label>
+
+                        {{ field }}
+
+                        {% if field.help_text %}
+                            <div class="form-text">
+                                {{ field.help_text }}
+                            </div>
+                        {% endif %}
+
+                        {% if field.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ field.errors }}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+                {% endfor %}
+
+
+                <div class="d-flex gap-2">
+
+                    <button type="submit"
+                            class="btn btn-success">
+                        تأكيد الاستلام
+                    </button>
+
+                    <a href="{% url 'inventory:purchase_detail' purchase.pk %}"
+                       class="btn btn-secondary">
+                        إلغاء
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

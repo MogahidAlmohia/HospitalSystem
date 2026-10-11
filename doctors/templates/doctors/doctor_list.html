@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>إدارة الأطباء</title>
+
+<style>
+:root{--blue:#0d6efd;--navy:#17324d;--line:#e5eaf1}
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:Tahoma,Arial,sans-serif;
+    background:#f4f7fb;
+    color:#172033;
+}
+.header{
+    background:linear-gradient(135deg,#0d6efd,#084298);
+    box-shadow:0 8px 22px rgba(13,110,253,.18);
+    color:white;
+    padding:22px;
+}
+.header h1{margin:0 0 6px}
+.container{
+    max-width:1250px;
+    margin:25px auto;
+    padding:0 15px;
+}
+.cards{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+    margin-bottom:20px;
+}
+.card{
+    background:white;
+    border-radius:14px;
+    padding:20px;
+    box-shadow:0 3px 12px #00000012;
+}
+.card strong{
+    display:block;
+    font-size:30px;
+    margin-top:8px;
+}
+.toolbar{
+    background:white;
+    padding:18px;
+    border-radius:14px;
+    margin-bottom:20px;
+    box-shadow:0 3px 12px #00000012;
+}
+input,select{
+    padding:11px;
+    border:1px solid #d5dce5;
+    border-radius:8px;
+    width:100%;
+}
+.grid{
+    display:grid;
+    grid-template-columns:2fr 1fr auto;
+    gap:10px;
+}
+button,.btn{
+    border:0;
+    border-radius:8px;
+    padding:11px 18px;
+    cursor:pointer;
+    text-decoration:none;
+    display:inline-block;
+}
+.primary{
+    background:#1769aa;
+    color:white;
+}
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+    border-radius:14px;
+    overflow:hidden;
+    box-shadow:0 3px 12px #00000012;
+}
+th,td{
+    padding:13px;
+    border-bottom:1px solid #edf0f4;
+    text-align:right;
+}
+th{
+    background:#eef4fa;
+}
+.badge{
+    padding:5px 9px;
+    border-radius:20px;
+    font-size:12px;
+}
+.active{
+    background:#dff5e5;
+    color:#18733a;
+}
+.inactive{
+    background:#fce1e1;
+    color:#a12222;
+}
+.actions a{
+    margin-left:5px;
+}
+.messages{
+    margin-bottom:15px;
+}
+.message{
+    background:#e6f4ea;
+    padding:12px;
+    border-radius:8px;
+    margin-bottom:7px;
+}
+@media(max-width:800px){
+    .cards{grid-template-columns:1fr}
+    .grid{grid-template-columns:1fr}
+    table{font-size:13px}
+    .table-wrap{overflow-x:auto}
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <div class="container">
+        <h1>👨‍⚕️ إدارة الأطباء</h1>
+        <div>إدارة الأطباء وربطهم بالأقسام والحسابات</div>
+    </div>
+</div>
+
+<div class="container">
+
+{% if messages %}
+<div class="messages">
+{% for message in messages %}
+<div class="message">{{ message }}</div>
+{% endfor %}
+</div>
+{% endif %}
+
+<div class="cards">
+    <div class="card">
+        إجمالي الأطباء
+        <strong>{{ total_doctors }}</strong>
+    </div>
+
+    <div class="card">
+        الأطباء النشطون
+        <strong>{{ active_doctors }}</strong>
+    </div>
+
+    <div class="card">
+        الأطباء غير النشطين
+        <strong>{{ inactive_doctors }}</strong>
+    </div>
+</div>
+
+<div class="toolbar">
+
+<form method="get">
+
+<div class="grid">
+
+<div>
+<input
+    type="text"
+    name="q"
+    value="{{ query }}"
+    placeholder="البحث باسم الطبيب أو رقم الطبيب">
+</div>
+
+<div>
+<select name="department">
+<option value="">كل الأقسام</option>
+
+{% for department in departments %}
+<option
+    value="{{ department.id }}"
+    {% if department_id == department.id|stringformat:"s" %}selected{% endif %}
+>
+{{ department.name_ar }} - {{ department.name_en }}
+</option>
+{% endfor %}
+
+</select>
+</div>
+
+<div>
+<button class="primary" type="submit">بحث</button>
+</div>
+
+</div>
+
+</form>
+
+<br>
+
+<a class="btn primary" href="{% url 'doctors:create' %}">
++ إضافة طبيب جديد
+</a>
+
+</div>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+<tr>
+<th>رقم الطبيب</th>
+<th>الطبيب</th>
+<th>التخصص</th>
+<th>القسم</th>
+<th>الهاتف</th>
+<th>الترخيص</th>
+<th>الحالة</th>
+<th>الإجراءات</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for doctor in doctors %}
+
+<tr>
+
+<td>{{ doctor.doctor_number }}</td>
+
+<td>
+<strong>{{ doctor.full_name }}</strong><br>
+<small>{{ doctor.user.username }}</small>
+</td>
+
+<td>{{ doctor.specialty|default:"-" }}</td>
+
+<td>
+{% if doctor.department %}
+{{ doctor.department.name_ar }}
+{% else %}
+-
+{% endif %}
+</td>
+
+<td>{{ doctor.phone|default:"-" }}</td>
+
+<td>{{ doctor.license_number|default:"-" }}</td>
+
+<td>
+{% if doctor.is_active %}
+<span class="badge active">نشط</span>
+{% else %}
+<span class="badge inactive">غير نشط</span>
+{% endif %}
+</td>
+
+<td class="actions">
+
+<a class="btn primary"
+   href="{% url 'doctors:edit' doctor.id %}">
+تعديل
+</a>
+
+<a class="btn"
+   href="{% url 'doctors:toggle' doctor.id %}">
+{% if doctor.is_active %}
+تعطيل
+{% else %}
+تفعيل
+{% endif %}
+</a>
+
+</td>
+
+</tr>
+
+{% empty %}
+
+<tr>
+<td colspan="8" style="text-align:center;padding:30px">
+لا يوجد أطباء مسجلون حاليًا.
+</td>
+</tr>
+
+{% endfor %}
+
+</tbody>
+</table>
+
+</div>
+
+</div>
+
+</body>
+</html>

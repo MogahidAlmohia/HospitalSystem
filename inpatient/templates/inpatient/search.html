@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}البحث في التنويم{% endblock %}
+
+{% block content %}
+
+<h2 class="page-title">🔍 البحث في حالات التنويم</h2>
+
+<div class="card p-4 mb-4">
+
+<form method="get">
+<div class="input-group">
+<input type="text"
+name="q"
+value="{{ query }}"
+class="form-control"
+placeholder="اسم المريض أو رقم التنويم">
+
+<button class="btn btn-primary">
+بحث
+</button>
+</div>
+</form>
+
+</div>
+
+{% if query %}
+<div class="card p-3">
+
+<h5 class="mb-3">
+نتائج البحث عن: {{ query }}
+</h5>
+
+<div class="table-responsive">
+<table class="table table-hover">
+
+<thead>
+<tr>
+<th>رقم التنويم</th>
+<th>المريض</th>
+<th>القسم</th>
+<th>الغرفة</th>
+<th>السرير</th>
+<th>الحالة</th>
+<th></th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for admission in admissions %}
+<tr>
+
+<td>{{ admission.admission_number }}</td>
+
+<td>{{ admission.patient.full_name }}</td>
+
+<td>{{ admission.department.name_ar|default:"-" }}</td>
+
+<td>{{ admission.room.room_number|default:"-" }}</td>
+
+<td>{{ admission.bed.bed_number|default:"-" }}</td>
+
+<td>{{ admission.get_status_display }}</td>
+
+<td>
+<a href="{% url 'inpatient:admission_detail' admission.id %}"
+class="btn btn-sm btn-outline-primary">
+فتح
+</a>
+</td>
+
+</tr>
+
+{% empty %}
+
+<tr>
+<td colspan="7"
+class="text-center text-muted py-4">
+لا توجد نتائج.
+</td>
+</tr>
+
+{% endfor %}
+
+</tbody>
+</table>
+</div>
+
+</div>
+{% endif %}
+
+{% endblock %}

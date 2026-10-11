@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+<h3 class="mb-3">{{ title }}</h3>
+
+<div class="card shadow-sm">
+<div class="card-body p-0">
+
+{% if rows %}
+<div class="table-responsive">
+<table class="table table-hover mb-0">
+<thead>
+<tr>
+<th>الصنف</th>
+<th>الكمية الحالية</th>
+<th>حد إعادة الطلب</th>
+</tr>
+</thead>
+<tbody>
+{% for row in rows %}
+<tr>
+<td>{{ row.item.name_ar }}</td>
+<td>{{ row.quantity }}</td>
+<td>{{ row.reorder_level }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% else %}
+<div class="p-5 text-center text-muted">
+{{ empty_text }}
+</div>
+{% endif %}
+
+</div>
+</div>
+
+</div>
+{% endblock %}

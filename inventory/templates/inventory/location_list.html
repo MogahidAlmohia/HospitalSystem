@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div>
+            <h3>مواقع التخزين</h3>
+            <div class="text-muted">الأرفف والمواقع داخل المستودعات</div>
+        </div>
+        <a href="{% url 'inventory:location_create' %}" class="btn btn-primary">+ إضافة موقع</a>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>المستودع</th>
+                        <th>الموقع</th>
+                        <th>الرمز</th>
+                        <th>الوصف</th>
+                        <th>الحالة</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for obj in locations %}
+                    <tr>
+                        <td>{{ obj.id }}</td>
+                        <td>{{ obj.warehouse.name_ar }}</td>
+                        <td>{{ obj.name_ar }}</td>
+                        <td><code>{{ obj.code }}</code></td>
+                        <td>{{ obj.description|default:"—" }}</td>
+                        <td>
+                            {% if obj.is_active %}
+                                <span class="badge bg-success">نشط</span>
+                            {% else %}
+                                <span class="badge bg-secondary">غير نشط</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'inventory:location_edit' obj.id %}" class="btn btn-sm btn-outline-primary">تعديل</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="7" class="text-center text-muted py-4">لا توجد مواقع تخزين.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

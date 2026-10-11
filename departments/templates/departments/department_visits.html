@@ -1,0 +1,349 @@
+{% extends "base.html" %}
+
+{% block title %}{{ department.name_ar }} - زيارات المرضى{% endblock %}
+
+{% block content %}
+
+<style>
+    .page-header {
+        background: linear-gradient(135deg,#0d6efd,#084298);
+        color:#fff;
+        border-radius:20px;
+        padding:22px;
+        margin-bottom:20px;
+        box-shadow:0 8px 25px rgba(13,110,253,.18);
+    }
+
+    .stat-card {
+        background:#fff;
+        border:1px solid #e5e7eb;
+        border-radius:16px;
+        padding:18px;
+        height:100%;
+        box-shadow:0 4px 15px rgba(0,0,0,.04);
+    }
+
+    .stat-number {
+        font-size:28px;
+        font-weight:800;
+    }
+
+    .stat-label {
+        color:#6b7280;
+        font-size:12px;
+    }
+
+    .panel {
+        background:#fff;
+        border:1px solid #e5e7eb;
+        border-radius:18px;
+        overflow:hidden;
+        box-shadow:0 4px 16px rgba(0,0,0,.04);
+    }
+
+    .panel-header {
+        padding:16px 18px;
+        border-bottom:1px solid #e5e7eb;
+        font-weight:800;
+    }
+
+    .table td,
+    .table th {
+        vertical-align:middle;
+        font-size:12px;
+    }
+
+    .patient-name {
+        font-weight:800;
+    }
+
+    .visit-number {
+        font-family:monospace;
+        font-weight:700;
+    }
+</style>
+
+<!-- HEADER -->
+
+<div class="page-header">
+
+    <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+
+        <div>
+            <div class="fs-4 fw-bold">
+                🏥 {{ department.name_ar }}
+            </div>
+
+            <div class="opacity-75">
+                {{ department.name_en }} · {{ department.code }}
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap">
+
+            <a href="{% url 'departments:dashboard' department.id %}"
+               class="btn btn-light">
+                ← لوحة القسم
+            </a>
+
+            <a href="{% url 'departments:patients' department.id %}"
+               class="btn btn-outline-light">
+                👥 المرضى
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- STATISTICS -->
+
+<div class="row g-3 mb-4">
+
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-number">{{ visit_count }}</div>
+            <div class="stat-label">إجمالي الزيارات</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-number">
+                {{ visits|length }}
+            </div>
+            <div class="stat-label">الزيارات المعروضة</div>
+        </div>
+    </div>
+
+</div>
+
+<!-- SEARCH -->
+
+<div class="panel mb-4">
+
+    <div class="panel-header">
+        🔎 البحث وتصفية الزيارات
+    </div>
+
+    <div class="p-3">
+
+        <form method="get">
+
+            <div class="row g-2">
+
+                <div class="col-md-7">
+
+                    <input
+                        type="text"
+                        name="q"
+                        value="{{ query }}"
+                        class="form-control"
+                        placeholder="اسم المريض أو رقم الملف أو رقم الزيارة..."
+                    >
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <select name="status" class="form-select">
+
+                        <option value="">
+                            كل الحالات
+                        </option>
+
+                        {% for value,label in status_choices %}
+
+                            <option
+                                value="{{ value }}"
+                                {% if selected_status == value %}selected{% endif %}
+                            >
+                                {{ label }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-2">
+
+                    <button class="btn btn-primary w-100">
+                        🔎 بحث
+                    </button>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<!-- VISITS -->
+
+<div class="panel">
+
+    <div class="panel-header d-flex justify-content-between align-items-center">
+
+        <span>
+            📅 زيارات {{ department.name_ar }}
+        </span>
+
+        <span class="badge bg-primary">
+            {{ visit_count }}
+        </span>
+
+    </div>
+
+    <div class="table-responsive">
+
+        <table class="table table-hover mb-0">
+
+            <thead>
+
+                <tr>
+                    <th>رقم الزيارة</th>
+                    <th>المريض</th>
+                    <th>الطبيب</th>
+                    <th>النوع</th>
+                    <th>الحالة</th>
+                    <th>التاريخ</th>
+                    <th>الإجراءات</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+            {% for visit in visits %}
+
+                <tr>
+
+                    <td>
+                        <span class="visit-number">
+                            {{ visit.visit_number }}
+                        </span>
+                    </td>
+
+                    <td>
+
+                        <div class="patient-name">
+                            {{ visit.patient.full_name }}
+                        </div>
+
+                        <small class="text-muted">
+                            {{ visit.patient.patient_number }}
+                        </small>
+
+                    </td>
+
+                    <td>
+
+                        {% if visit.doctor %}
+                            {{ visit.doctor }}
+                        {% else %}
+                            <span class="text-muted">
+                                غير محدد
+                            </span>
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+                        {{ visit.get_visit_type_display }}
+                    </td>
+
+                    <td>
+
+                        {% if visit.status == "OPEN" %}
+
+                            <span class="badge bg-primary">
+                                مفتوحة
+                            </span>
+
+                        {% elif visit.status == "IN_PROGRESS" %}
+
+                            <span class="badge bg-warning text-dark">
+                                قيد المعالجة
+                            </span>
+
+                        {% elif visit.status == "COMPLETED" %}
+
+                            <span class="badge bg-success">
+                                مكتملة
+                            </span>
+
+                        {% elif visit.status == "CANCELLED" %}
+
+                            <span class="badge bg-danger">
+                                ملغاة
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+                        {{ visit.created_at|date:"Y-m-d H:i" }}
+                    </td>
+
+                    <td>
+
+                        <div class="d-flex gap-1 flex-wrap">
+
+                            <a
+                                href="{% url 'patients:visit_detail' visit.id %}"
+                                class="btn btn-sm btn-outline-primary"
+                            >
+                                فتح
+                            </a>
+
+                            <a
+                                href="{% url 'laboratory:create_order' visit.id %}"
+                                class="btn btn-sm btn-outline-success"
+                            >
+                                🧪 طلب تحليل
+                            </a>
+
+                            <a
+                                href="{% url 'patients:detail' visit.patient.id %}"
+                                class="btn btn-sm btn-outline-secondary"
+                            >
+                                👤 الملف
+                            </a>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+            {% empty %}
+
+                <tr>
+
+                    <td
+                        colspan="7"
+                        class="text-center text-muted p-5"
+                    >
+                        لا توجد زيارات مطابقة للبحث.
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

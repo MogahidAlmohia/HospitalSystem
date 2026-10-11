@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Laboratory Tests</title>
+
+<style>
+:root{--blue:#0d6efd;--navy:#17324d;--line:#e5eaf1}
+body{font-family:"Cairo",Arial,sans-serif;background:radial-gradient(circle at 100% 0%,rgba(13,110,253,.08),transparent 30rem),#f4f7fb}
+.header{background:linear-gradient(135deg,#0d6efd,#084298);box-shadow:0 8px 22px rgba(13,110,253,.18)}
+.card{border:1px solid var(--line);box-shadow:0 9px 24px rgba(15,23,42,.06)}
+tr{transition:.18s}tr:hover{background:#f4f9ff}
+input:focus,select:focus,textarea:focus{outline:0;border-color:#78aefc;box-shadow:0 0 0 .22rem rgba(13,110,253,.12)}
+@media(max-width:650px){.container{padding:0 10px}.header{padding:18px}.table-wrapper{overflow-x:auto}}
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f4f7fb;
+    color:#263238;
+}
+.header{
+    background:#173b57;
+    color:white;
+    padding:22px;
+}
+.header h1{margin:0 0 5px}
+.container{
+    max-width:1400px;
+    margin:25px auto;
+    padding:0 15px;
+}
+.box{
+    background:white;
+    padding:20px;
+    border-radius:14px;
+    box-shadow:0 3px 15px #0001;
+    margin-bottom:20px;
+}
+.toolbar{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
+input,select{
+    padding:11px;
+    border:1px solid #ccd5df;
+    border-radius:7px;
+}
+button,.btn{
+    padding:10px 15px;
+    border:0;
+    border-radius:7px;
+    background:#173b57;
+    color:white;
+    text-decoration:none;
+    cursor:pointer;
+}
+.btn-add{background:#198754}
+.btn-edit{background:#1261a0}
+.btn-delete{background:#dc3545}
+.btn-toggle{background:#6c757d}
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+th,td{
+    padding:11px;
+    border-bottom:1px solid #eee;
+    text-align:right;
+}
+th{background:#edf3f8}
+.badge{
+    padding:5px 9px;
+    border-radius:15px;
+    font-size:12px;
+}
+.active{
+    background:#dcfce7;
+    color:#166534;
+}
+.inactive{
+    background:#fee2e2;
+    color:#991b1b;
+}
+.actions{
+    display:flex;
+    gap:5px;
+    flex-wrap:wrap;
+}
+form.inline{display:inline}
+@media(max-width:800px){
+    table{font-size:12px}
+    th,td{padding:7px}
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <h1>إدارة الفحوصات المخبرية</h1>
+    <div>Laboratory Test Management</div>
+</div>
+
+<div class="container">
+
+<div class="box">
+
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+    <h2>قائمة الفحوصات</h2>
+    <a class="btn btn-add"
+       href="{% url 'laboratory:test_create' %}">
+       + إضافة فحص جديد
+    </a>
+</div>
+
+<form method="get" class="toolbar">
+
+<input type="text"
+       name="q"
+       value="{{ q }}"
+       placeholder="بحث بالكود أو اسم الفحص">
+
+<select name="department">
+<option value="">كل الأقسام</option>
+{% for department in departments %}
+<option value="{{ department.id }}"
+{% if selected_department == department.id|stringformat:"s" %}
+selected
+{% endif %}>
+{{ department.name_ar }} - {{ department.name_en }}
+</option>
+{% endfor %}
+</select>
+
+<select name="active">
+<option value="">الكل</option>
+<option value="1" {% if selected_active == "1" %}selected{% endif %}>
+Active
+</option>
+<option value="0" {% if selected_active == "0" %}selected{% endif %}>
+Inactive
+</option>
+</select>
+
+<button type="submit">بحث</button>
+
+<a class="btn" href="{% url 'laboratory:test_list' %}">
+إلغاء الفلتر
+</a>
+
+</form>
+</div>
+
+<div class="box" style="overflow-x:auto">
+
+<table>
+
+<thead>
+<tr>
+<th>#</th>
+<th>Code</th>
+<th>Test Name</th>
+<th>القسم</th>
+<th>Sample</th>
+<th>Device</th>
+<th>Reagent</th>
+<th>Unit</th>
+<th>Reference Range</th>
+<th>Price</th>
+<th>Status</th>
+<th>Actions</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for test in tests %}
+
+<tr>
+
+<td>{{ forloop.counter }}</td>
+
+<td><strong>{{ test.code }}</strong></td>
+
+<td>
+<strong>{{ test.name_en }}</strong>
+{% if test.name_ar %}
+<br>
+<small>{{ test.name_ar }}</small>
+{% endif %}
+</td>
+
+<td>
+{% if test.department %}
+{{ test.department.name_ar }}
+<br>
+<small>{{ test.department.name_en }}</small>
+{% else %}
+-
+{% endif %}
+</td>
+
+<td>{{ test.get_sample_type_display }}</td>
+
+<td>{{ test.device|default:"-" }}</td>
+
+<td>{{ test.reagent|default:"-" }}</td>
+
+<td>{{ test.unit|default:"-" }}</td>
+
+<td>{{ test.reference_range|default:"-" }}</td>
+
+<td>{{ test.price }}</td>
+
+<td>
+{% if test.is_active %}
+<span class="badge active">Active</span>
+{% else %}
+<span class="badge inactive">Inactive</span>
+{% endif %}
+</td>
+
+<td>
+<div class="actions">
+
+<a class="btn btn-edit"
+href="{% url 'laboratory:test_edit' test.id %}">
+تعديل
+</a>
+
+<form class="inline"
+method="post"
+action="{% url 'laboratory:test_toggle' test.id %}">
+{% csrf_token %}
+<button class="btn-toggle" type="submit">
+{% if test.is_active %}
+تعطيل
+{% else %}
+تفعيل
+{% endif %}
+</button>
+</form>
+
+<form class="inline"
+method="post"
+action="{% url 'laboratory:test_delete' test.id %}"
+onsubmit="return confirm('هل أنت متأكد من حذف هذا الفحص؟');">
+{% csrf_token %}
+<button class="btn-delete" type="submit">
+حذف
+</button>
+</form>
+
+</div>
+</td>
+
+</tr>
+
+{% empty %}
+
+<tr>
+<td colspan="12" style="text-align:center;padding:35px">
+لا توجد فحوصات مسجلة حاليًا.
+</td>
+</tr>
+
+{% endfor %}
+
+</tbody>
+</table>
+
+</div>
+
+</div>
+
+</body>
+</html>

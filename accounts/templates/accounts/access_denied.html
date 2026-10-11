@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ليس لديك صلاحية</title>
+<style>
+body{
+    margin:0;
+    background:#f4f7fb;
+    font-family:Tahoma,Arial,sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
+}
+.box{
+    background:white;
+    width:min(520px,90%);
+    padding:40px;
+    text-align:center;
+    border-radius:18px;
+    box-shadow:0 5px 25px #0002;
+}
+.icon{
+    font-size:65px;
+    margin-bottom:15px;
+}
+h1{
+    color:#c0392b;
+}
+p{
+    color:#555;
+    line-height:2;
+}
+a{
+    display:inline-block;
+    background:#123b5d;
+    color:white;
+    padding:12px 25px;
+    border-radius:8px;
+    text-decoration:none;
+}
+</style>
+</head>
+<body>
+
+<div class="box">
+    <div class="icon">🔒</div>
+    <h1>ليس لديك صلاحية</h1>
+    <p>
+        حسابك لا يملك الصلاحية المطلوبة للوصول إلى هذه الصفحة.
+        <br>
+        يرجى التواصل مع مدير النظام إذا كنت تحتاج إلى هذه الصلاحية.
+    </p>
+
+    <a href="{% url 'home' %}">العودة إلى الصفحة الرئيسية</a>
+</div>
+
+</body>
+</html>

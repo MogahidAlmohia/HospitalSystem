@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}سجل حركات المخزون{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+<h3 class="mb-3">سجل حركات المخزون</h3>
+
+<form method="get" class="card card-body shadow-sm mb-3">
+<div class="row g-2">
+<div class="col-12 col-md">
+<input class="form-control" name="q" value="{{ query }}" placeholder="بحث">
+</div>
+<div class="col-12 col-md-3">
+<select class="form-select" name="type">
+<option value="">كل الحركات</option>
+{% for value,label in movement_choices %}
+<option value="{{ value }}" {% if movement_type == value %}selected{% endif %}>
+{{ label }}
+</option>
+{% endfor %}
+</select>
+</div>
+<div class="col-auto">
+<button class="btn btn-outline-primary">تصفية</button>
+</div>
+</div>
+</form>
+
+<div class="card shadow-sm">
+<div class="card-body p-0">
+
+{% if movements %}
+<div class="table-responsive">
+<table class="table table-hover mb-0">
+<thead>
+<tr>
+<th>التاريخ</th>
+<th>الصنف</th>
+<th>Batch</th>
+<th>المستودع</th>
+<th>الحركة</th>
+<th>الكمية</th>
+<th>السبب</th>
+<th>المستخدم</th>
+</tr>
+</thead>
+<tbody>
+{% for row in movements %}
+<tr>
+<td>{{ row.created_at|date:"Y-m-d H:i" }}</td>
+<td>{{ row.batch.item.name_ar }}</td>
+<td>{{ row.batch.batch_number|default:"—" }}</td>
+<td>{{ row.batch.warehouse.name_ar }}</td>
+<td>{{ row.get_movement_type_display }}</td>
+<td>{{ row.quantity }}</td>
+<td>{{ row.reason|default:"—" }}</td>
+<td>{{ row.performed_by }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% else %}
+<div class="p-5 text-center text-muted">
+لا توجد حركات مخزون مسجلة حاليًا.
+</div>
+{% endif %}
+
+</div>
+</div>
+
+</div>
+{% endblock %}

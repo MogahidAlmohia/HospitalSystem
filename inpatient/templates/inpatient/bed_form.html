@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}إضافة سرير{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+<div class="col-lg-7">
+
+<div class="card p-4">
+<h3 class="mb-4">➕ إضافة سرير</h3>
+
+<form method="post">
+{% csrf_token %}
+
+<div class="mb-3">
+    <label class="form-label">الغرفة</label>
+    <select name="room" class="form-select" required>
+        <option value="">-- اختر الغرفة --</option>
+        {% for room in rooms %}
+        <option value="{{ room.id }}">
+            {{ room.room_number }} - {{ room.name }}
+        </option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="mb-3">
+    <label class="form-label">رقم السرير</label>
+    <input type="text" name="bed_number"
+           class="form-control"
+           placeholder="مثال: B-01"
+           required>
+</div>
+
+<div class="mb-3">
+    <label class="form-label">ملاحظات</label>
+    <textarea name="notes" class="form-control" rows="4"></textarea>
+</div>
+
+<button class="btn btn-primary">💾 حفظ السرير</button>
+<a href="{% url 'inpatient:bed_list' %}" class="btn btn-secondary">رجوع</a>
+
+</form>
+</div>
+
+</div>
+</div>
+{% endblock %}

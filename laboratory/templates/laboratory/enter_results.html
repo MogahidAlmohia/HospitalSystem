@@ -1,0 +1,586 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}إدخال نتائج الفحوصات{% endblock %}
+
+{% block content %}
+
+<style>
+    .results-page {
+        direction: rtl;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #0d6efd, #084298);
+        color: #fff;
+        border-radius: 16px;
+        padding: 22px;
+        margin-bottom: 20px;
+        box-shadow: 0 8px 25px rgba(13, 110, 253, .18);
+    }
+
+    .page-header h1 {
+        margin: 0;
+        font-size: 1.55rem;
+        font-weight: 800;
+    }
+
+    .page-header p {
+        margin: 6px 0 0;
+        opacity: .9;
+    }
+
+    .patient-card {
+        border: 1px solid #e5eaf1;
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, .06);
+        margin-bottom: 20px;
+    }
+
+    .patient-card .card-body {
+        padding: 20px;
+    }
+
+    .info-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 13px 15px;
+        height: 100%;
+    }
+
+    .info-label {
+        display: block;
+        color: #64748b;
+        font-size: .82rem;
+        margin-bottom: 5px;
+        font-weight: 700;
+    }
+
+    .info-value {
+        color: #0f172a;
+        font-weight: 700;
+    }
+
+    .examiner-box {
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 12px;
+        padding: 15px 18px;
+        margin-bottom: 20px;
+    }
+
+    .results-card {
+        border: 1px solid #e5eaf1;
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, .06);
+        overflow: hidden;
+    }
+
+    .results-card-header {
+        padding: 18px 20px;
+        border-bottom: 1px solid #e5eaf1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .results-card-header h2 {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 800;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .results-table {
+        min-width: 1050px;
+        margin-bottom: 0;
+        vertical-align: middle;
+    }
+
+    .results-table th {
+        background: #17324d;
+        color: #fff;
+        white-space: nowrap;
+        font-size: .86rem;
+    }
+
+    .results-table td {
+        vertical-align: middle;
+    }
+
+    .test-en {
+        font-weight: 800;
+    }
+
+    .test-ar {
+        color: #64748b;
+        font-size: .82rem;
+        margin-top: 3px;
+    }
+
+    .result-input {
+        min-width: 180px;
+        font-weight: 600;
+    }
+
+    .notes-input {
+        min-width: 210px;
+        min-height: 70px;
+        resize: vertical;
+    }
+
+    .readonly-value {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 8px 10px;
+        min-width: 90px;
+        display: inline-block;
+        font-weight: 700;
+    }
+
+    .flag {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 78px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-weight: 800;
+        font-size: .82rem;
+    }
+
+    .flag-H {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .flag-L {
+        background: #ffedd5;
+        color: #c2410c;
+    }
+
+    .flag-NORMAL {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .flag-empty {
+        background: #f1f5f9;
+        color: #64748b;
+    }
+
+    .critical {
+        background: #7f1d1d;
+        color: #fff;
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-size: .78rem;
+        font-weight: 800;
+        display: inline-block;
+    }
+
+    .status-badge {
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-size: .78rem;
+        font-weight: 800;
+    }
+
+    .action-bar {
+        padding: 18px 20px;
+        border-top: 1px solid #e5eaf1;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .empty-state {
+        padding: 40px 20px;
+        text-align: center;
+        color: #64748b;
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            padding: 18px;
+        }
+
+        .page-header h1 {
+            font-size: 1.25rem;
+        }
+
+        .results-card-header,
+        .action-bar {
+            padding: 15px;
+        }
+    }
+</style>
+
+<div class="results-page">
+
+    <div class="page-header">
+        <h1>🧪 إدخال نتائج الفحوصات المخبرية</h1>
+        <p>Laboratory Information System — Result Entry</p>
+    </div>
+
+    <div class="patient-card">
+        <div class="card-body">
+
+            <div class="row g-3">
+
+                <div class="col-12 col-md-6 col-xl-3">
+                    <div class="info-box">
+                        <span class="info-label">رقم الطلب</span>
+                        <span class="info-value">
+                            {{ order.order_number }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-xl-3">
+                    <div class="info-box">
+                        <span class="info-label">المريض</span>
+                        <span class="info-value">
+                            {{ order.patient.full_name }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-xl-3">
+                    <div class="info-box">
+                        <span class="info-label">القسم الطالب</span>
+                        <span class="info-value">
+                            {% if order.requesting_department %}
+                                {{ order.requesting_department.name_ar }}
+                            {% else %}
+                                غير محدد
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-xl-3">
+                    <div class="info-box">
+                        <span class="info-label">الطبيب الطالب</span>
+                        <span class="info-value">
+                            {% if order.requesting_doctor %}
+                                د. {{ order.requesting_doctor.full_name }}
+                            {% else %}
+                                غير محدد
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-xl-3">
+                    <div class="info-box">
+                        <span class="info-label">الأولوية</span>
+                        <span class="info-value">
+                            {{ order.get_priority_display }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-xl-3">
+                    <div class="info-box">
+                        <span class="info-label">حالة الطلب</span>
+                        <span class="info-value">
+                            {{ order.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-xl-3">
+                    <div class="info-box">
+                        <span class="info-label">عدد الفحوصات</span>
+                        <span class="info-value">
+                            {{ items|length }}
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="examiner-box">
+        <strong>👨‍🔬 الفاحص الحالي:</strong>
+        {{ request.user.get_full_name|default:request.user.username }}
+        <div class="small text-muted mt-1">
+            يتم إدخال النتيجة من خلال هذه الصفحة فقط، ثم اعتمادها من صفحة اعتماد النتائج.
+        </div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="results-card">
+
+            <div class="results-card-header">
+                <h2>🧬 نتائج الفحوصات</h2>
+
+                <span class="badge text-bg-primary">
+                    {{ items|length }} فحص
+                </span>
+            </div>
+
+            <div class="table-responsive">
+
+                <table class="table table-hover results-table">
+
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>الفحص</th>
+                            <th>العينة</th>
+                            <th>Reference Range</th>
+                            <th>Unit</th>
+                            <th>Result</th>
+                            <th>Numeric Result</th>
+                            <th>Flag</th>
+                            <th>Critical</th>
+                            <th>Examiner Notes</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                    {% for item in items %}
+
+                        <tr>
+
+                            <td>
+                                {{ forloop.counter }}
+                            </td>
+
+                            <td>
+                                <div class="test-en">
+                                    {{ item.test.name_en }}
+                                </div>
+
+                                {% if item.test.name_ar %}
+                                    <div class="test-ar">
+                                        {{ item.test.name_ar }}
+                                    </div>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {{ item.test.get_sample_type_display }}
+                            </td>
+
+                            <td>
+                                {{ item.test.reference_range|default:"—" }}
+                            </td>
+
+                            <td>
+                                {{ item.test.unit|default:"—" }}
+                            </td>
+
+                            <td>
+
+                                {% if item.verified %}
+
+                                    <div class="readonly-value">
+                                        {{ item.result|default:"—" }}
+                                    </div>
+
+                                {% else %}
+
+                                    <input
+                                        type="text"
+                                        class="form-control result-input"
+                                        name="result_{{ item.id }}"
+                                        value="{{ item.result }}"
+                                        placeholder="Enter result"
+                                    >
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {% if item.result_numeric is not None %}
+
+                                    <span class="readonly-value">
+                                        {{ item.result_numeric }}
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="text-muted">
+                                        —
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {% if item.result_flag == "H" %}
+
+                                    <span class="flag flag-H">
+                                        🔴 H
+                                    </span>
+
+                                {% elif item.result_flag == "L" %}
+
+                                    <span class="flag flag-L">
+                                        🟠 L
+                                    </span>
+
+                                {% elif item.result_flag == "NORMAL" %}
+
+                                    <span class="flag flag-NORMAL">
+                                        🟢 NORMAL
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="flag flag-empty">
+                                        —
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {% if item.critical_status %}
+
+                                    <span class="critical">
+                                        ⚠ CRITICAL
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="text-muted">
+                                        —
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {% if item.verified %}
+
+                                    <div class="readonly-value">
+                                        {{ item.examiner_notes|default:"—" }}
+                                    </div>
+
+                                {% else %}
+
+                                    <textarea
+                                        class="form-control notes-input"
+                                        name="examiner_notes_{{ item.id }}"
+                                        placeholder="ملاحظات الفاحص..."
+                                    >{{ item.examiner_notes }}</textarea>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {% if item.status == "COMPLETED" %}
+
+                                    <span class="badge text-bg-success status-badge">
+                                        معتمد
+                                    </span>
+
+                                {% elif item.status == "PROCESSING" %}
+
+                                    <span class="badge text-bg-warning status-badge">
+                                        قيد المعالجة
+                                    </span>
+
+                                {% elif item.status == "COLLECTED" %}
+
+                                    <span class="badge text-bg-info status-badge">
+                                        تم سحب العينة
+                                    </span>
+
+                                {% elif item.status == "CANCELLED" %}
+
+                                    <span class="badge text-bg-danger status-badge">
+                                        ملغى
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge text-bg-secondary status-badge">
+                                        {{ item.get_status_display }}
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                    {% empty %}
+
+                        <tr>
+                            <td colspan="11">
+                                <div class="empty-state">
+                                    لا توجد فحوصات متاحة لهذا الطلب.
+                                </div>
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <div class="action-bar">
+
+                <button
+                    type="submit"
+                    class="btn btn-primary btn-lg"
+                >
+                    💾 حفظ النتائج
+                </button>
+
+                <a
+                    href="{% url 'laboratory:order_detail' order.id %}"
+                    class="btn btn-secondary btn-lg"
+                >
+                    ↩ العودة للطلب
+                </a>
+
+                <a
+                    href="{% url 'laboratory:result_workflow_dashboard' %}"
+                    class="btn btn-outline-primary btn-lg"
+                >
+                    📋 سير النتائج
+                </a>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

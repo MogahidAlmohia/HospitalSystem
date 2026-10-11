@@ -1,0 +1,435 @@
+{% extends "base.html" %}
+
+{% block title %}النتائج المطلوبة - {{ department.name_ar }}{% endblock %}
+
+{% block content %}
+
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+        color: #fff;
+        border-radius: 18px;
+        padding: 22px;
+        margin-bottom: 20px;
+        box-shadow: 0 8px 24px rgba(13, 110, 253, .18);
+    }
+
+    .stat-card {
+        border: 0;
+        border-radius: 16px;
+        box-shadow: 0 5px 18px rgba(0,0,0,.07);
+        height: 100%;
+    }
+
+    .stat-number {
+        font-size: 30px;
+        font-weight: 800;
+    }
+
+    .result-card {
+        border: 0;
+        border-radius: 18px;
+        box-shadow: 0 5px 20px rgba(0,0,0,.07);
+        margin-bottom: 18px;
+        overflow: hidden;
+    }
+
+    .result-card-header {
+        background: #f8faff;
+        border-bottom: 1px solid #e9eef7;
+        padding: 15px 18px;
+    }
+
+    .patient-name {
+        font-weight: 800;
+        color: #17365d;
+    }
+
+    .info-label {
+        color: #6c757d;
+        font-size: 12px;
+        margin-bottom: 2px;
+    }
+
+    .info-value {
+        font-weight: 600;
+    }
+
+    .test-badge {
+        display: inline-block;
+        background: #eef5ff;
+        color: #0d6efd;
+        border-radius: 20px;
+        padding: 5px 10px;
+        margin: 2px;
+        font-size: 12px;
+    }
+
+    .receive-box {
+        background: #fff8e1;
+        border: 1px solid #ffe69c;
+        border-radius: 14px;
+        padding: 14px;
+    }
+
+    .empty-box {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+
+    .btn {
+        border-radius: 10px;
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            padding: 18px;
+        }
+
+        .result-card-header {
+            padding: 13px;
+        }
+
+        .table-responsive {
+            font-size: 13px;
+        }
+    }
+</style>
+
+<div class="container-fluid">
+
+    <!-- HEADER -->
+    <div class="page-header">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+
+            <div>
+                <h3 class="mb-1">
+                    📥 النتائج المطلوبة
+                </h3>
+
+                <div class="opacity-75">
+                    قسم {{ department.name_ar }}
+                    {% if department.name_en %}
+                        — {{ department.name_en }}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{% url 'departments:dashboard' department.id %}"
+                   class="btn btn-light">
+                    🏠 لوحة القسم
+                </a>
+
+                <a href="{% url 'departments:results' department.id %}"
+                   class="btn btn-outline-light">
+                    🧪 النتائج
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- STAT -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-12 col-md-4">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="text-muted small">
+                        نتائج بانتظار الاستلام
+                    </div>
+
+                    <div class="stat-number text-warning">
+                        {{ delivery_count }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="text-muted small">
+                        القسم
+                    </div>
+
+                    <div class="fw-bold">
+                        {{ department.name_ar }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="text-muted small">
+                        حالة العمل
+                    </div>
+
+                    {% if delivery_count %}
+                        <span class="badge bg-warning text-dark fs-6">
+                            يوجد نتائج تحتاج استلام
+                        </span>
+                    {% else %}
+                        <span class="badge bg-success fs-6">
+                            لا توجد نتائج معلقة
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {% if deliveries %}
+
+        {% for delivery in deliveries %}
+
+            <div class="card result-card">
+
+                <!-- CARD HEADER -->
+                <div class="result-card-header">
+
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+
+                        <div>
+                            <span class="patient-name">
+                                👤
+                                {{ delivery.order.patient.full_name }}
+                            </span>
+
+                            <div class="text-muted small mt-1">
+                                رقم المريض:
+                                <strong>
+                                    {{ delivery.order.patient.patient_number }}
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div>
+                            <span class="badge bg-primary">
+                                طلب {{ delivery.order.order_number }}
+                            </span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- CARD BODY -->
+                <div class="card-body">
+
+                    <div class="row g-3 mb-3">
+
+                        <div class="col-6 col-md-3">
+                            <div class="info-label">
+                                المريض
+                            </div>
+
+                            <div class="info-value">
+                                {{ delivery.order.patient.full_name }}
+                            </div>
+                        </div>
+
+                        <div class="col-6 col-md-3">
+                            <div class="info-label">
+                                رقم الملف
+                            </div>
+
+                            <div class="info-value">
+                                {{ delivery.order.patient.patient_number }}
+                            </div>
+                        </div>
+
+                        <div class="col-6 col-md-3">
+                            <div class="info-label">
+                                الطبيب
+                            </div>
+
+                            <div class="info-value">
+                                {% if delivery.doctor %}
+                                    {{ delivery.doctor.full_name }}
+                                {% elif delivery.order.requesting_doctor %}
+                                    {{ delivery.order.requesting_doctor.full_name }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="col-6 col-md-3">
+                            <div class="info-label">
+                                تاريخ إرسال النتيجة
+                            </div>
+
+                            <div class="info-value">
+                                {{ delivery.sent_at|date:"Y-m-d H:i" }}
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- TESTS -->
+                    <div class="mb-3">
+
+                        <div class="fw-bold mb-2">
+                            🧪 الفحوصات
+                        </div>
+
+                        {% for item in delivery.order.items.all %}
+
+                            <span class="test-badge">
+
+                                {% if item.test.code %}
+                                    {{ item.test.code }} —
+                                {% endif %}
+
+                                {{ item.test.name_en }}
+
+                                {% if item.result %}
+                                    : {{ item.result }}
+                                {% elif item.result_numeric != None %}
+                                    : {{ item.result_numeric }}
+                                {% endif %}
+
+                                {% if item.result_flag %}
+                                    [{{ item.result_flag }}]
+                                {% endif %}
+
+                            </span>
+
+                        {% empty %}
+
+                            <span class="text-muted">
+                                لا توجد فحوصات مرتبطة بهذا الطلب.
+                            </span>
+
+                        {% endfor %}
+
+                    </div>
+
+                    <!-- RECEIVE -->
+                    <div class="receive-box">
+
+                        <div class="row align-items-center g-3">
+
+                            <div class="col-12 col-md-8">
+
+                                <div class="fw-bold mb-1">
+                                    📥 النتيجة جاهزة للاستلام
+                                </div>
+
+                                <div class="text-muted small">
+                                    تأكيد الاستلام سيقوم بتسجيل:
+                                    <strong>المستخدم</strong>
+                                    و<strong>وقت الاستلام</strong>
+                                    في سجل تسليم النتيجة.
+                                </div>
+
+                            </div>
+
+                            <div class="col-12 col-md-4 text-md-end">
+
+                                <form method="post"
+                                      action="{% url 'laboratory:receive_result' delivery.id %}"
+                                      class="d-inline"
+                                      onsubmit="return confirm('هل أنت متأكد من تأكيد استلام هذه النتيجة؟');">
+
+                                    {% csrf_token %}
+
+                                    <button type="submit"
+                                            class="btn btn-success btn-lg w-100">
+
+                                        ✅ تأكيد استلام النتيجة
+
+                                    </button>
+
+                                </form>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- ACTIONS -->
+                    <div class="d-flex flex-wrap gap-2 mt-3">
+
+                        <a href="{% url 'laboratory:order_detail' delivery.order.id %}"
+                           class="btn btn-outline-primary">
+
+                            📄 تفاصيل الطلب
+
+                        </a>
+
+                        <a href="{% url 'laboratory:laboratory_report' delivery.order.id %}"
+                           class="btn btn-outline-success">
+
+                            📋 التقرير
+
+                        </a>
+
+                        <a href="{% url 'patients:detail' delivery.order.patient.id %}"
+                           class="btn btn-outline-secondary">
+
+                            👤 ملف المريض
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="card result-card">
+
+            <div class="card-body empty-box">
+
+                <div style="font-size: 55px;">
+                    ✅
+                </div>
+
+                <h4 class="mt-3">
+                    لا توجد نتائج بانتظار الاستلام
+                </h4>
+
+                <p class="text-muted mb-4">
+                    جميع النتائج المرسلة إلى هذا القسم تم استلامها،
+                    أو لا توجد نتائج جديدة حاليًا.
+                </p>
+
+                <div class="d-flex justify-content-center flex-wrap gap-2">
+
+                    <a href="{% url 'departments:dashboard' department.id %}"
+                       class="btn btn-primary">
+
+                        🏠 العودة إلى لوحة القسم
+
+                    </a>
+
+                    <a href="{% url 'departments:results' department.id %}"
+                       class="btn btn-outline-primary">
+
+                        🧪 عرض النتائج
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

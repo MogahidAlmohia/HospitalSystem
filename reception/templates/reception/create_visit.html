@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+{% block title %}إنشاء زيارة{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-xl-9"><div class="d-flex justify-content-between align-items-center mb-4"><div><h1 class="page-title mb-1">إنشاء زيارة جديدة</h1><p class="page-subtitle mb-0">تسجيل زيارة للمريض وربطها بالقسم والطبيب</p></div></div><div class="card"><div class="card-body p-4"><div class="alert alert-primary"><strong>المريض:</strong> {{ patient.full_name }} <span class="mx-2">·</span> <strong>رقم الملف:</strong> {{ patient.patient_number }}</div><form method="post">{% csrf_token %}<div class="row g-3"><div class="col-md-6"><label class="form-label">رقم الزيارة</label><input class="form-control" type="text" name="visit_number" placeholder="V-000001" required></div><div class="col-md-6"><label class="form-label">نوع الزيارة</label><select class="form-select" name="visit_type" required><option value="OPD">عيادة خارجية</option><option value="ER">طوارئ</option><option value="INPATIENT">تنويم</option><option value="FOLLOWUP">متابعة</option></select></div><div class="col-md-6"><label class="form-label">القسم</label><select class="form-select" name="department" id="department" required><option value="">اختر القسم</option>{% for department in departments %}<option value="{{ department.id }}">{{ department.name_ar }} — {{ department.name_en }}</option>{% endfor %}</select></div><div class="col-md-6"><label class="form-label">الطبيب</label><select class="form-select" name="doctor" id="doctor" required><option value="">اختر الطبيب</option>{% for doctor in doctors %}<option value="{{ doctor.id }}" data-department="{{ doctor.department_id }}">د. {{ doctor.full_name }} — {{ doctor.get_specialty_display }}</option>{% endfor %}</select></div><div class="col-12"><label class="form-label">سبب الزيارة</label><textarea class="form-control" name="reason" rows="3" placeholder="سبب حضور المريض..."></textarea></div><div class="col-12"><label class="form-label">الطبيب المحول</label><input class="form-control" type="text" name="referring_doctor"></div><div class="col-12"><label class="form-label">ملاحظات</label><textarea class="form-control" name="notes" rows="3"></textarea></div></div><div class="d-flex gap-2 mt-4"><button class="btn btn-primary" type="submit">💾 حفظ الزيارة</button><a class="btn btn-outline-secondary" href="{% url 'reception:patient_profile' patient.id %}">إلغاء</a></div></form></div></div></div></div>
+<script>const department=document.getElementById('department');const doctor=document.getElementById('doctor');department.addEventListener('change',()=>{Array.from(doctor.options).forEach(option=>{option.hidden=!!option.dataset.department&&option.dataset.department!==department.value;});doctor.value='';});</script>
+{% endblock %}
+
+
+<!-- legacy styles removed; this page uses the shared application layout -->
+<!--
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f1f5f9;
+}
+
+.header {
+    background: #0f172a;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+.container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+}
+
+.card {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.08);
+}
+
+.patient {
+    background: #eff6ff;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns:
+        repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+}
+
+.full {
+    grid-column: 1 / -1;
+}
+
+label {
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+input,
+select,
+textarea {
+    padding: 13px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+textarea {
+    min-height: 100px;
+}
+
+button {
+    margin-top: 25px;
+    padding: 14px 25px;
+    border: 0;
+    border-radius: 8px;
+    background: #2563eb;
+    color: white;
+    font-size: 17px;
+}
+
+</style>
+-->
+</head>
+
+<!-- legacy markup below is intentionally disabled -->
+<!--
+<body>
+
+<div class="header">
+
+<h1>🏥 نظام إدارة المستشفى</h1>
+
+<p>إنشاء زيارة جديدة</p>
+
+</div>
+
+<div class="container">
+
+<div class="card">
+
+<div class="patient">
+
+<strong>المريض:</strong>
+{{ patient.full_name }}
+
+<br>
+
+<strong>رقم الملف:</strong>
+{{ patient.patient_number }}
+
+</div>
+
+<form method="post">
+
+{% csrf_token %}
+
+<div class="grid">
+
+<div class="field">
+
+<label>رقم الزيارة</label>
+
+<input
+type="text"
+name="visit_number"
+placeholder="V-000001"
+required
+>
+
+</div>
+
+<div class="field">
+
+<label>نوع الزيارة</label>
+
+<select name="visit_type" required>
+
+<option value="OPD">
+عيادة خارجية
+</option>
+
+<option value="ER">
+طوارئ
+</option>
+
+<option value="INPATIENT">
+تنويم
+</option>
+
+<option value="FOLLOWUP">
+متابعة
+</option>
+
+</select>
+
+</div>
+
+<div class="field">
+
+<label>القسم</label>
+
+<select name="department" id="department" required>
+
+<option value="">اختر القسم</option>
+
+{% for department in departments %}
+
+<option value="{{ department.id }}">
+
+{{ department.name_ar }}
+
+-
+
+{{ department.name_en }}
+
+</option>
+
+{% endfor %}
+
+</select>
+
+</div>
+
+<div class="field">
+
+<label>الطبيب</label>
+
+<select name="doctor" id="doctor" required>
+
+<option value="">
+اختر الطبيب
+</option>
+
+{% for doctor in doctors %}
+
+<option
+    value="{{ doctor.id }}"
+    data-department="{{ doctor.department_id }}"
+>
+د. {{ doctor.full_name }}
+-
+{{ doctor.get_specialty_display }}
+</option>
+
+{% endfor %}
+
+</select>
+
+</div>
+
+<div class="field full">
+
+<label>سبب الزيارة</label>
+
+<textarea
+name="reason"
+placeholder="سبب حضور المريض..."
+></textarea>
+
+</div>
+
+<div class="field full">
+
+<label>الطبيب المحول</label>
+
+<input
+type="text"
+name="referring_doctor"
+>
+
+</div>
+
+<div class="field full">
+
+<label>ملاحظات</label>
+
+<textarea
+name="notes"
+></textarea>
+
+</div>
+
+</div>
+
+<button type="submit">
+حفظ الزيارة
+</button>
+
+</form>
+
+</div>
+
+</div>
+<script>
+
+const departmentSelect =
+    document.getElementById("department");
+
+const doctorSelect =
+    document.getElementById("doctor");
+
+function filterDoctors() {
+
+    const departmentId =
+        departmentSelect.value;
+
+    const options =
+        doctorSelect.querySelectorAll(
+            "option[data-department]"
+        );
+
+    doctorSelect.value = "";
+
+    options.forEach(function(option) {
+
+        if (
+            !departmentId ||
+            option.dataset.department === departmentId
+        ) {
+
+            option.style.display = "";
+
+        } else {
+
+            option.style.display = "none";
+
+        }
+
+    });
+}
+
+departmentSelect.addEventListener(
+    "change",
+    filterDoctors
+);
+
+filterDoctors();
+
+</script>
+</body>
+
+</html>
+-->

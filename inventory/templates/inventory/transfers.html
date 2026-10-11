@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}تحويلات المخزون{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+<h3>تحويلات المخزون</h3>
+{% if can_movement %}
+<a class="btn btn-primary" href="{% url 'inventory:transfer_create' %}">
++ طلب تحويل
+</a>
+{% endif %}
+</div>
+
+<div class="card shadow-sm">
+<div class="card-body p-0">
+
+{% if transfers %}
+<div class="table-responsive">
+<table class="table table-hover mb-0 align-middle">
+<thead>
+<tr>
+<th>الرقم</th>
+<th>من</th>
+<th>إلى</th>
+<th>الأصناف</th>
+<th>الحالة</th>
+<th>الطالب</th>
+<th>التاريخ</th>
+<th>الإجراء</th>
+</tr>
+</thead>
+<tbody>
+
+{% for transfer in transfers %}
+<tr>
+<td>#{{ transfer.id }}</td>
+<td>{{ transfer.source_warehouse.name_ar }}</td>
+<td>{{ transfer.destination_warehouse.name_ar }}</td>
+<td>
+{% for row in transfer.items.all %}
+<div>{{ row.item.name_ar }} — {{ row.quantity }}</div>
+{% empty %}
+—
+{% endfor %}
+</td>
+<td>{{ transfer.get_status_display }}</td>
+<td>{{ transfer.requested_by }}</td>
+<td>{{ transfer.created_at|date:"Y-m-d H:i" }}</td>
+<td>
+{% if can_movement and transfer.status == "REQUESTED" %}
+<form method="post" action="{% url 'inventory:transfer_approve' transfer.id %}" class="d-inline">
+{% csrf_token %}
+<button class="btn btn-sm btn-outline-primary">اعتماد</button>
+</form>
+{% endif %}
+
+{% if can_movement and transfer.status == "APPROVED" %}
+<form method="post" action="{% url 'inventory:transfer_complete' transfer.id %}" class="d-inline">
+{% csrf_token %}
+<button class="btn btn-sm btn-success">إكمال النقل</button>
+</form>
+{% endif %}
+</td>
+</tr>
+{% endfor %}
+
+</tbody>
+</table>
+</div>
+{% else %}
+<div class="p-5 text-center text-muted">
+لا توجد تحويلات مخزون مسجلة حاليًا.
+</div>
+{% endif %}
+
+</div>
+</div>
+
+</div>
+{% endblock %}

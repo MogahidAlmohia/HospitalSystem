@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}تحديث حالة الطوارئ{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+
+<div class="col-xl-9">
+
+<div class="card">
+
+<div class="card-body p-4">
+
+<h3 class="mb-4">
+✏️ تحديث {{ case.case_number }}
+</h3>
+
+<form method="post">
+
+{% csrf_token %}
+
+<div class="row g-3">
+
+<div class="col-md-6">
+
+<label class="form-label">
+Triage
+</label>
+
+<select name="triage_level"
+        class="form-select">
+
+{% for value,label in triage_choices %}
+
+<option value="{{ value }}"
+{% if case.triage_level == value %}selected{% endif %}>
+{{ label }}
+</option>
+
+{% endfor %}
+
+</select>
+
+</div>
+
+<div class="col-md-6">
+
+<label class="form-label">
+الحالة
+</label>
+
+<select name="status"
+        class="form-select">
+
+{% for value,label in status_choices %}
+
+<option value="{{ value }}"
+{% if case.status == value %}selected{% endif %}>
+{{ label }}
+</option>
+
+{% endfor %}
+
+</select>
+
+</div>
+
+<div class="col-md-6">
+
+<label class="form-label">
+النتيجة / Disposition
+</label>
+
+<select name="disposition"
+        class="form-select">
+
+<option value="">-- اختر --</option>
+
+{% for value,label in disposition_choices %}
+
+<option value="{{ value }}"
+{% if case.disposition == value %}selected{% endif %}>
+{{ label }}
+</option>
+
+{% endfor %}
+
+</select>
+
+</div>
+
+<div class="col-12">
+
+<label class="form-label">
+التشخيص الأولي
+</label>
+
+<textarea name="preliminary_diagnosis"
+          class="form-control"
+          rows="3">{{ case.preliminary_diagnosis }}</textarea>
+
+</div>
+
+<div class="col-12">
+
+<label class="form-label">
+العلاج والإجراءات
+</label>
+
+<textarea name="treatment"
+          class="form-control"
+          rows="4">{{ case.treatment }}</textarea>
+
+</div>
+
+<div class="col-12">
+
+<label class="form-label">
+الملاحظات
+</label>
+
+<textarea name="clinical_notes"
+          class="form-control"
+          rows="4">{{ case.clinical_notes }}</textarea>
+
+</div>
+
+</div>
+
+<div class="mt-4">
+
+<button class="btn btn-primary"
+        type="submit">
+💾 حفظ التحديث
+</button>
+
+<a href="{% url 'emergency:detail' case.id %}"
+   class="btn btn-secondary">
+إلغاء
+</a>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}

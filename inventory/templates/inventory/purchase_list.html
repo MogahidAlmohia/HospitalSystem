@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="mb-1">المشتريات</h4>
+            <div class="text-muted small">إدارة أوامر الشراء والاستلام</div>
+        </div>
+
+        <a href="{% url 'inventory:purchase_create' %}"
+           class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i>
+            أمر شراء جديد
+        </a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header">
+            <strong>البحث والتصفية</strong>
+        </div>
+
+        <div class="card-body">
+            <form method="get" class="row g-3">
+
+                <div class="col-12 col-md-6">
+                    <label class="form-label">بحث</label>
+                    <input
+                        type="text"
+                        name="q"
+                        value="{{ search }}"
+                        class="form-control"
+                        placeholder="رقم أمر الشراء أو اسم المورد">
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label class="form-label">الحالة</label>
+                    <select name="status" class="form-select">
+                        <option value="">كل الحالات</option>
+                        {% for value, label in purchase_statuses %}
+                            <option value="{{ value }}"
+                                {% if status == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label class="form-label">المورد</label>
+                    <select name="supplier" class="form-select">
+                        <option value="">كل الموردين</option>
+                        {% for supplier in suppliers %}
+                            <option value="{{ supplier.pk }}"
+                                {% if supplier_id == supplier.pk|stringformat:"s" %}selected{% endif %}>
+                                {{ supplier.name_ar }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label class="form-label">المستودع</label>
+                    <select name="warehouse" class="form-select">
+                        <option value="">كل المستودعات</option>
+                        {% for warehouse in warehouses %}
+                            <option value="{{ warehouse.pk }}"
+                                {% if warehouse_id == warehouse.pk|stringformat:"s" %}selected{% endif %}>
+                                {{ warehouse.name_ar }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-12 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i>
+                        بحث وتصفية
+                    </button>
+
+                    <a href="{% url 'inventory:purchase_list' %}"
+                       class="btn btn-outline-secondary">
+                        إعادة تعيين
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th>رقم الشراء</th>
+                            <th>المورد</th>
+                            <th>المستودع</th>
+                            <th>التاريخ</th>
+                            <th>الحالة</th>
+                            <th>الإجمالي</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for purchase in purchases %}
+                        <tr>
+                            <td class="fw-semibold">
+                                {{ purchase.purchase_number }}
+                            </td>
+
+                            <td>
+                                {{ purchase.supplier.name_ar }}
+                            </td>
+
+                            <td>
+                                {{ purchase.warehouse.name_ar }}
+                            </td>
+
+                            <td>
+                                {{ purchase.purchase_date }}
+                            </td>
+
+                            <td>
+                                {% if purchase.status == "DRAFT" %}
+                                    <span class="badge bg-secondary">
+                                        مسودة
+                                    </span>
+                                {% elif purchase.status == "ORDERED" %}
+                                    <span class="badge bg-primary">
+                                        معتمد
+                                    </span>
+                                {% elif purchase.status == "PARTIALLY_RECEIVED" %}
+                                    <span class="badge bg-warning text-dark">
+                                        مستلم جزئيًا
+                                    </span>
+                                {% elif purchase.status == "RECEIVED" %}
+                                    <span class="badge bg-success">
+                                        مكتمل الاستلام
+                                    </span>
+                                {% elif purchase.status == "CANCELLED" %}
+                                    <span class="badge bg-danger">
+                                        ملغى
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary">
+                                        {{ purchase.status }}
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {{ purchase.total_amount }}
+                            </td>
+
+                            <td class="text-end">
+                                <a href="{% url 'inventory:purchase_detail' purchase.pk %}"
+                                   class="btn btn-sm btn-outline-primary">
+                                    التفاصيل
+                                </a>
+                            </td>
+                        </tr>
+
+                        {% empty %}
+                        <tr>
+                            <td colspan="7"
+                                class="text-center text-muted py-5">
+                                لا توجد أوامر شراء حتى الآن.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

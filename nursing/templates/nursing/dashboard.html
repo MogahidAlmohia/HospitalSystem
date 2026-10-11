@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+
+{% block title %}التمريض{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3" dir="rtl">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">
+                <i class="bi bi-heart-pulse"></i>
+                قسم التمريض
+            </h3>
+            <div class="text-muted">
+                لوحة متابعة العمليات التمريضية
+            </div>
+        </div>
+
+        <div class="text-muted">
+            {{ today }}
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">إجمالي المرضى</div>
+                    <div class="fs-3 fw-bold">{{ total_patients }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">زيارات اليوم</div>
+                    <div class="fs-3 fw-bold">{{ today_visits }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">التقييمات اليوم</div>
+                    <div class="fs-3 fw-bold">{{ today_assessments }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">العلامات الحيوية</div>
+                    <div class="fs-3 fw-bold">{{ today_vitals }}</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">ملاحظات اليوم</div>
+                    <div class="fs-3 fw-bold">{{ today_notes }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">إعطاء الأدوية</div>
+                    <div class="fs-3 fw-bold">{{ today_medications }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">خطط الرعاية النشطة</div>
+                    <div class="fs-3 fw-bold">{{ active_care_plans }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">طلبات المختبر اليوم</div>
+                    <div class="fs-3 fw-bold">{{ today_lab_orders }}</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+
+            <h5 class="fw-bold mb-3">
+                العمليات التمريضية
+            </h5>
+
+            <div class="row g-2">
+
+                <div class="col-6 col-md-3">
+                    <a href="{% url 'nursing:patient_list' %}"
+                       class="btn btn-outline-primary w-100 py-3">
+                        المرضى
+                    </a>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <a href="{% url 'nursing:assessment_create' %}"
+                       class="btn btn-outline-primary w-100 py-3">
+                        تقييم تمريضي
+                    </a>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <a href="{% url 'nursing:vitals_create' %}"
+                       class="btn btn-outline-primary w-100 py-3">
+                        العلامات الحيوية
+                    </a>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <a href="{% url 'nursing:note_create' %}"
+                       class="btn btn-outline-primary w-100 py-3">
+                        ملاحظة تمريض
+                    </a>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <a href="{% url 'nursing:medication_create' %}"
+                       class="btn btn-outline-success w-100 py-3">
+                        إعطاء دواء
+                    </a>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <a href="{% url 'nursing:care_plan_create' %}"
+                       class="btn btn-outline-success w-100 py-3">
+                        خطة رعاية
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row g-3">
+
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header fw-bold">
+                    آخر التقييمات التمريضية
+                </div>
+
+                <div class="card-body p-0">
+
+                    {% if recent_assessments %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>المريض</th>
+                                    <th>الحالة</th>
+                                    <th>التاريخ</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                            {% for item in recent_assessments %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'nursing:patient_record' item.patient.id %}">
+                                            {{ item.patient.full_name }}
+                                        </a>
+                                    </td>
+                                    <td>{{ item.get_status_display }}</td>
+                                    <td>{{ item.created_at|date:"Y-m-d H:i" }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="p-4 text-center text-muted">
+                        لا توجد تقييمات تمريضية حتى الآن.
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header fw-bold">
+                    آخر العلامات الحيوية
+                </div>
+
+                <div class="card-body p-0">
+
+                    {% if recent_vitals %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>المريض</th>
+                                    <th>الحرارة</th>
+                                    <th>النبض</th>
+                                    <th>التاريخ</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                            {% for item in recent_vitals %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'nursing:patient_record' item.patient.id %}">
+                                            {{ item.patient.full_name }}
+                                        </a>
+                                    </td>
+                                    <td>{{ item.temperature|default:"-" }}</td>
+                                    <td>{{ item.pulse|default:"-" }}</td>
+                                    <td>{{ item.recorded_at|date:"Y-m-d H:i" }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="p-4 text-center text-muted">
+                        لا توجد علامات حيوية مسجلة حتى الآن.
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

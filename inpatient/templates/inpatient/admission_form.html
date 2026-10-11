@@ -1,0 +1,1022 @@
+{% extends "base.html" %}
+
+{% block title %}تنويم مريض{% endblock %}
+
+{% block content %}
+
+<style>
+    .admission-page {
+        direction: rtl;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+        color: #fff;
+        border-radius: 18px;
+        padding: 24px;
+        margin-bottom: 20px;
+        box-shadow: 0 8px 25px rgba(13, 110, 253, .15);
+    }
+
+    .page-header h2 {
+        margin: 0;
+        font-weight: 700;
+    }
+
+    .page-header p {
+        margin: 8px 0 0;
+        opacity: .9;
+    }
+
+    .section-card {
+        background: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: 16px;
+        margin-bottom: 18px;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, .05);
+    }
+
+    .section-title {
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        padding: 15px 18px;
+        font-weight: 700;
+        color: #212529;
+    }
+
+    .section-body {
+        padding: 20px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        margin-bottom: 7px;
+    }
+
+    .form-control,
+    .form-select {
+        min-height: 46px;
+        border-radius: 10px;
+    }
+
+    textarea.form-control {
+        min-height: auto;
+    }
+
+    .required-star {
+        color: #dc3545;
+    }
+
+    .patient-info {
+        display: none;
+        background: #f0f7ff;
+        border: 1px solid #cfe2ff;
+        border-radius: 12px;
+        padding: 15px;
+        margin-top: 12px;
+    }
+
+    .patient-info.show {
+        display: block;
+    }
+
+    .patient-info-item {
+        margin-bottom: 8px;
+    }
+
+    .patient-info-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .patient-info-label {
+        color: #6c757d;
+        font-size: .85rem;
+    }
+
+    .patient-info-value {
+        font-weight: 700;
+    }
+
+    .bed-help {
+        background: #e8f5e9;
+        border: 1px solid #c8e6c9;
+        color: #2e7d32;
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-top: 8px;
+        font-size: .9rem;
+    }
+
+    .warning-box {
+        background: #fff8e1;
+        border: 1px solid #ffe082;
+        border-radius: 12px;
+        padding: 14px;
+        margin-bottom: 18px;
+    }
+
+    .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+
+    .actions .btn {
+        min-width: 150px;
+        min-height: 46px;
+        border-radius: 10px;
+        font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            padding: 18px;
+            border-radius: 14px;
+        }
+
+        .page-header h2 {
+            font-size: 1.3rem;
+        }
+
+        .section-body {
+            padding: 15px;
+        }
+
+        .actions {
+            flex-direction: column;
+        }
+
+        .actions .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="container-fluid admission-page">
+
+    <!-- Header -->
+    <div class="page-header">
+        <div class="d-flex align-items-center gap-3">
+            <div style="font-size: 2rem;">🏥</div>
+            <div>
+                <h2>تنويم مريض جديد</h2>
+                <p>تسجيل دخول المريض إلى قسم التنويم وتحديد الغرفة والسرير</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Important notice -->
+    <div class="warning-box">
+        <strong>⚠️ تنبيه:</strong>
+        سيتم تسجيل المريض بحالة <strong>Admitted</strong>، وسيتم حجز السرير المختار تلقائيًا.
+        تأكد من صحة بيانات المريض والسرير قبل التسجيل.
+    </div>
+
+    <form method="post" id="admissionForm">
+        {% csrf_token %}
+
+        <!-- Patient -->
+        <div class="section-card">
+
+            <div class="section-title">
+                👤 بيانات المريض
+            </div>
+
+            <div class="section-body">
+
+                <div class="row g-3">
+
+                    <div class="col-12 col-lg-8">
+
+                        <label class="form-label">
+                            المريض
+                            <span class="required-star">*</span>
+                        </label>
+
+                        <select
+                            name="patient"
+                            id="patientSelect"
+                            class="form-select"
+                            required
+                        >
+
+                            <option value="">
+                                -- اختر المريض --
+                            </option>
+
+                            {% for patient in patients %}
+
+                            <option
+                                value="{{ patient.id }}"
+                                data-number="{{ patient.patient_number }}"
+                                data-name="{{ patient.full_name }}"
+                                data-age="{{ patient.age|default:'' }}"
+                                data-gender="{{ patient.get_gender_display|default:patient.gender }}"
+                                data-phone="{{ patient.phone|default:'' }}"
+                                data-blood="{{ patient.blood_group|default:'' }}"
+                            >
+                                {{ patient.patient_number }} - {{ patient.full_name }}
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                        <div class="form-text">
+                            ابحث عن المريض باستخدام رقم الملف أو الاسم.
+                        </div>
+
+                    </div>
+
+                    <div class="col-12 col-lg-4">
+
+                        <label class="form-label">
+                            الزيارة المرتبطة
+                        </label>
+
+                        <select
+                            name="visit"
+                            id="visitSelect"
+                            class="form-select"
+                        >
+
+                            <option value="">
+                                -- بدون زيارة --
+                            </option>
+
+                        </select>
+
+                        <div class="form-text">
+                            يمكن ربط التنويم بزيارة موجودة.
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- Patient quick information -->
+                <div id="patientInfo" class="patient-info">
+
+                    <div class="row g-3">
+
+                        <div class="col-6 col-md-3">
+                            <div class="patient-info-label">
+                                رقم المريض
+                            </div>
+                            <div
+                                class="patient-info-value"
+                                id="infoNumber"
+                            >
+                                —
+                            </div>
+                        </div>
+
+                        <div class="col-6 col-md-3">
+                            <div class="patient-info-label">
+                                الاسم
+                            </div>
+                            <div
+                                class="patient-info-value"
+                                id="infoName"
+                            >
+                                —
+                            </div>
+                        </div>
+
+                        <div class="col-6 col-md-2">
+                            <div class="patient-info-label">
+                                العمر
+                            </div>
+                            <div
+                                class="patient-info-value"
+                                id="infoAge"
+                            >
+                                —
+                            </div>
+                        </div>
+
+                        <div class="col-6 col-md-2">
+                            <div class="patient-info-label">
+                                الجنس
+                            </div>
+                            <div
+                                class="patient-info-value"
+                                id="infoGender"
+                            >
+                                —
+                            </div>
+                        </div>
+
+                        <div class="col-6 col-md-2">
+                            <div class="patient-info-label">
+                                فصيلة الدم
+                            </div>
+                            <div
+                                class="patient-info-value"
+                                id="infoBlood"
+                            >
+                                —
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="patient-info-label">
+                                الهاتف
+                            </div>
+                            <div
+                                class="patient-info-value"
+                                id="infoPhone"
+                            >
+                                —
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Admission details -->
+        <div class="section-card">
+
+            <div class="section-title">
+                🏨 بيانات التنويم
+            </div>
+
+            <div class="section-body">
+
+                <div class="row g-3">
+
+                    <!-- Department -->
+                    <div class="col-12 col-md-6">
+
+                        <label class="form-label">
+                            القسم
+                        </label>
+
+                        <select
+                            name="department"
+                            id="departmentSelect"
+                            class="form-select"
+                        >
+
+                            <option value="">
+                                -- اختر القسم --
+                            </option>
+
+                            {% for department in departments %}
+
+                            <option value="{{ department.id }}">
+                                {{ department.name_ar }} - {{ department.name_en }}
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <!-- Doctor -->
+                    <div class="col-12 col-md-6">
+
+                        <label class="form-label">
+                            الطبيب المسؤول
+                        </label>
+
+                        <select
+                            name="doctor"
+                            id="doctorSelect"
+                            class="form-select"
+                        >
+
+                            <option value="">
+                                -- اختر الطبيب --
+                            </option>
+
+                            {% for doctor in doctors %}
+
+                            <option
+                                value="{{ doctor.id }}"
+                                data-department-id="{{ doctor.department_id|default:'' }}"
+                            >
+                                Dr. {{ doctor.full_name }}
+                                -
+                                {{ doctor.get_specialty_display }}
+                                {% if doctor.department %}
+                                    — {{ doctor.department.name_ar }}
+                                {% endif %}
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <!-- Admission type -->
+                    <div class="col-12 col-md-6">
+
+                        <label class="form-label">
+                            نوع الدخول
+                            <span class="required-star">*</span>
+                        </label>
+
+                        <select
+                            name="admission_type"
+                            id="admissionType"
+                            class="form-select"
+                            required
+                        >
+
+                            <option value="EMERGENCY">
+                                Emergency — طوارئ
+                            </option>
+
+                            <option value="ELECTIVE">
+                                Elective — دخول مجدول
+                            </option>
+
+                            <option value="REFERRAL">
+                                Referral — إحالة
+                            </option>
+
+                            <option value="OTHER">
+                                Other — أخرى
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <!-- Expected discharge -->
+                    <div class="col-12 col-md-6">
+
+                        <label class="form-label">
+                            تاريخ الخروج المتوقع
+                        </label>
+
+                        <input
+                            type="date"
+                            name="expected_discharge_date"
+                            id="expectedDischargeDate"
+                            class="form-control"
+                        >
+
+                        <div class="form-text">
+                            يمكن تركه فارغًا إذا لم يتم تحديد التاريخ.
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Bed -->
+        <div class="section-card">
+
+            <div class="section-title">
+                🛏️ الغرفة والسرير
+            </div>
+
+            <div class="section-body">
+
+                <label class="form-label">
+                    السرير المتاح
+                    <span class="required-star">*</span>
+                </label>
+
+                <select
+                    name="bed"
+                    id="bedSelect"
+                    class="form-select"
+                    required
+                >
+
+                    <option value="">
+                        -- اختر سريرًا متاحًا --
+                    </option>
+
+                    {% for bed in beds %}
+
+                    <option
+                        value="{{ bed.id }}"
+                        data-room="{{ bed.room.room_number }}"
+                        data-bed="{{ bed.bed_number }}"
+                        data-department-id="{{ bed.room.department_id|default:'' }}"
+                    >
+
+                        غرفة {{ bed.room.room_number }}
+                        /
+                        سرير {{ bed.bed_number }}
+
+                        {% if bed.room.department %}
+                            - {{ bed.room.department.name_ar }}
+                        {% endif %}
+
+                    </option>
+
+                    {% empty %}
+
+                    <option value="" disabled>
+                        لا توجد أسرة متاحة حاليًا
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+                <div class="bed-help">
+                    ✅ القائمة تعرض الأسرة المتاحة فقط. عند تسجيل التنويم سيتم تغيير حالة السرير إلى <strong>Occupied</strong>.
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Clinical information -->
+        <div class="section-card">
+
+            <div class="section-title">
+                🩺 المعلومات السريرية
+            </div>
+
+            <div class="section-body">
+
+                <div class="mb-4">
+
+                    <label class="form-label">
+                        تشخيص الدخول
+                    </label>
+
+                    <textarea
+                        name="admission_diagnosis"
+                        id="admissionDiagnosis"
+                        class="form-control"
+                        rows="4"
+                        placeholder="اكتب التشخيص أو سبب التنويم..."
+                    ></textarea>
+
+                </div>
+
+                <div>
+
+                    <label class="form-label">
+                        الملاحظات السريرية
+                    </label>
+
+                    <textarea
+                        name="clinical_notes"
+                        id="clinicalNotes"
+                        class="form-control"
+                        rows="5"
+                        placeholder="اكتب الملاحظات السريرية، الأعراض، التعليمات أو أي معلومات مهمة..."
+                    ></textarea>
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="section-card">
+
+            <div class="section-body">
+
+                <div class="actions">
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                        id="submitBtn"
+                    >
+                        🏥 تسجيل التنويم
+                    </button>
+
+                    <a
+                        href="{% url 'inpatient:admission_list' %}"
+                        class="btn btn-secondary"
+                    >
+                        ↩️ إلغاء
+                    </a>
+
+                </div>
+
+            </div>
+        </div>
+
+    </form>
+
+</div>
+
+<script>
+(function () {
+
+    const patientSelect = document.getElementById("patientSelect");
+    const patientInfo = document.getElementById("patientInfo");
+
+    const infoNumber = document.getElementById("infoNumber");
+    const infoName = document.getElementById("infoName");
+    const infoAge = document.getElementById("infoAge");
+    const infoGender = document.getElementById("infoGender");
+    const infoBlood = document.getElementById("infoBlood");
+    const infoPhone = document.getElementById("infoPhone");
+
+    function updatePatientInfo() {
+
+        const option =
+            patientSelect.options[patientSelect.selectedIndex];
+
+        if (!option || !option.value) {
+
+            patientInfo.classList.remove("show");
+
+            infoNumber.textContent = "—";
+            infoName.textContent = "—";
+            infoAge.textContent = "—";
+            infoGender.textContent = "—";
+            infoBlood.textContent = "—";
+            infoPhone.textContent = "—";
+
+            return;
+        }
+
+        infoNumber.textContent =
+            option.dataset.number || "—";
+
+        infoName.textContent =
+            option.dataset.name || "—";
+
+        infoAge.textContent =
+            option.dataset.age || "—";
+
+        infoGender.textContent =
+            option.dataset.gender || "—";
+
+        infoBlood.textContent =
+            option.dataset.blood || "—";
+
+        infoPhone.textContent =
+            option.dataset.phone || "—";
+
+        patientInfo.classList.add("show");
+    }
+
+    patientSelect.addEventListener(
+        "change",
+        updatePatientInfo
+    );
+
+    /*
+     * تحميل زيارات المريض تلقائيًا
+     */
+    const visitSelect =
+        document.getElementById("visitSelect");
+
+    const departmentSelect =
+        document.getElementById("departmentSelect");
+
+    const doctorSelect =
+        document.getElementById("doctorSelect");
+
+    function resetVisitSelect(message) {
+
+        visitSelect.innerHTML = "";
+
+        const option =
+            document.createElement("option");
+
+        option.value = "";
+        option.textContent =
+            message || "-- اختر زيارة --";
+
+        visitSelect.appendChild(option);
+    }
+
+    function loadPatientVisits() {
+
+        const patientId =
+            patientSelect.value;
+
+        if (!patientId) {
+
+            resetVisitSelect(
+                "-- اختر المريض أولاً --"
+            );
+
+            return;
+        }
+
+        resetVisitSelect(
+            "⏳ جارٍ تحميل زيارات المريض..."
+        );
+
+        fetch(
+            "{% url 'inpatient:patient_visits_api' %}" +
+            "?patient_id=" +
+            encodeURIComponent(patientId),
+            {
+                method: "GET",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            }
+        )
+        .then(function(response) {
+
+            if (!response.ok) {
+                throw new Error(
+                    "HTTP " + response.status
+                );
+            }
+
+            return response.json();
+        })
+        .then(function(data) {
+
+            if (!data.success) {
+                throw new Error(
+                    data.message || "تعذر تحميل الزيارات."
+                );
+            }
+
+            visitSelect.innerHTML = "";
+
+            const emptyOption =
+                document.createElement("option");
+
+            emptyOption.value = "";
+
+            emptyOption.textContent =
+                data.visits.length
+                    ? "-- اختر الزيارة --"
+                    : "-- لا توجد زيارات للمريض --";
+
+            visitSelect.appendChild(emptyOption);
+
+            data.visits.forEach(function(visit) {
+
+                const option =
+                    document.createElement("option");
+
+                option.value = visit.id;
+
+                let label =
+                    visit.visit_number +
+                    " — " +
+                    visit.visit_type +
+                    " — " +
+                    visit.status;
+
+                if (visit.department_name) {
+                    label +=
+                        " — " +
+                        visit.department_name;
+                }
+
+                if (visit.doctor_name) {
+                    label +=
+                        " — Dr. " +
+                        visit.doctor_name;
+                }
+
+                option.textContent = label;
+
+                option.dataset.departmentId =
+                    visit.department_id || "";
+
+                option.dataset.doctorId =
+                    visit.doctor_id || "";
+
+                option.dataset.reason =
+                    visit.reason || "";
+
+                visitSelect.appendChild(option);
+            });
+
+            if (data.visits.length === 1) {
+                visitSelect.value =
+                    data.visits[0].id;
+
+                applySelectedVisit();
+            }
+
+        })
+        .catch(function(error) {
+
+            console.error(error);
+
+            resetVisitSelect(
+                "-- تعذر تحميل الزيارات --"
+            );
+
+            alert(
+                "تعذر تحميل زيارات المريض. " +
+                "تأكد من الاتصال بالنظام."
+            );
+        });
+    }
+
+    function applySelectedVisit() {
+
+        const option =
+            visitSelect.options[
+                visitSelect.selectedIndex
+            ];
+
+        if (!option || !option.value) {
+            return;
+        }
+
+        const departmentId =
+            option.dataset.departmentId || "";
+
+        const doctorId =
+            option.dataset.doctorId || "";
+
+        if (departmentId) {
+            departmentSelect.value =
+                departmentId;
+        }
+
+        if (doctorId) {
+            doctorSelect.value =
+                doctorId;
+        }
+    }
+
+    patientSelect.addEventListener(
+        "change",
+        loadPatientVisits
+    );
+
+    visitSelect.addEventListener(
+        "change",
+        applySelectedVisit
+    );
+
+    // منع اختيار تاريخ خروج متوقع قبل تاريخ اليوم
+    const expectedDate =
+        document.getElementById("expectedDischargeDate");
+
+    if (expectedDate) {
+
+        const today =
+            new Date().toISOString().split("T")[0];
+
+        expectedDate.min = today;
+    }
+
+    // تأكيد قبل تسجيل التنويم
+    const form =
+        document.getElementById("admissionForm");
+
+    const submitBtn =
+        document.getElementById("submitBtn");
+
+    form.addEventListener("submit", function (event) {
+
+        const patient =
+            patientSelect.value;
+
+        const bed =
+            document.getElementById("bedSelect").value;
+
+        if (!patient || !bed) {
+            return;
+        }
+
+        const patientName =
+            patientSelect.options[
+                patientSelect.selectedIndex
+            ].dataset.name || "";
+
+        const bedOption =
+            document.getElementById("bedSelect").options[
+                document.getElementById("bedSelect").selectedIndex
+            ];
+
+        const bedText =
+            bedOption ? bedOption.text.trim() : "";
+
+        const confirmed =
+            confirm(
+                "تأكيد تسجيل التنويم؟\n\n" +
+                "المريض: " + patientName + "\n" +
+                "السرير: " + bedText + "\n\n" +
+                "سيتم حجز السرير للمريض."
+            );
+
+        if (!confirmed) {
+            event.preventDefault();
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = "⏳ جارٍ تسجيل التنويم...";
+    });
+
+    updatePatientInfo();
+
+})();
+</script>
+
+{% endblock %}
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const departmentSelect =
+        document.getElementById("departmentSelect");
+
+    const doctorSelect =
+        document.getElementById("doctorSelect");
+
+    const bedSelect =
+        document.getElementById("bedSelect");
+
+    if (!departmentSelect) return;
+
+    function filterDoctors() {
+        const departmentId = departmentSelect.value;
+
+        Array.from(doctorSelect.options).forEach(function (option, index) {
+            if (index === 0 || !option.value) {
+                option.hidden = false;
+                return;
+            }
+
+            const doctorDepartment =
+                option.dataset.departmentId || "";
+
+            option.hidden =
+                !!departmentId &&
+                doctorDepartment !== departmentId;
+        });
+
+        if (
+            doctorSelect.value &&
+            doctorSelect.selectedOptions[0] &&
+            doctorSelect.selectedOptions[0].hidden
+        ) {
+            doctorSelect.value = "";
+        }
+    }
+
+    function filterBeds() {
+        const departmentId = departmentSelect.value;
+
+        Array.from(bedSelect.options).forEach(function (option, index) {
+
+            if (index === 0 || !option.value) {
+                option.hidden = false;
+                return;
+            }
+
+            const bedDepartment =
+                option.dataset.departmentId || "";
+
+            /*
+             * إذا كانت الغرفة غير مرتبطة بقسم،
+             * لا نخفي السرير، لأنه يمكن استخدامه كسرير عام.
+             */
+            if (!bedDepartment) {
+                option.hidden = false;
+                return;
+            }
+
+            option.hidden =
+                !!departmentId &&
+                bedDepartment !== departmentId;
+        });
+
+        if (
+            bedSelect.value &&
+            bedSelect.selectedOptions[0] &&
+            bedSelect.selectedOptions[0].hidden
+        ) {
+            bedSelect.value = "";
+        }
+    }
+
+    departmentSelect.addEventListener(
+        "change",
+        function () {
+            filterDoctors();
+            filterBeds();
+        }
+    );
+
+    /*
+     * تشغيل الفلترة عند تحميل الصفحة.
+     */
+    filterDoctors();
+    filterBeds();
+
+});
+</script>

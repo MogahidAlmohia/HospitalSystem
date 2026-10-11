@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% if edit_mode %}تعديل المستخدم{% else %}إضافة مستخدم{% endif %}</title>
+<style>
+body{margin:0;background:#f4f7fb;font-family:Tahoma,Arial;color:#263238}
+.header{background:#123b5d;color:white;padding:18px 25px}
+.container{max-width:900px;margin:25px auto;padding:0 15px}
+.box{background:white;border-radius:12px;padding:25px;box-shadow:0 3px 12px #0001}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.field{margin-bottom:14px}
+label{display:block;margin-bottom:7px;font-weight:bold}
+input,select{width:100%;box-sizing:border-box;padding:11px;border:1px solid #ccd6df;border-radius:7px}
+.full{grid-column:1/-1}
+button,.btn{padding:12px 20px;border:0;border-radius:7px;text-decoration:none;cursor:pointer}
+button{background:#1677b8;color:white}
+.btn{background:#777;color:white}
+.error{background:#fdeaea;color:#a33;padding:12px;border-radius:7px;margin-bottom:15px}
+@media(max-width:700px){.grid{grid-template-columns:1fr}.full{grid-column:auto}}
+</style>
+</head>
+<body>
+
+<div class="header">
+<h2>{% if edit_mode %}✏️ تعديل بيانات المستخدم{% else %}➕ إضافة مستخدم جديد{% endif %}</h2>
+</div>
+
+<div class="container">
+<div class="box">
+
+{% for message in messages %}
+<div class="error">{{ message }}</div>
+{% endfor %}
+
+<form method="post">
+{% csrf_token %}
+
+<div class="grid">
+
+<div class="field">
+<label>اسم المستخدم *</label>
+<input name="username" value="{{ user_obj.username|default:'' }}" required>
+</div>
+
+<div class="field">
+<label>الرقم الوظيفي *</label>
+<input name="employee_number" value="{{ profile.employee_number|default:'' }}" required>
+</div>
+
+<div class="field full">
+<label>اسم الموظف *</label>
+<input name="full_name" value="{{ profile.full_name|default:'' }}" required>
+</div>
+
+<div class="field">
+<label>الصلاحية *</label>
+<select name="role" required>
+{% for value,label in roles %}
+<option value="{{ value }}" {% if profile.role == value %}selected{% endif %}>{{ label }}</option>
+{% endfor %}
+</select>
+</div>
+
+<div class="field">
+<label>القسم</label>
+<select name="department">
+<option value="">-- بدون قسم --</option>
+{% for department in departments %}
+<option value="{{ department.id }}"
+{% if profile.department_id == department.id %}selected{% endif %}>
+{{ department.name_ar }} - {{ department.name_en }}
+</option>
+{% endfor %}
+</select>
+</div>
+
+<div class="field">
+<label>رقم الهاتف</label>
+<input name="phone" value="{{ profile.phone|default:'' }}">
+</div>
+
+<div class="field">
+<label>{% if edit_mode %}كلمة مرور جديدة{% else %}كلمة المرور *{% endif %}</label>
+<input type="password" name="password" {% if not edit_mode %}required{% endif %}>
+</div>
+
+<div class="field">
+<label>تأكيد كلمة المرور</label>
+<input type="password" name="password2" {% if not edit_mode %}required{% endif %}>
+</div>
+
+</div>
+
+<br>
+
+<button type="submit">{% if edit_mode %}حفظ التعديلات{% else %}إنشاء المستخدم{% endif %}</button>
+<a class="btn" href="{% url 'accounts:user_list' %}">إلغاء</a>
+
+</form>
+</div>
+</div>
+</body>
+</html>

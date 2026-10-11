@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}📋 طلبات الأشعة{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-pro">
+
+    <div class="command-header">
+        <div class="command-content">
+            <h1 class="command-title">📋 طلبات الأشعة</h1>
+            <div class="command-subtitle">
+                إدارة ومتابعة جميع طلبات قسم الأشعة
+            </div>
+        </div>
+    </div>
+
+    <div class="pro-panel p-4 mb-4">
+
+        <form method="get">
+
+            <div class="row g-2">
+
+                <div class="col-12 col-md-5">
+                    <input
+                        type="text"
+                        name="q"
+                        value="{{ q }}"
+                        class="form-control"
+                        placeholder="🔎 رقم الطلب / اسم المريض / رقم الملف / الفحص">
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <select name="status" class="form-select">
+                        <option value="">كل الحالات</option>
+
+                        {% for value,label in status_choices %}
+                            <option
+                                value="{{ value }}"
+                                {% if status == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+                <div class="col-6 col-md-2">
+                    <select name="priority" class="form-select">
+                        <option value="">كل الأولويات</option>
+
+                        {% for value,label in priority_choices %}
+                            <option
+                                value="{{ value }}"
+                                {% if priority == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+                <div class="col-6 col-md-1">
+                    <button class="btn btn-primary w-100">
+                        بحث
+                    </button>
+                </div>
+
+                <div class="col-6 col-md-1">
+                    <a
+                        href="{% url 'radiology:order_list' %}"
+                        class="btn btn-outline-secondary w-100">
+                        مسح
+                    </a>
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <div class="pro-panel p-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+
+            <h3 class="mb-0">
+                🩻 الطلبات
+            </h3>
+
+            <a
+                href="{% url 'radiology:order_create' %}"
+                class="btn btn-primary">
+                ➕ طلب أشعة جديد
+            </a>
+
+        </div>
+
+
+        {% if orders %}
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle">
+
+                <thead>
+                    <tr>
+                        <th>رقم الطلب</th>
+                        <th>المريض</th>
+                        <th>الفحص</th>
+                        <th>الطبيب</th>
+                        <th>الأولوية</th>
+                        <th>الحالة</th>
+                        <th>التاريخ</th>
+                        <th></th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                {% for order in orders %}
+
+                    <tr>
+
+                        <td>
+                            <a
+                                href="{% url 'radiology:order_detail' order.id %}"
+                                class="fw-bold">
+                                {{ order.order_number }}
+                            </a>
+                        </td>
+
+                        <td>
+                            {{ order.patient.full_name }}
+                            <small class="text-muted d-block">
+                                {{ order.patient.patient_number }}
+                            </small>
+                        </td>
+
+                        <td>
+                            {{ order.exam_type.name_ar }}
+                            <small class="text-muted d-block">
+                                {{ order.exam_type.name_en }}
+                            </small>
+                        </td>
+
+                        <td>
+                            {{ order.requesting_doctor.full_name|default:"—" }}
+                        </td>
+
+                        <td>
+                            {{ order.get_priority_display }}
+                        </td>
+
+                        <td>
+                            {{ order.get_status_display }}
+                        </td>
+
+                        <td>
+                            {{ order.created_at|date:"Y-m-d H:i" }}
+                        </td>
+
+                        <td>
+                            <a
+                                href="{% url 'radiology:order_detail' order.id %}"
+                                class="btn btn-sm btn-outline-primary">
+                                فتح
+                            </a>
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <div class="alert alert-info mb-0">
+            لا توجد طلبات أشعة مطابقة للبحث.
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

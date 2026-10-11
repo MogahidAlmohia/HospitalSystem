@@ -1,0 +1,682 @@
+{% extends "base.html" %}
+
+{% block title %}مركز أقسام المستشفى{% endblock %}
+
+{% block content %}
+
+<style>
+    .dept-center{font-family:"Cairo",Tahoma,Arial,sans-serif}
+    .dept-center .card,.dept-center .stat-card{border:1px solid #e5eaf1;box-shadow:0 9px 24px rgba(15,23,42,.06);transition:.18s}
+    .dept-center .card:hover,.dept-center .stat-card:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(15,23,42,.10)}
+    .dept-center table tbody tr{transition:.18s}.dept-center table tbody tr:hover{background:#f4f9ff}
+    .dept-center {
+        direction: rtl;
+    }
+
+    .hero {
+        background: linear-gradient(135deg, #0d6efd, #084298);
+        color: #fff;
+        border-radius: 24px;
+        padding: 28px;
+        margin-bottom: 22px;
+        box-shadow: 0 10px 30px rgba(13,110,253,.20);
+    }
+
+    .hero-title {
+        font-size: 28px;
+        font-weight: 900;
+    }
+
+    .hero-subtitle {
+        opacity: .9;
+        margin-top: 6px;
+    }
+
+    .hero-date {
+        background: rgba(255,255,255,.14);
+        border: 1px solid rgba(255,255,255,.20);
+        border-radius: 14px;
+        padding: 10px 14px;
+    }
+
+    .stat-card {
+        background: #fff;
+        border: 0;
+        border-radius: 18px;
+        padding: 18px;
+        height: 100%;
+        box-shadow: 0 5px 20px rgba(0,0,0,.07);
+    }
+
+    .stat-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #eef5ff;
+        font-size: 25px;
+    }
+
+    .stat-value {
+        font-size: 27px;
+        font-weight: 900;
+        line-height: 1;
+    }
+
+    .stat-label {
+        color: #6c757d;
+        font-size: 13px;
+        margin-top: 7px;
+    }
+
+    .section-title {
+        font-weight: 900;
+        margin: 28px 0 14px;
+    }
+
+    .search-panel {
+        background: #fff;
+        border-radius: 18px;
+        padding: 15px;
+        box-shadow: 0 4px 18px rgba(0,0,0,.06);
+    }
+
+    .department-card {
+        height: 100%;
+        background: #fff;
+        border: 0;
+        border-radius: 22px;
+        overflow: hidden;
+        box-shadow: 0 5px 22px rgba(0,0,0,.07);
+        transition: .2s ease;
+    }
+
+    .department-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 32px rgba(0,0,0,.12);
+    }
+
+    .department-header {
+        padding: 20px;
+        background: linear-gradient(135deg,#f4f8ff,#ffffff);
+        border-bottom: 1px solid #edf0f4;
+    }
+
+    .department-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 18px;
+        background: #e8f1ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        flex-shrink: 0;
+    }
+
+    .department-name {
+        font-size: 19px;
+        font-weight: 900;
+    }
+
+    .department-name-en {
+        color: #6c757d;
+        font-size: 12px;
+        margin-top: 3px;
+    }
+
+    .department-code {
+        font-family: monospace;
+        font-size: 11px;
+        background: #edf1f5;
+        padding: 5px 8px;
+        border-radius: 8px;
+    }
+
+    .department-body {
+        padding: 18px;
+    }
+
+    .department-info {
+        font-size: 13px;
+        color: #6c757d;
+        margin-bottom: 6px;
+    }
+
+    .mini-stats {
+        display: grid;
+        grid-template-columns: repeat(2,1fr);
+        gap: 8px;
+        margin-top: 15px;
+    }
+
+    .mini-stat {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 10px;
+        text-align: center;
+    }
+
+    .mini-stat-value {
+        font-size: 18px;
+        font-weight: 900;
+    }
+
+    .mini-stat-label {
+        font-size: 11px;
+        color: #6c757d;
+        margin-top: 2px;
+    }
+
+    .warning-stat {
+        background: #fff8e1;
+    }
+
+    .danger-stat {
+        background: #fff0f0;
+    }
+
+    .success-stat {
+        background: #edf9f1;
+    }
+
+    .info-stat {
+        background: #eef8ff;
+    }
+
+    .department-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 15px;
+    }
+
+    .department-actions .btn {
+        border-radius: 11px;
+        font-weight: 700;
+    }
+
+    .empty-state {
+        background: #fff;
+        border-radius: 20px;
+        padding: 55px 20px;
+        text-align: center;
+        box-shadow: 0 5px 20px rgba(0,0,0,.05);
+    }
+
+    @media (max-width: 576px) {
+        .hero {
+            padding: 20px;
+        }
+
+        .hero-title {
+            font-size: 22px;
+        }
+
+        .department-actions {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="container-fluid dept-center">
+
+    <!-- =========================
+         HEADER
+    ========================== -->
+    <div class="hero">
+
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+
+            <div>
+                <div class="hero-title">
+                    🏥 مركز أقسام المستشفى
+                </div>
+
+                <div class="hero-subtitle">
+                    مركز التشغيل والمتابعة المركزي
+                    لنظام إدارة المستشفى
+                    HIS / LIS
+                </div>
+            </div>
+
+            <div class="hero-date">
+                📅 {{ today|date:"Y-m-d" }}
+            </div>
+
+        </div>
+
+        {% if can_manage %}
+        <div class="mt-3">
+            <a href="{% url 'departments:create' %}"
+               class="btn btn-light">
+                ➕ إضافة قسم جديد
+            </a>
+        </div>
+        {% endif %}
+
+    </div>
+
+
+    <!-- =========================
+         GLOBAL STATISTICS
+    ========================== -->
+    <div class="row g-3">
+
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon">🏥</div>
+                    <div>
+                        <div class="stat-value">
+                            {{ department_count }}
+                        </div>
+                        <div class="stat-label">
+                            الأقسام النشطة
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon">👥</div>
+                    <div>
+                        <div class="stat-value">
+                            {{ total_patients }}
+                        </div>
+                        <div class="stat-label">
+                            المرضى
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon">🩺</div>
+                    <div>
+                        <div class="stat-value">
+                            {{ today_visits }}
+                        </div>
+                        <div class="stat-label">
+                            زيارات اليوم
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon">🧪</div>
+                    <div>
+                        <div class="stat-value">
+                            {{ today_orders }}
+                        </div>
+                        <div class="stat-label">
+                            طلبات التحاليل اليوم
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon">⏳</div>
+                    <div>
+                        <div class="stat-value">
+                            {{ pending_orders }}
+                        </div>
+                        <div class="stat-label">
+                            طلبات معلقة
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon">📋</div>
+                    <div>
+                        <div class="stat-value">
+                            {{ pending_results }}
+                        </div>
+                        <div class="stat-label">
+                            نتائج قيد الإنجاز
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon">🚨</div>
+                    <div>
+                        <div class="stat-value">
+                            {{ critical_results }}
+                        </div>
+                        <div class="stat-label">
+                            نتائج حرجة
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon">📥</div>
+                    <div>
+                        <div class="stat-value">
+                            {{ required_results }}
+                        </div>
+                        <div class="stat-label">
+                            نتائج لم تُستلم
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         SEARCH
+    ========================== -->
+    <h4 class="section-title">
+        🔎 البحث في الأقسام
+    </h4>
+
+    <div class="search-panel">
+
+        <form method="get">
+
+            <div class="input-group input-group-lg">
+
+                <input
+                    type="search"
+                    name="q"
+                    value="{{ query }}"
+                    class="form-control"
+                    placeholder="ابحث باسم القسم أو الاسم الإنجليزي أو الرمز..."
+                >
+
+                <button class="btn btn-primary">
+                    🔎 بحث
+                </button>
+
+                {% if query %}
+                <a href="{% url 'departments:list' %}"
+                   class="btn btn-outline-secondary">
+                    إلغاء
+                </a>
+                {% endif %}
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- =========================
+         DEPARTMENTS
+    ========================== -->
+    <h4 class="section-title">
+        🏥 أقسام المستشفى
+    </h4>
+
+
+    {% if departments %}
+
+    <div class="row g-4">
+
+        {% for department in departments %}
+
+        <div class="col-12 col-md-6 col-xl-4">
+
+            <div class="department-card">
+
+                <!-- HEADER -->
+                <div class="department-header">
+
+                    <div class="d-flex align-items-center gap-3">
+
+                        <div class="department-icon">
+                            🏥
+                        </div>
+
+                        <div class="flex-grow-1">
+
+                            <div class="department-name">
+                                {{ department.name_ar }}
+                            </div>
+
+                            <div class="department-name-en">
+                                {{ department.name_en }}
+                            </div>
+
+                        </div>
+
+                        <span class="department-code">
+                            {{ department.code }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- BODY -->
+                <div class="department-body">
+
+                    <div class="department-info">
+                        🏷️
+                        {{ department.get_department_type_display }}
+                    </div>
+
+                    {% if department.location %}
+                    <div class="department-info">
+                        📍 {{ department.location }}
+                    </div>
+                    {% endif %}
+
+                    {% if department.phone %}
+                    <div class="department-info">
+                        ☎️ {{ department.phone }}
+                    </div>
+                    {% endif %}
+
+
+                    <!-- MINI STATISTICS -->
+                    <div class="mini-stats">
+
+                        <div class="mini-stat">
+                            <div class="mini-stat-value">
+                                {{ department.patient_count }}
+                            </div>
+                            <div class="mini-stat-label">
+                                👥 المرضى
+                            </div>
+                        </div>
+
+
+                        <div class="mini-stat">
+                            <div class="mini-stat-value">
+                                {{ department.visit_count }}
+                            </div>
+                            <div class="mini-stat-label">
+                                🩺 الزيارات
+                            </div>
+                        </div>
+
+
+                        <div class="mini-stat info-stat">
+                            <div class="mini-stat-value">
+                                {{ department.laboratory_order_count }}
+                            </div>
+                            <div class="mini-stat-label">
+                                🧪 طلبات التحاليل
+                            </div>
+                        </div>
+
+
+                        <div class="mini-stat warning-stat">
+                            <div class="mini-stat-value">
+                                {{ department.pending_orders_count }}
+                            </div>
+                            <div class="mini-stat-label">
+                                ⏳ معلقة
+                            </div>
+                        </div>
+
+
+                        <div class="mini-stat danger-stat">
+                            <div class="mini-stat-value">
+                                {{ department.critical_results_count }}
+                            </div>
+                            <div class="mini-stat-label">
+                                🚨 حرجة
+                            </div>
+                        </div>
+
+
+                        <div class="mini-stat success-stat">
+                            <div class="mini-stat-value">
+                                {{ department.required_results_count }}
+                            </div>
+                            <div class="mini-stat-label">
+                                📥 نتائج مطلوبة
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <!-- ACTIONS -->
+                    <div class="department-actions">
+
+                        <a href="{% url 'departments:dashboard' department.id %}"
+                           class="btn btn-primary">
+                            📊 لوحة القسم
+                        </a>
+
+                        <a href="{% url 'departments:patients' department.id %}"
+                           class="btn btn-outline-primary">
+                            👥 المرضى
+                        </a>
+
+                        <a href="{% url 'departments:visits' department.id %}"
+                           class="btn btn-outline-secondary">
+                            🩺 الزيارات
+                        </a>
+
+                        <a href="{% url 'departments:lab_orders' department.id %}"
+                           class="btn btn-outline-success">
+                            🧪 طلبات التحليل
+                        </a>
+
+                        <a href="{% url 'departments:results' department.id %}"
+                           class="btn btn-outline-info">
+                            📋 النتائج
+                        </a>
+
+                        <a href="{% url 'departments:required_results' department.id %}"
+                           class="btn btn-outline-warning">
+                            📥 النتائج المطلوبة
+                        </a>
+
+                        <a href="{% url 'departments:achievements' department.id %}"
+                           class="btn btn-outline-dark">
+                            🏆 الإنجازات
+                        </a>
+
+                    </div>
+
+
+                    {% if can_manage %}
+
+                    <div class="d-flex gap-2 mt-2">
+
+                        <a href="{% url 'departments:edit' department.id %}"
+                           class="btn btn-sm btn-outline-warning flex-fill">
+                            ✏️ تعديل
+                        </a>
+
+                        <form
+                            method="post"
+                            action="{% url 'departments:toggle' department.id %}"
+                            class="flex-fill"
+                            onsubmit="return confirm('هل أنت متأكد من تغيير حالة القسم؟');"
+                        >
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="btn btn-sm btn-outline-danger w-100"
+                            >
+                                🔄 تغيير الحالة
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+    {% else %}
+
+    <div class="empty-state">
+
+        <div style="font-size:55px;">
+            🏥
+        </div>
+
+        <h4 class="mt-3">
+            لا توجد أقسام
+        </h4>
+
+        <p>
+            لم يتم العثور على قسم مطابق للبحث.
+        </p>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

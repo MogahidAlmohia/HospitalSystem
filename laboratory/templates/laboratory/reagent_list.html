@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block content %}
+<style>.container-fluid,.container{max-width:1600px;margin:auto}.card{border:1px solid #e5eaf1;box-shadow:0 8px 24px rgba(15,23,42,.06);border-radius:16px}.table tbody tr:hover{background:#f4f9ff}</style>
+<div dir="rtl" class="container-fluid py-4">
+
+<h2 class="mb-4">🧴 إدارة الكواشف</h2>
+
+<a href="{% url 'laboratory:reagent_create' %}" class="btn btn-primary mb-3">
++ إضافة كاشف
+</a>
+
+<form method="get" class="row g-2 mb-4">
+<div class="col-md-9">
+<input name="q" value="{{ q }}" class="form-control"
+placeholder="بحث باسم الكاشف أو الشركة أو Catalog Number">
+</div>
+<div class="col-md-3">
+<button class="btn btn-secondary w-100">بحث</button>
+</div>
+</form>
+
+<div class="table-responsive">
+<table class="table table-bordered table-hover align-middle">
+<thead class="table-dark">
+<tr>
+<th>الكاشف</th>
+<th>الشركة</th>
+<th>Catalog Number</th>
+<th>الجهاز</th>
+<th>الفحوصات</th>
+<th>الوحدة</th>
+<th>الحالة</th>
+<th>إجراءات</th>
+</tr>
+</thead>
+
+<tbody>
+{% for reagent in reagents %}
+<tr>
+<td>{{ reagent.name }}</td>
+<td>{{ reagent.manufacturer|default:"-" }}</td>
+<td>{{ reagent.catalog_number|default:"-" }}</td>
+<td>{{ reagent.device|default:"-" }}</td>
+<td>
+{% for test in reagent.tests.all %}
+<span class="badge bg-info text-dark">{{ test.code }}</span>
+{% empty %}
+-
+{% endfor %}
+</td>
+<td>{{ reagent.unit|default:"-" }}</td>
+<td>
+{% if reagent.is_active %}
+<span class="badge bg-success">Active</span>
+{% else %}
+<span class="badge bg-danger">Inactive</span>
+{% endif %}
+</td>
+<td>
+<a href="{% url 'laboratory:reagent_edit' reagent.id %}"
+class="btn btn-sm btn-outline-primary">تعديل</a>
+
+<a href="{% url 'laboratory:reagent_toggle' reagent.id %}"
+class="btn btn-sm btn-outline-secondary">
+{% if reagent.is_active %}تعطيل{% else %}تفعيل{% endif %}
+</a>
+</td>
+</tr>
+{% empty %}
+<tr>
+<td colspan="8" class="text-center">لا توجد كواشف.</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+
+</div>
+{% endblock %}

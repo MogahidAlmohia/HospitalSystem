@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}تقرير قيمة المخزون{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div>
+            <h3 class="mb-1">تقرير قيمة المخزون</h3>
+            <div class="text-muted">
+                الكميات الحالية والقيمة المالية لكل دفعة
+            </div>
+        </div>
+
+        <a href="{% url 'inventory:dashboard' %}"
+           class="btn btn-outline-secondary">
+            لوحة المخزون
+        </a>
+    </div>
+
+    <!-- Filters -->
+    <form method="get" class="card shadow-sm border-0 mb-3">
+        <div class="card-body">
+            <div class="row g-2">
+
+                <div class="col-12 col-md-6">
+                    <label class="form-label">بحث</label>
+                    <input
+                        type="text"
+                        name="q"
+                        value="{{ search_query }}"
+                        class="form-control"
+                        placeholder="الصنف أو الكود أو الباركود أو Batch..."
+                    >
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <label class="form-label">المستودع</label>
+                    <select name="warehouse" class="form-select">
+                        <option value="">كل المستودعات</option>
+
+                        {% for warehouse in warehouses %}
+                            <option
+                                value="{{ warehouse.id }}"
+                                {% if warehouse_id == warehouse.id|stringformat:"s" %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ warehouse.name_ar }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-12 col-md-2 d-flex align-items-end">
+                    <button class="btn btn-primary w-100">
+                        بحث
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </form>
+
+    <!-- Summary -->
+    <div class="row g-2 mb-3">
+
+        <div class="col-6 col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="small text-muted">
+                        عدد الدفعات
+                    </div>
+                    <div class="fs-4 fw-bold">
+                        {{ rows|length }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="small text-muted">
+                        إجمالي الكمية
+                    </div>
+                    <div class="fs-4 fw-bold text-primary">
+                        {{ total_quantity }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="small text-muted">
+                        إجمالي قيمة المخزون
+                    </div>
+                    <div class="fs-4 fw-bold text-success">
+                        {{ total_value|floatformat:2 }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Report Table -->
+    <div class="card shadow-sm border-0">
+
+        <div class="card-header bg-transparent">
+            <strong>تفاصيل المخزون</strong>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+
+                <thead>
+                    <tr>
+                        <th>الصنف</th>
+                        <th>المستودع</th>
+                        <th>الموقع</th>
+                        <th>Batch</th>
+                        <th>الكمية</th>
+                        <th>تكلفة الوحدة</th>
+                        <th>القيمة</th>
+                        <th>الانتهاء</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                {% for row in rows %}
+
+                    <tr>
+
+                        <td>
+                            <strong>
+                                {{ row.batch.item.name_ar }}
+                            </strong>
+
+                            <small class="d-block text-muted">
+                                {{ row.batch.item.code }}
+                            </small>
+                        </td>
+
+                        <td>
+                            {{ row.batch.warehouse.name_ar }}
+                        </td>
+
+                        <td>
+                            {{ row.batch.location.name_ar }}
+                        </td>
+
+                        <td>
+                            {{ row.batch.batch_number|default:"—" }}
+                        </td>
+
+                        <td class="fw-bold">
+                            {{ row.quantity }}
+                        </td>
+
+                        <td>
+                            {{ row.unit_cost|floatformat:2 }}
+                        </td>
+
+                        <td class="fw-bold text-success">
+                            {{ row.value|floatformat:2 }}
+                        </td>
+
+                        <td>
+                            {% if row.batch.expiry_date %}
+                                {{ row.batch.expiry_date }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+                        <td colspan="8"
+                            class="text-center text-muted py-5">
+                            لا توجد بيانات مخزون متاحة.
+                        </td>
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

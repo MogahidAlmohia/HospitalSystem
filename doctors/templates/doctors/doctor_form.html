@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% if doctor %}تعديل طبيب{% else %}إضافة طبيب{% endif %}</title>
+
+<style>
+body{
+    margin:0;
+    background:#f4f7fb;
+    font-family:Tahoma,Arial,sans-serif;
+}
+.container{
+    max-width:850px;
+    margin:35px auto;
+    padding:20px;
+}
+.card{
+    background:white;
+    padding:30px;
+    border-radius:16px;
+    box-shadow:0 4px 18px #00000012;
+}
+h1{color:#123b63}
+.grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+}
+.field{
+    margin-bottom:15px;
+}
+label{
+    display:block;
+    margin-bottom:7px;
+    font-weight:bold;
+}
+input,select{
+    width:100%;
+    padding:12px;
+    border:1px solid #d4dce6;
+    border-radius:8px;
+}
+.full{grid-column:1/-1}
+.actions{
+    margin-top:20px;
+    display:flex;
+    gap:10px;
+}
+button,a{
+    padding:12px 20px;
+    border:0;
+    border-radius:8px;
+    text-decoration:none;
+    cursor:pointer;
+}
+button{
+    background:#1769aa;
+    color:white;
+}
+a{
+    background:#e8edf3;
+    color:#172033;
+}
+.error{
+    background:#fde2e2;
+    color:#9b2226;
+    padding:12px;
+    border-radius:8px;
+}
+@media(max-width:700px){
+    .grid{grid-template-columns:1fr}
+    .full{grid-column:auto}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="card">
+
+<h1>
+{% if doctor %}
+تعديل بيانات الطبيب
+{% else %}
+إضافة طبيب جديد
+{% endif %}
+</h1>
+
+<p>
+ربط الطبيب بالقسم وحساب المستخدم الخاص به.
+</p>
+
+{% if messages %}
+{% for message in messages %}
+<div class="error">{{ message }}</div>
+{% endfor %}
+{% endif %}
+
+<form method="post">
+{% csrf_token %}
+
+<div class="grid">
+
+<div class="field">
+<label>رقم الطبيب *</label>
+<input
+    type="text"
+    name="doctor_number"
+    required
+    value="{{ doctor.doctor_number|default:'' }}"
+    placeholder="مثال: DOC-001">
+</div>
+
+<div class="field">
+<label>اسم الطبيب *</label>
+<input
+    type="text"
+    name="full_name"
+    required
+    value="{{ doctor.full_name|default:'' }}">
+</div>
+
+<div class="field">
+<label>التخصص</label>
+<input
+    type="text"
+    name="specialty"
+    value="{{ doctor.specialty|default:'' }}"
+    placeholder="مثال: Internal Medicine">
+</div>
+
+<div class="field">
+<label>القسم *</label>
+<select name="department" required>
+<option value="">اختر القسم</option>
+
+{% for department in departments %}
+<option
+    value="{{ department.id }}"
+    {% if doctor and doctor.department_id == department.id %}selected{% endif %}
+>
+{{ department.name_ar }} - {{ department.name_en }}
+</option>
+{% endfor %}
+
+</select>
+</div>
+
+<div class="field">
+<label>رقم الهاتف</label>
+<input
+    type="text"
+    name="phone"
+    value="{{ doctor.phone|default:'' }}">
+</div>
+
+<div class="field">
+<label>رقم الترخيص</label>
+<input
+    type="text"
+    name="license_number"
+    value="{{ doctor.license_number|default:'' }}">
+</div>
+
+<div class="field full">
+<label>حساب المستخدم *</label>
+
+<select name="user" required>
+
+<option value="">اختر حساب المستخدم</option>
+
+{% for user in users %}
+<option
+    value="{{ user.id }}"
+    {% if doctor and doctor.user_id == user.id %}selected{% endif %}
+>
+{{ user.username }}
+{% if user.get_full_name %}
+ - {{ user.get_full_name }}
+{% endif %}
+</option>
+{% endfor %}
+
+</select>
+
+</div>
+
+<div class="field full">
+
+<label>
+<input
+    type="checkbox"
+    name="is_active"
+    {% if not doctor or doctor.is_active %}checked{% endif %}
+>
+ الطبيب نشط
+</label>
+
+</div>
+
+</div>
+
+<div class="actions">
+
+<button type="submit">
+{% if doctor %}
+حفظ التعديلات
+{% else %}
+إضافة الطبيب
+{% endif %}
+</button>
+
+<a href="{% url 'doctors:list' %}">
+إلغاء
+</a>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+</body>
+</html>

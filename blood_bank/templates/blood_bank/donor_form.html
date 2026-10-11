@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if donor %}تعديل متبرع{% else %}إضافة متبرع{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-person-plus text-primary"></i>
+                {% if donor %}
+                    تعديل بيانات المتبرع
+                {% else %}
+                    إضافة متبرع جديد
+                {% endif %}
+            </h2>
+
+            <p class="text-muted mb-0">
+                إدخال وحفظ بيانات متبرع الدم
+            </p>
+        </div>
+
+        <a href="{% url 'blood_bank:donor_list' %}"
+           class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-right"></i>
+            العودة للمتبرعين
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+
+        <div class="col-12 col-xl-10">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-header fw-bold">
+                    <i class="bi bi-person-vcard"></i>
+                    بيانات المتبرع
+                </div>
+
+                <div class="card-body">
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="row g-3">
+
+                            <div class="col-12 col-md-4">
+                                <label class="form-label">
+                                    رقم المتبرع
+                                    <span class="text-danger">*</span>
+                                </label>
+
+                                {{ form.donor_number }}
+
+                                {% for error in form.donor_number.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-12 col-md-8">
+                                <label class="form-label">
+                                    الاسم الكامل
+                                    <span class="text-danger">*</span>
+                                </label>
+
+                                {{ form.full_name }}
+
+                                {% for error in form.full_name.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-12 col-md-4">
+                                <label class="form-label">
+                                    رقم الهوية
+                                </label>
+
+                                {{ form.national_id }}
+
+                                {% for error in form.national_id.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-12 col-md-4">
+                                <label class="form-label">
+                                    فصيلة الدم
+                                    <span class="text-danger">*</span>
+                                </label>
+
+                                {{ form.blood_group }}
+
+                                {% for error in form.blood_group.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-12 col-md-4">
+                                <label class="form-label">
+                                    رقم الهاتف
+                                </label>
+
+                                {{ form.phone }}
+
+                                {% for error in form.phone.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">
+                                    تاريخ الميلاد
+                                </label>
+
+                                {{ form.date_of_birth }}
+
+                                {% for error in form.date_of_birth.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">
+                                    تاريخ آخر تبرع
+                                </label>
+
+                                {{ form.last_donation_date }}
+
+                                {% for error in form.last_donation_date.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">
+                                    العنوان
+                                </label>
+
+                                {{ form.address }}
+
+                                {% for error in form.address.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">
+                                    ملاحظات
+                                </label>
+
+                                {{ form.notes }}
+
+                                {% for error in form.notes.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    {{ form.is_active }}
+
+                                    <label class="form-check-label">
+                                        المتبرع نشط
+                                    </label>
+                                </div>
+
+                                {% for error in form.is_active.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex flex-wrap gap-2">
+
+                            <button type="submit"
+                                    class="btn btn-primary px-4">
+                                <i class="bi bi-check-lg"></i>
+
+                                {% if donor %}
+                                    حفظ التعديلات
+                                {% else %}
+                                    حفظ المتبرع
+                                {% endif %}
+                            </button>
+
+                            <a href="{% url 'blood_bank:donor_list' %}"
+                               class="btn btn-outline-secondary px-4">
+                                <i class="bi bi-x-lg"></i>
+                                إلغاء
+                            </a>
+
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

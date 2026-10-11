@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}➕ طلب أشعة جديد{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-pro">
+
+    <div class="command-header">
+        <div class="command-content">
+            <h1 class="command-title">➕ إنشاء طلب أشعة</h1>
+            <div class="command-subtitle">
+                تسجيل طلب فحص أشعة للمريض
+            </div>
+        </div>
+    </div>
+
+
+    <div class="pro-panel p-4">
+
+        <form method="post">
+
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+
+            <div class="row g-3">
+
+                <div class="col-12 col-md-6">
+
+                    <label class="form-label">
+                        المريض *
+                    </label>
+
+                    {{ form.patient }}
+
+                    {% for error in form.patient.errors %}
+                        <div class="text-danger small">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+
+                </div>
+
+
+                <div class="col-12 col-md-6">
+
+                    <label class="form-label">
+                        الزيارة
+                    </label>
+
+                    {{ form.visit }}
+
+                    {% for error in form.visit.errors %}
+                        <div class="text-danger small">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+
+                </div>
+
+
+                <div class="col-12 col-md-6">
+
+                    <label class="form-label">
+                        الطبيب الطالب
+                    </label>
+
+                    {{ form.requesting_doctor }}
+
+                </div>
+
+
+                <div class="col-12 col-md-6">
+
+                    <label class="form-label">
+                        القسم الطالب
+                    </label>
+
+                    {{ form.requesting_department }}
+
+                </div>
+
+
+                <div class="col-12 col-md-6">
+
+                    <label class="form-label">
+                        نوع الفحص *
+                    </label>
+
+                    {{ form.exam_type }}
+
+                </div>
+
+
+                <div class="col-12 col-md-6">
+
+                    <label class="form-label">
+                        الأولوية
+                    </label>
+
+                    {{ form.priority }}
+
+                </div>
+
+
+                <div class="col-12">
+
+                    <label class="form-label">
+                        السبب السريري / التشخيص
+                    </label>
+
+                    {{ form.clinical_indication }}
+
+                </div>
+
+
+                <div class="col-12">
+
+                    <label class="form-label">
+                        تعليمات التحضير
+                    </label>
+
+                    {{ form.preparation_notes }}
+
+                </div>
+
+
+                <div class="col-12">
+
+                    <label class="form-label">
+                        ملاحظات
+                    </label>
+
+                    {{ form.notes }}
+
+                </div>
+
+            </div>
+
+
+            <hr class="my-4">
+
+
+            <div class="d-flex flex-wrap gap-2">
+
+                <button
+                    type="submit"
+                    class="btn btn-primary">
+                    💾 حفظ الطلب
+                </button>
+
+                <a
+                    href="{% url 'radiology:order_list' %}"
+                    class="btn btn-outline-secondary">
+                    إلغاء
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+    <h3 class="mb-3">
+        إضافة إجراء جراحي
+    </h3>
+
+    <div class="alert alert-light border">
+        العملية:
+        <strong>{{ order.order_number }}</strong>
+        —
+        {{ order.patient.full_name }}
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <form method="post">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <div class="row g-3">
+
+                    {% for field in form %}
+
+                        <div class="col-12 col-md-6">
+
+                            <label class="form-label">
+                                {{ field.label }}
+                            </label>
+
+                            {{ field }}
+
+                            {% for error in field.errors %}
+                                <div class="text-danger small">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+                <div class="mt-4 d-flex gap-2">
+
+                    <button class="btn btn-primary">
+                        حفظ
+                    </button>
+
+                    <a
+                        href="{% url 'surgery:order_detail' order.id %}"
+                        class="btn btn-outline-secondary"
+                    >
+                        إلغاء
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

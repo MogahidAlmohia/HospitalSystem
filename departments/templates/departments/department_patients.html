@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}مرضى {{ department.name_ar }}{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+
+    <div>
+        <h3 class="fw-bold mb-1">
+            👥 مرضى {{ department.name_ar }}
+        </h3>
+
+        <div class="text-muted">
+            {{ department.name_en }}
+        </div>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'patients:create' %}?department_id={{ department.id }}"
+           class="btn btn-success">
+            ➕ تسجيل مريض جديد
+        </a>
+
+        <a href="{% url 'patients:list' %}"
+           class="btn btn-outline-success">
+            📋 قائمة المرضى
+        </a>
+
+        <a href="{% url 'departments:dashboard' department.id %}"
+           class="btn btn-primary">
+            ← لوحة القسم
+        </a>
+    </div>
+
+</div>
+
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+
+        <form method="get" class="row g-2">
+
+            <div class="col-md-9">
+                <input
+                    type="text"
+                    name="q"
+                    value="{{ query }}"
+                    class="form-control"
+                    placeholder="ابحث باسم المريض أو رقم الملف أو الهاتف..."
+                >
+            </div>
+
+            <div class="col-md-3">
+                <button class="btn btn-primary w-100">
+                    🔍 بحث
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+
+<div class="card border-0 shadow-sm">
+
+    <div class="card-header bg-white fw-bold">
+        المرضى: {{ patient_count }}
+    </div>
+
+    <div class="table-responsive">
+
+        <table class="table table-hover align-middle mb-0">
+
+            <thead>
+                <tr>
+                    <th>رقم الملف</th>
+                    <th>المريض</th>
+                    <th>الجنس</th>
+                    <th>العمر</th>
+                    <th>الهاتف</th>
+                    <th>الإجراء</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+            {% for patient in patients %}
+
+                <tr>
+
+                    <td>
+                        <strong>
+                            {{ patient.patient_number }}
+                        </strong>
+                    </td>
+
+                    <td>
+                        {{ patient.full_name }}
+                    </td>
+
+                    <td>
+                        {{ patient.get_gender_display }}
+                    </td>
+
+                    <td>
+                        {{ patient.age|default:"-" }}
+                    </td>
+
+                    <td>
+                        {{ patient.phone|default:"-" }}
+                    </td>
+
+                    <td>
+                        <a
+                            href="{% url 'patients:detail' patient.id %}"
+                            class="btn btn-sm btn-outline-primary"
+                        >
+                            فتح الملف
+                        </a>
+                    </td>
+
+                </tr>
+
+            {% empty %}
+
+                <tr>
+                    <td colspan="6"
+                        class="text-center text-muted p-5">
+                        لا توجد نتائج.
+                    </td>
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-xl-10"><div class="card">
+<div class="card-header bg-white p-4"><h1 class="h4 mb-1">{{ title }}</h1><p class="text-muted mb-0">أدخل البيانات بدقة لضمان اكتمال الملف الطبي.</p>
+{% if department %}
+<div class="alert alert-info mt-3 mb-0">
+    القسم المحدد: <strong>{{ department.name_ar }}</strong>
+    {% if department.name_en %} — {{ department.name_en }}{% endif %}
+</div>
+{% endif %}
+</div>
+<div class="card-body p-4">{% if form.errors %}<div class="alert alert-danger">يرجى مراجعة الحقول المميزة وتصحيح الأخطاء.</div>{% endif %}
+<form method="post" novalidate>{% csrf_token %}{% if department %}<input type="hidden" name="department_id" value="{{ department.id }}">{% endif %}<div class="row g-3">
+{% for field in form %}<div class="{% if field.name in 'medical_notes allergies address' %}col-12{% else %}col-md-6{% endif %}">{% if field.field.widget.input_type == 'checkbox' %}<div class="form-check mt-4">{{ field }}<label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label></div>{% else %}<label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="text-danger">*</span>{% endif %}</label>{{ field }}{% endif %}{% for error in field.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}</div>{% endfor %}</div>
+<div class="d-flex flex-wrap gap-2 mt-4"><button type="submit" class="btn btn-primary">💾 حفظ البيانات</button><a href="{% url 'patients:list' %}" class="btn btn-outline-secondary">إلغاء</a></div></form>
+</div></div></div></div>
+{% endblock %}

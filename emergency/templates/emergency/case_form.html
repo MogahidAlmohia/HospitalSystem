@@ -1,0 +1,275 @@
+{% extends "base.html" %}
+
+{% block title %}تسجيل حالة طوارئ{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+
+<div class="col-xl-10">
+
+<div class="card">
+
+<div class="card-body p-4">
+
+<h3 class="mb-4">🚑 تسجيل حالة طوارئ</h3>
+
+<form method="post">
+
+{% csrf_token %}
+
+<div class="row g-3">
+
+<div class="col-md-6">
+
+<label class="form-label">
+المريض
+</label>
+
+<select name="patient"
+        class="form-select"
+        required>
+
+<option value="">
+-- اختر المريض --
+</option>
+
+{% for patient in patients %}
+
+<option value="{{ patient.id }}">
+{{ patient.patient_number }} -
+{{ patient.full_name }}
+</option>
+
+{% endfor %}
+
+</select>
+
+</div>
+
+<div class="col-md-6">
+
+<label class="form-label">
+الطبيب المسؤول
+</label>
+
+<select name="doctor"
+        class="form-select">
+
+<option value="">
+-- اختر الطبيب --
+</option>
+
+{% for doctor in doctors %}
+
+<option value="{{ doctor.id }}">
+د/ {{ doctor.full_name }}
+</option>
+
+{% endfor %}
+
+</select>
+
+</div>
+
+<div class="col-md-6">
+
+<label class="form-label">
+مستوى الخطورة Triage
+</label>
+
+<select name="triage_level"
+        class="form-select">
+
+{% for value,label in triage_choices %}
+
+<option value="{{ value }}">
+{{ label }}
+</option>
+
+{% endfor %}
+
+</select>
+
+</div>
+
+<div class="col-12">
+
+<label class="form-label">
+الشكوى الرئيسية
+</label>
+
+<textarea name="chief_complaint"
+          class="form-control"
+          rows="3"
+          required></textarea>
+
+</div>
+
+<div class="col-12">
+
+<label class="form-label">
+التاريخ المرضي
+</label>
+
+<textarea name="history"
+          class="form-control"
+          rows="3"></textarea>
+
+</div>
+
+<hr>
+
+<h5>🩺 العلامات الحيوية</h5>
+
+<div class="col-md-2">
+
+<label class="form-label">
+Temperature
+</label>
+
+<input type="number"
+       step="0.01"
+       name="temperature"
+       class="form-control">
+
+</div>
+
+<div class="col-md-2">
+
+<label class="form-label">
+Pulse
+</label>
+
+<input type="number"
+       name="pulse"
+       class="form-control">
+
+</div>
+
+<div class="col-md-2">
+
+<label class="form-label">
+Respiratory Rate
+</label>
+
+<input type="number"
+       name="respiratory_rate"
+       class="form-control">
+
+</div>
+
+<div class="col-md-2">
+
+<label class="form-label">
+Systolic BP
+</label>
+
+<input type="number"
+       name="systolic_bp"
+       class="form-control">
+
+</div>
+
+<div class="col-md-2">
+
+<label class="form-label">
+Diastolic BP
+</label>
+
+<input type="number"
+       name="diastolic_bp"
+       class="form-control">
+
+</div>
+
+<div class="col-md-2">
+
+<label class="form-label">
+SpO₂
+</label>
+
+<input type="number"
+       step="0.01"
+       name="oxygen_saturation"
+       class="form-control">
+
+</div>
+
+<div class="col-md-3">
+
+<label class="form-label">
+Pain Score
+</label>
+
+<input type="number"
+       min="0"
+       max="10"
+       name="pain_score"
+       class="form-control">
+
+</div>
+
+<div class="col-12">
+
+<label class="form-label">
+التشخيص الأولي
+</label>
+
+<textarea name="preliminary_diagnosis"
+          class="form-control"
+          rows="3"></textarea>
+
+</div>
+
+<div class="col-12">
+
+<label class="form-label">
+العلاج والإجراءات
+</label>
+
+<textarea name="treatment"
+          class="form-control"
+          rows="4"></textarea>
+
+</div>
+
+<div class="col-12">
+
+<label class="form-label">
+ملاحظات طبية
+</label>
+
+<textarea name="clinical_notes"
+          class="form-control"
+          rows="3"></textarea>
+
+</div>
+
+</div>
+
+<div class="mt-4">
+
+<button type="submit"
+        class="btn btn-danger">
+💾 تسجيل الحالة
+</button>
+
+<a href="{% url 'emergency:dashboard' %}"
+   class="btn btn-secondary">
+إلغاء
+</a>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}

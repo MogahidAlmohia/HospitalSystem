@@ -1,0 +1,607 @@
+{% extends "base.html" %}
+
+{% block title %}💊 لوحة الصيدلية | HIS / LIS{% endblock %}
+
+{% block content %}
+<style>
+.pharmacy-page {
+    --ph-blue: #0d6efd;
+    --ph-green: #198754;
+    --ph-orange: #fd7e14;
+    --ph-red: #dc3545;
+    --ph-purple: #6f42c1;
+}
+
+.pharmacy-hero {
+    background: linear-gradient(135deg, #0d6efd 0%, #084298 100%);
+    color: #fff;
+    border-radius: 22px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 12px 30px rgba(13, 110, 253, .18);
+}
+
+.pharmacy-hero h1 {
+    font-size: 1.65rem;
+    font-weight: 800;
+    margin: 0 0 6px;
+}
+
+.pharmacy-hero p {
+    margin: 0;
+    opacity: .9;
+}
+
+.pharmacy-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+.pharmacy-chip {
+    background: rgba(255,255,255,.14);
+    border: 1px solid rgba(255,255,255,.2);
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: .85rem;
+}
+
+.pharmacy-kpi {
+    position: relative;
+    overflow: hidden;
+    border: 0;
+    border-radius: 18px;
+    background: var(--bs-body-bg, #fff);
+    box-shadow: 0 6px 20px rgba(0,0,0,.06);
+    padding: 20px;
+    height: 100%;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.pharmacy-kpi:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(0,0,0,.1);
+}
+
+.pharmacy-kpi-icon {
+    width: 46px;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    font-size: 1.35rem;
+    margin-bottom: 12px;
+}
+
+.kpi-blue .pharmacy-kpi-icon { background: rgba(13,110,253,.12); }
+.kpi-green .pharmacy-kpi-icon { background: rgba(25,135,84,.12); }
+.kpi-orange .pharmacy-kpi-icon { background: rgba(253,126,20,.13); }
+.kpi-red .pharmacy-kpi-icon { background: rgba(220,53,69,.12); }
+.kpi-purple .pharmacy-kpi-icon { background: rgba(111,66,193,.12); }
+
+.pharmacy-kpi-value {
+    font-size: 1.75rem;
+    line-height: 1.1;
+    font-weight: 800;
+}
+
+.pharmacy-kpi-label {
+    color: var(--bs-secondary-color, #6c757d);
+    font-size: .88rem;
+    margin-top: 5px;
+}
+
+.pharmacy-section {
+    background: var(--bs-body-bg, #fff);
+    border-radius: 18px;
+    box-shadow: 0 6px 20px rgba(0,0,0,.05);
+    padding: 20px;
+    height: 100%;
+}
+
+.pharmacy-section-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.pharmacy-section-title h3 {
+    font-size: 1.05rem;
+    font-weight: 800;
+    margin: 0;
+}
+
+.pharmacy-table {
+    width: 100%;
+    margin: 0;
+}
+
+.pharmacy-table th {
+    font-size: .78rem;
+    color: var(--bs-secondary-color, #6c757d);
+    white-space: nowrap;
+}
+
+.pharmacy-table td {
+    vertical-align: middle;
+    font-size: .86rem;
+}
+
+.pharmacy-alert {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 13px;
+    margin-bottom: 9px;
+    background: rgba(220,53,69,.07);
+}
+
+.pharmacy-alert.warning {
+    background: rgba(253,126,20,.08);
+}
+
+.pharmacy-alert-icon {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(220,53,69,.12);
+}
+
+.pharmacy-alert.warning .pharmacy-alert-icon {
+    background: rgba(253,126,20,.14);
+}
+
+.pharmacy-alert-name {
+    font-weight: 700;
+    font-size: .9rem;
+}
+
+.pharmacy-alert-meta {
+    font-size: .78rem;
+    color: var(--bs-secondary-color, #6c757d);
+}
+
+.pharmacy-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.pharmacy-action {
+    text-decoration: none;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 14px;
+    padding: 14px;
+    color: inherit;
+    background: var(--bs-body-bg, #fff);
+    transition: all .2s ease;
+}
+
+.pharmacy-action:hover {
+    border-color: var(--ph-blue);
+    transform: translateY(-2px);
+    box-shadow: 0 7px 18px rgba(13,110,253,.1);
+}
+
+.pharmacy-action-icon {
+    font-size: 1.35rem;
+    margin-bottom: 6px;
+}
+
+.pharmacy-action-title {
+    font-weight: 800;
+    font-size: .88rem;
+}
+
+.pharmacy-action-text {
+    font-size: .75rem;
+    color: var(--bs-secondary-color, #6c757d);
+    margin-top: 3px;
+}
+
+.pharmacy-empty {
+    text-align: center;
+    padding: 25px 10px;
+    color: var(--bs-secondary-color, #6c757d);
+}
+
+.pharmacy-status {
+    font-size: .72rem;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 5px 9px;
+}
+
+.status-pending {
+    background: rgba(253,126,20,.12);
+    color: #b45309;
+}
+
+.status-dispensed {
+    background: rgba(25,135,84,.12);
+    color: #146c43;
+}
+
+.status-cancelled {
+    background: rgba(220,53,69,.12);
+    color: #b02a37;
+}
+
+@media (max-width: 767.98px) {
+    .pharmacy-hero {
+        padding: 18px;
+        border-radius: 17px;
+    }
+
+    .pharmacy-hero h1 {
+        font-size: 1.3rem;
+    }
+
+    .pharmacy-kpi {
+        padding: 16px;
+    }
+
+    .pharmacy-kpi-value {
+        font-size: 1.45rem;
+    }
+
+    .pharmacy-section {
+        padding: 15px;
+        border-radius: 15px;
+    }
+
+    .pharmacy-actions {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .table-responsive {
+        border-radius: 12px;
+    }
+}
+</style>
+
+<div class="pharmacy-page">
+
+    <!-- Header -->
+    <div class="pharmacy-hero">
+        <h1>💊 مركز تشغيل الصيدلية</h1>
+        <p>متابعة الأدوية والمخزون والوصفات والصرف من شاشة واحدة.</p>
+
+        <div class="pharmacy-meta">
+            <span class="pharmacy-chip">📅 {{ today|date:"Y-m-d" }}</span>
+            <span class="pharmacy-chip">👤 {{ request.user.get_full_name|default:request.user.username }}</span>
+            <span class="pharmacy-chip">🟢 النظام يعمل</span>
+        </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-6 col-xl-3">
+            <div class="pharmacy-kpi kpi-blue">
+                <div class="pharmacy-kpi-icon">💊</div>
+                <div class="pharmacy-kpi-value">{{ total_medicines }}</div>
+                <div class="pharmacy-kpi-label">الأدوية الفعالة</div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="pharmacy-kpi kpi-orange">
+                <div class="pharmacy-kpi-icon">⚠️</div>
+                <div class="pharmacy-kpi-value">{{ low_stock }}</div>
+                <div class="pharmacy-kpi-label">أدوية منخفضة المخزون</div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="pharmacy-kpi kpi-red">
+                <div class="pharmacy-kpi-icon">🚫</div>
+                <div class="pharmacy-kpi-value">{{ out_of_stock }}</div>
+                <div class="pharmacy-kpi-label">أدوية منتهية المخزون</div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="pharmacy-kpi kpi-green">
+                <div class="pharmacy-kpi-icon">🧾</div>
+                <div class="pharmacy-kpi-value">{{ pending_prescriptions }}</div>
+                <div class="pharmacy-kpi-label">وصفات بانتظار الصرف</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Second KPIs -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-6 col-md-3">
+            <div class="pharmacy-kpi kpi-purple">
+                <div class="pharmacy-kpi-value">{{ today_prescriptions }}</div>
+                <div class="pharmacy-kpi-label">وصفات اليوم</div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="pharmacy-kpi kpi-green">
+                <div class="pharmacy-kpi-value">{{ dispensed_prescriptions }}</div>
+                <div class="pharmacy-kpi-label">وصفات مصروفة</div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="pharmacy-kpi kpi-red">
+                <div class="pharmacy-kpi-value">{{ cancelled_prescriptions }}</div>
+                <div class="pharmacy-kpi-label">وصفات ملغاة</div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="pharmacy-kpi kpi-blue">
+                <div class="pharmacy-kpi-value">{{ total_stock_quantity|floatformat:0 }}</div>
+                <div class="pharmacy-kpi-label">إجمالي وحدات المخزون</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Quick actions -->
+    <div class="pharmacy-section mb-4">
+        <div class="pharmacy-section-title">
+            <h3>⚡ التشغيل السريع</h3>
+        </div>
+
+        <div class="pharmacy-actions">
+
+            <a class="pharmacy-action" href="{% url 'pharmacy:prescription_list' %}">
+                <div class="pharmacy-action-icon">🧾</div>
+                <div class="pharmacy-action-title">الوصفات</div>
+                <div class="pharmacy-action-text">متابعة وصرف الوصفات</div>
+            </a>
+
+            <a class="pharmacy-action" href="{% url 'pharmacy:medicine_list' %}">
+                <div class="pharmacy-action-icon">💊</div>
+                <div class="pharmacy-action-title">الأدوية</div>
+                <div class="pharmacy-action-text">إدارة قائمة الأدوية</div>
+            </a>
+
+            <a class="pharmacy-action" href="{% url 'pharmacy:stock_list' %}">
+                <div class="pharmacy-action-icon">📦</div>
+                <div class="pharmacy-action-title">المخزون</div>
+                <div class="pharmacy-action-text">الكميات وحالة المخزون</div>
+            </a>
+
+            <a class="pharmacy-action" href="{% url 'pharmacy:medicine_list' %}">
+                <div class="pharmacy-action-icon">📥</div>
+                <div class="pharmacy-action-title">استلام مخزون</div>
+                <div class="pharmacy-action-text">اختر الدواء ثم أضف الكمية</div>
+            </a>
+
+            <a class="pharmacy-action" href="{% url 'pharmacy:medicine_list' %}">
+                <div class="pharmacy-action-icon">⚙️</div>
+                <div class="pharmacy-action-title">تسوية المخزون</div>
+                <div class="pharmacy-action-text">اختر الدواء ثم عدّل الكمية</div>
+            </a>
+
+            <a class="pharmacy-action" href="{% url 'pharmacy:stock_movements' %}">
+                <div class="pharmacy-action-icon">📊</div>
+                <div class="pharmacy-action-title">حركات المخزون</div>
+                <div class="pharmacy-action-text">سجل الدخول والخروج</div>
+            </a>
+
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Alerts -->
+        <div class="col-12 col-xl-5">
+            <div class="pharmacy-section">
+
+                <div class="pharmacy-section-title">
+                    <h3>🚨 تنبيهات المخزون</h3>
+                    <span class="badge text-bg-light">
+                        {{ out_of_stock|add:low_stock }}
+                    </span>
+                </div>
+
+                {% for medicine in out_of_stock_medicines %}
+                <div class="pharmacy-alert">
+                    <div class="pharmacy-alert-icon">🚫</div>
+                    <div class="flex-grow-1">
+                        <div class="pharmacy-alert-name">
+                            {{ medicine.name_ar }}
+                        </div>
+                        <div class="pharmacy-alert-meta">
+                            المخزون: {{ medicine.stock_quantity|floatformat:0 }}
+                            {% if medicine.code %} · {{ medicine.code }}{% endif %}
+                        </div>
+                    </div>
+                    <span class="pharmacy-status status-cancelled">نفد</span>
+                </div>
+                {% endfor %}
+
+                {% for medicine in low_stock_medicines %}
+                <div class="pharmacy-alert warning">
+                    <div class="pharmacy-alert-icon">⚠️</div>
+                    <div class="flex-grow-1">
+                        <div class="pharmacy-alert-name">
+                            {{ medicine.name_ar }}
+                        </div>
+                        <div class="pharmacy-alert-meta">
+                            {{ medicine.stock_quantity|floatformat:0 }}
+                            / حد إعادة الطلب {{ medicine.reorder_level|floatformat:0 }}
+                        </div>
+                    </div>
+                    <span class="pharmacy-status status-pending">منخفض</span>
+                </div>
+                {% endfor %}
+
+                {% if not out_of_stock_medicines and not low_stock_medicines %}
+                <div class="pharmacy-empty">
+                    ✅ لا توجد تنبيهات مخزون حاليًا
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+
+        <!-- Recent prescriptions -->
+        <div class="col-12 col-xl-7">
+            <div class="pharmacy-section">
+
+                <div class="pharmacy-section-title">
+                    <h3>🧾 آخر الوصفات</h3>
+                    <a href="{% url 'pharmacy:prescription_list' %}"
+                       class="btn btn-sm btn-outline-primary">
+                        عرض الكل
+                    </a>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table pharmacy-table">
+                        <thead>
+                            <tr>
+                                <th>الوصفة</th>
+                                <th>المريض</th>
+                                <th>الطبيب</th>
+                                <th>الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                        {% for prescription in recent_prescriptions %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'pharmacy:prescription_detail' prescription.pk %}"
+                                       class="fw-bold text-decoration-none">
+                                        {{ prescription.prescription_number }}
+                                    </a>
+                                </td>
+
+                                <td>
+                                    {{ prescription.patient.full_name }}
+                                </td>
+
+                                <td>
+                                    {{ prescription.doctor.get_full_name|default:"غير محدد" }}
+                                </td>
+
+                                <td>
+                                    {% if prescription.status == "PENDING" %}
+                                        <span class="pharmacy-status status-pending">بانتظار الصرف</span>
+                                    {% elif prescription.status == "DISPENSED" %}
+                                        <span class="pharmacy-status status-dispensed">مصروفة</span>
+                                    {% elif prescription.status == "CANCELLED" %}
+                                        <span class="pharmacy-status status-cancelled">ملغاة</span>
+                                    {% else %}
+                                        <span class="pharmacy-status">
+                                            {{ prescription.status }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4">
+                                    <div class="pharmacy-empty">
+                                        لا توجد وصفات مسجلة
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Stock movements -->
+    <div class="pharmacy-section mt-4">
+
+        <div class="pharmacy-section-title">
+            <h3>📦 آخر حركات المخزون</h3>
+
+            <a href="{% url 'pharmacy:stock_movements' %}"
+               class="btn btn-sm btn-outline-primary">
+                سجل الحركات
+            </a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table pharmacy-table">
+                <thead>
+                    <tr>
+                        <th>التاريخ</th>
+                        <th>الدواء</th>
+                        <th>نوع الحركة</th>
+                        <th>الكمية</th>
+                        <th>المستخدم</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                {% for movement in recent_stock_movements %}
+                    <tr>
+                        <td>{{ movement.created_at|date:"Y-m-d H:i" }}</td>
+
+                        <td class="fw-bold">
+                            {{ movement.medicine.name_ar }}
+                        </td>
+
+                        <td>
+                            {% if movement.movement_type == "IN" %}
+                                <span class="pharmacy-status status-dispensed">
+                                    📥 استلام
+                                </span>
+                            {% elif movement.movement_type == "OUT" %}
+                                <span class="pharmacy-status status-cancelled">
+                                    📤 صرف
+                                </span>
+                            {% else %}
+                                <span class="pharmacy-status status-pending">
+                                    ⚙️ تسوية
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td class="fw-bold">
+                            {{ movement.quantity|floatformat:0 }}
+                        </td>
+
+                        <td>
+                            {{ movement.created_by.get_full_name|default:movement.created_by.username }}
+                        </td>
+                    </tr>
+
+                {% empty %}
+                    <tr>
+                        <td colspan="5">
+                            <div class="pharmacy-empty">
+                                لا توجد حركات مخزون
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

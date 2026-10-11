@@ -1,0 +1,356 @@
+{% extends "base.html" %}
+
+{% block title %}الملف التمريضي{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3" dir="rtl">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+
+        <div>
+            <h3 class="fw-bold mb-1">
+                الملف التمريضي
+            </h3>
+
+            <div class="text-muted">
+                {{ patient.full_name }}
+                —
+                {{ patient.patient_number }}
+            </div>
+        </div>
+
+        <a href="{% url 'nursing:patient_list' %}"
+           class="btn btn-secondary">
+            رجوع للمرضى
+        </a>
+
+    </div>
+
+    <div class="card shadow-sm mb-3">
+
+        <div class="card-body">
+
+            <div class="row g-3">
+
+                <div class="col-6 col-md-3">
+                    <strong>المريض</strong>
+                    <div>{{ patient.full_name }}</div>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <strong>رقم الملف</strong>
+                    <div>{{ patient.patient_number }}</div>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <strong>العمر</strong>
+                    <div>{{ patient.age|default:"-" }}</div>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <strong>الهاتف</strong>
+                    <div>{{ patient.phone|default:"-" }}</div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="row g-2 mb-4">
+
+        <div class="col-6 col-md-3">
+            <a href="{% url 'nursing:assessment_create' %}"
+               class="btn btn-primary w-100">
+                تقييم تمريضي
+            </a>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <a href="{% url 'nursing:vitals_create' %}"
+               class="btn btn-primary w-100">
+                العلامات الحيوية
+            </a>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <a href="{% url 'nursing:note_create' %}"
+               class="btn btn-primary w-100">
+                ملاحظة
+            </a>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <a href="{% url 'nursing:medication_create' %}"
+               class="btn btn-success w-100">
+                إعطاء دواء
+            </a>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <a href="{% url 'nursing:care_plan_create' %}"
+               class="btn btn-success w-100">
+                خطة رعاية
+            </a>
+        </div>
+
+    </div>
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header fw-bold">
+            العلامات الحيوية
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table table-hover mb-0">
+
+                <thead>
+                    <tr>
+                        <th>التاريخ</th>
+                        <th>الحرارة</th>
+                        <th>الضغط</th>
+                        <th>النبض</th>
+                        <th>التنفس</th>
+                        <th>SpO₂</th>
+                        <th>الألم</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                {% for item in vitals %}
+
+                    <tr>
+                        <td>{{ item.recorded_at|date:"Y-m-d H:i" }}</td>
+                        <td>{{ item.temperature|default:"-" }}</td>
+
+                        <td>
+                            {% if item.systolic_bp or item.diastolic_bp %}
+                                {{ item.systolic_bp|default:"-" }}/{{ item.diastolic_bp|default:"-" }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <td>{{ item.pulse|default:"-" }}</td>
+                        <td>{{ item.respiratory_rate|default:"-" }}</td>
+                        <td>{{ item.oxygen_saturation|default:"-" }}</td>
+                        <td>{{ item.pain_score|default:"-" }}</td>
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+                        <td colspan="7"
+                            class="text-center text-muted py-3">
+                            لا توجد علامات حيوية.
+                        </td>
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header fw-bold">
+            التقييمات التمريضية
+        </div>
+
+        <div class="card-body">
+
+            {% for item in assessments %}
+
+                <div class="border-bottom pb-3 mb-3">
+
+                    <div class="d-flex justify-content-between">
+
+                        <strong>
+                            {{ item.get_status_display }}
+                        </strong>
+
+                        <small class="text-muted">
+                            {{ item.created_at|date:"Y-m-d H:i" }}
+                        </small>
+
+                    </div>
+
+                    {% if item.nursing_diagnosis %}
+                        <div class="mt-2">
+                            <strong>التشخيص التمريضي:</strong>
+                            {{ item.nursing_diagnosis }}
+                        </div>
+                    {% endif %}
+
+                    {% if item.notes %}
+                        <div class="mt-2">
+                            <strong>ملاحظات:</strong>
+                            {{ item.notes }}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+            {% empty %}
+
+                <div class="text-muted">
+                    لا توجد تقييمات تمريضية.
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header fw-bold">
+            ملاحظات التمريض
+        </div>
+
+        <div class="card-body">
+
+            {% for item in notes %}
+
+                <div class="border-bottom pb-3 mb-3">
+
+                    <div class="d-flex justify-content-between">
+
+                        <strong>{{ item.get_note_type_display }}</strong>
+
+                        <small class="text-muted">
+                            {{ item.created_at|date:"Y-m-d H:i" }}
+                        </small>
+
+                    </div>
+
+                    <div class="mt-2">
+                        {{ item.note|linebreaksbr }}
+                    </div>
+
+                </div>
+
+            {% empty %}
+
+                <div class="text-muted">
+                    لا توجد ملاحظات تمريضية.
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header fw-bold">
+            إعطاء الأدوية
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table table-hover mb-0">
+
+                <thead>
+                    <tr>
+                        <th>الدواء</th>
+                        <th>الجرعة</th>
+                        <th>الطريق</th>
+                        <th>الحالة</th>
+                        <th>وقت الإعطاء</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                {% for item in medications %}
+
+                    <tr>
+                        <td>{{ item.medicine_name }}</td>
+                        <td>{{ item.dose|default:"-" }}</td>
+                        <td>{{ item.route|default:"-" }}</td>
+                        <td>{{ item.get_status_display }}</td>
+                        <td>{{ item.administration_time|date:"Y-m-d H:i" }}</td>
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+                        <td colspan="5"
+                            class="text-center text-muted py-3">
+                            لا توجد سجلات أدوية.
+                        </td>
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <div class="card shadow-sm">
+
+        <div class="card-header fw-bold">
+            خطط الرعاية التمريضية
+        </div>
+
+        <div class="card-body">
+
+            {% for item in care_plans %}
+
+                <div class="border-bottom pb-3 mb-3">
+
+                    <strong>{{ item.problem }}</strong>
+
+                    <div class="mt-2">
+                        <strong>الهدف:</strong>
+                        {{ item.goal|default:"-" }}
+                    </div>
+
+                    <div class="mt-2">
+                        <strong>التدخلات:</strong>
+                        {{ item.interventions|default:"-" }}
+                    </div>
+
+                    <div class="mt-2">
+                        <strong>التقييم:</strong>
+                        {{ item.evaluation|default:"-" }}
+                    </div>
+
+                    <div class="mt-2">
+                        <span class="badge bg-primary">
+                            {{ item.get_status_display }}
+                        </span>
+                    </div>
+
+                </div>
+
+            {% empty %}
+
+                <div class="text-muted">
+                    لا توجد خطط رعاية.
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

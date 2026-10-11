@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+
+{% block title %}🩻 {{ order.order_number }}{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-pro">
+
+    <div class="command-header">
+
+        <div class="command-content">
+
+            <h1 class="command-title">
+                🩻 {{ order.order_number }}
+            </h1>
+
+            <div class="command-subtitle">
+                تفاصيل طلب الأشعة
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="row g-3">
+
+
+        <div class="col-12 col-lg-8">
+
+            <div class="pro-panel p-4 mb-3">
+
+                <h3 class="mb-4">
+                    👤 بيانات المريض
+                </h3>
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <strong>الاسم:</strong>
+                        {{ order.patient.full_name }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <strong>رقم الملف:</strong>
+                        {{ order.patient.patient_number }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <strong>الجنس:</strong>
+                        {{ order.patient.get_gender_display }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <strong>الهاتف:</strong>
+                        {{ order.patient.phone|default:"—" }}
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="pro-panel p-4 mb-3">
+
+                <h3 class="mb-4">
+                    🩻 بيانات الفحص
+                </h3>
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <strong>الفحص:</strong>
+                        {{ order.exam_type.name_ar }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <strong>Modality:</strong>
+                        {{ order.exam_type.get_modality_display }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <strong>الطبيب:</strong>
+                        {{ order.requesting_doctor.full_name|default:"—" }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <strong>القسم:</strong>
+                        {{ order.requesting_department.name_ar|default:"—" }}
+                    </div>
+
+                    <div class="col-12">
+                        <strong>السبب السريري:</strong>
+                        <div class="mt-2">
+                            {{ order.clinical_indication|default:"—"|linebreaks }}
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <strong>تعليمات التحضير:</strong>
+                        <div class="mt-2">
+                            {{ order.preparation_notes|default:"—"|linebreaks }}
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="pro-panel p-4 mb-3">
+
+                <h3 class="mb-4">
+                    📄 تقرير الأشعة
+                </h3>
+
+                {% if order.report_text %}
+
+                    <h5>Findings</h5>
+
+                    <div class="border rounded p-3 mb-3">
+                        {{ order.report_text|linebreaks }}
+                    </div>
+
+                    <h5>Impression</h5>
+
+                    <div class="border rounded p-3">
+                        {{ order.report_impression|default:"—"|linebreaks }}
+                    </div>
+
+                {% else %}
+
+                    <div class="alert alert-warning">
+                        لم يتم إدخال تقرير الأشعة بعد.
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <div class="col-12 col-lg-4">
+
+
+            <div class="pro-panel p-4 mb-3">
+
+                <h4>📊 حالة الطلب</h4>
+
+                <div class="fs-4 mt-3">
+                    {{ order.get_status_display }}
+                </div>
+
+                <div class="mt-2">
+                    الأولوية:
+                    <strong>
+                        {{ order.get_priority_display }}
+                    </strong>
+                </div>
+
+            </div>
+
+
+            <div class="pro-panel p-4 mb-3">
+
+                <h4>⚡ إجراءات</h4>
+
+                <div class="d-grid gap-2 mt-3">
+
+                    {% if order.status != "DELIVERED" and order.status != "CANCELLED" %}
+
+                    <a
+                        href="{% url 'radiology:report_create' order.id %}"
+                        class="btn btn-primary">
+                        📝 إدخال / تعديل التقرير
+                    </a>
+
+                    {% endif %}
+
+
+
+
+
+                    {% if order.status == "REQUESTED" %}
+
+                    <form
+                        method="post"
+                        action="{% url 'radiology:order_update_status' order.id %}">
+
+                        {% csrf_token %}
+
+                        <input
+                            type="hidden"
+                            name="status"
+                            value="SCHEDULED">
+
+                        <button class="btn btn-outline-primary w-100">
+                            📅 جدولة الفحص
+                        </button>
+
+                    </form>
+
+                    {% elif order.status == "SCHEDULED" %}
+
+                    <form
+                        method="post"
+                        action="{% url 'radiology:order_update_status' order.id %}">
+
+                        {% csrf_token %}
+
+                        <input
+                            type="hidden"
+                            name="status"
+                            value="IN_PROGRESS">
+
+                        <button class="btn btn-outline-primary w-100">
+                            ▶️ بدء الفحص
+                        </button>
+
+                    </form>
+
+                    {% elif order.status == "IN_PROGRESS" %}
+
+                    <form
+                        method="post"
+                        action="{% url 'radiology:order_update_status' order.id %}">
+
+                        {% csrf_token %}
+
+                        <input
+                            type="hidden"
+                            name="status"
+                            value="COMPLETED">
+
+                        <button class="btn btn-outline-success w-100">
+                            ✅ إكمال الفحص
+                        </button>
+
+                    </form>
+
+                    {% elif order.status == "REPORTED" %}
+
+                    <form
+                        method="post"
+                        action="{% url 'radiology:order_update_status' order.id %}">
+
+                        {% csrf_token %}
+
+                        <input
+                            type="hidden"
+                            name="status"
+                            value="DELIVERED">
+
+                        <button class="btn btn-success w-100">
+                            📤 تسليم النتيجة
+                        </button>
+
+                    </form>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <a
+                href="{% url 'radiology:order_list' %}"
+                class="btn btn-outline-secondary w-100">
+                ← العودة للطلبات
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

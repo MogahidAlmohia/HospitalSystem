@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}لوحة الاستقبال{% endblock %}
+{% block content %}
+<style>
+.reception-page .card{border:1px solid #e5eaf1;box-shadow:0 9px 24px rgba(15,23,42,.06);transition:.18s}
+.reception-page .card:hover{box-shadow:0 12px 30px rgba(15,23,42,.10)}
+.reception-page table tbody tr{transition:.18s}.reception-page table tbody tr:hover{background:#f4f9ff}
+@media(max-width:576px){.reception-page .display-6{font-size:1.7rem}}
+</style>
+<div class="reception-page">
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4"><div><h1 class="page-title mb-1">🧾 لوحة الاستقبال</h1><p class="page-subtitle mb-0">متابعة التسجيل والزيارات اليومية</p></div><span class="badge text-bg-light p-2">📅 {{ today }}</span></div>
+<div class="row g-3 mb-4"><div class="col-6 col-xl-3"><div class="card h-100"><div class="card-body"><div class="text-muted small">👥 إجمالي المرضى</div><div class="display-6 fw-bold">{{ patients_count }}</div></div></div></div><div class="col-6 col-xl-3"><div class="card h-100"><div class="card-body"><div class="text-muted small">📅 مرضى اليوم</div><div class="display-6 fw-bold">{{ patients_today }}</div></div></div></div><div class="col-6 col-xl-3"><div class="card h-100"><div class="card-body"><div class="text-muted small">🩺 إجمالي الزيارات</div><div class="display-6 fw-bold">{{ visits_count }}</div></div></div></div><div class="col-6 col-xl-3"><div class="card h-100"><div class="card-body"><div class="text-muted small">🕐 زيارات اليوم</div><div class="display-6 fw-bold">{{ visits_today }}</div></div></div></div></div>
+<div class="d-flex flex-wrap gap-2 mb-4"><a class="btn btn-primary" href="{% url 'reception:register_patient' %}">➕ تسجيل مريض جديد</a><a class="btn btn-outline-primary" href="{% url 'reception:patient_search' %}">🔎 البحث عن مريض</a><a class="btn btn-outline-secondary" href="{% url 'patients:list' %}">👥 سجل المرضى</a></div>
+<div class="card mb-4"><div class="card-header bg-white p-4"><h2 class="h5 mb-0">آخر المرضى المسجلين</h2></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover mb-0"><thead class="table-light"><tr><th>رقم الملف</th><th>الاسم</th><th>العمر</th><th>الهاتف</th><th>التاريخ</th></tr></thead><tbody>{% for patient in recent_patients %}<tr><td>{{ patient.patient_number }}</td><td><a href="{% url 'reception:patient_profile' patient.id %}" class="fw-bold text-decoration-none">{{ patient.full_name }}</a></td><td>{{ patient.age|default:"—" }}</td><td>{{ patient.phone|default:"—" }}</td><td>{{ patient.created_at|date:"Y-m-d H:i" }}</td></tr>{% empty %}<tr><td colspan="5" class="text-center text-muted py-4">لا يوجد مرضى مسجلون.</td></tr>{% endfor %}</tbody></table></div></div></div>
+<div class="card"><div class="card-header bg-white p-4"><h2 class="h5 mb-0">آخر الزيارات</h2></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover mb-0"><thead class="table-light"><tr><th>رقم الزيارة</th><th>المريض</th><th>القسم</th><th>الطبيب</th><th>النوع</th></tr></thead><tbody>{% for visit in recent_visits %}<tr><td>{{ visit.visit_number }}</td><td>{{ visit.patient.full_name }}</td><td>{{ visit.department.name_ar|default:"—" }}</td><td>{{ visit.doctor.full_name|default:"—" }}</td><td><span class="badge text-bg-light">{{ visit.get_visit_type_display }}</span></td></tr>{% empty %}<tr><td colspan="5" class="text-center text-muted py-4">لا توجد زيارات.</td></tr>{% endfor %}</tbody></table></div></div></div>
+</div>
+{% endblock %}

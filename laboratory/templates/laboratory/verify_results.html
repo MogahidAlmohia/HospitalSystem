@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Verify Laboratory Results</title>
+<style>
+:root{--blue:#0d6efd;--navy:#17324d;--line:#e5eaf1}
+body{font-family:"Cairo",Arial,sans-serif;background:radial-gradient(circle at 100% 0%,rgba(13,110,253,.08),transparent 30rem),#f4f7fb;margin:0;color:#172033}
+.header{background:linear-gradient(135deg,#0d6efd,#084298);box-shadow:0 8px 22px rgba(13,110,253,.18)}
+.box{border:1px solid var(--line);box-shadow:0 9px 24px rgba(15,23,42,.06)}
+th{background:#eef5ff;color:#17324d}tr{transition:.18s}tr:hover{background:#f6faff}
+button{background:#0d6efd;box-shadow:0 4px 10px rgba(13,110,253,.18);transition:.18s}button:hover{transform:translateY(-1px)}
+.warning{background:#fff8e1;border:1px solid #fde68a}
+@media(max-width:700px){.container{margin:14px auto;padding:0 10px}.box{padding:14px}.box{overflow-x:auto}table{min-width:850px}}
+.header{background:#173b57;color:white;padding:20px}
+.container{max-width:1100px;margin:25px auto;padding:0 15px}
+.box{background:white;border-radius:12px;padding:20px;margin-bottom:20px;box-shadow:0 3px 12px #0001}
+table{width:100%;border-collapse:collapse}
+th,td{padding:12px;border-bottom:1px solid #eee}
+th{background:#edf3f8}
+input[type=checkbox]{transform:scale(1.3)}
+button{background:#198754;color:white;border:0;padding:12px 25px;border-radius:7px;cursor:pointer}
+.warning{background:#fff3cd;padding:12px;border-radius:8px;margin-bottom:15px}
+a{color:#1261a0;text-decoration:none}
+</style>
+</head>
+<body>
+
+<div class="header">
+<h1>مراجعة واعتماد النتائج</h1>
+<div>Laboratory Result Verification</div>
+</div>
+
+<div class="container">
+
+<div class="box">
+<h2>بيانات الطلب</h2>
+<p><strong>رقم الطلب:</strong> {{ order.order_number }}</p>
+<p><strong>المريض:</strong> {{ order.patient.full_name }}</p>
+
+{% if order.requesting_department %}
+<p><strong>القسم:</strong> {{ order.requesting_department.name_ar }}</p>
+{% endif %}
+
+{% if order.requesting_doctor %}
+<p><strong>الطبيب:</strong> {{ order.requesting_doctor.full_name }}</p>
+{% endif %}
+</div>
+
+<form method="post">
+{% csrf_token %}
+
+<div class="box">
+
+<div class="warning">
+يرجى مراجعة النتائج قبل اعتمادها. بعد الاعتماد تعتبر النتائج نتائج مخبرية معتمدة.
+</div>
+
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Result</th>
+<th>Unit</th>
+<th>Reference Range</th>
+<th>Flag</th>
+<th>Examiner</th>
+<th>Verified</th>
+</tr>
+</thead>
+
+<tbody>
+{% for item in order.items.all %}
+<tr>
+<td>
+{{ item.test.name_en }}
+{% if item.test.name_ar %}
+<br><small>{{ item.test.name_ar }}</small>
+{% endif %}
+</td>
+
+<td>{{ item.result|default:"-" }}</td>
+<td>{{ item.test.unit }}</td>
+<td>{{ item.test.reference_range }}</td>
+<td>{{ item.result_flag|default:"-" }}</td>
+<td>
+{% if item.examiner %}
+{{ item.examiner.get_full_name|default:item.examiner.username }}
+{% else %}
+-
+{% endif %}
+</td>
+
+<td>
+{% if item.verified %}
+✓
+{% else %}
+<input type="checkbox" name="verified_items"
+       value="{{ item.id }}">
+{% endif %}
+</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+<br>
+
+<button type="submit">
+اعتماد النتائج المحددة
+</button>
+
+</div>
+</form>
+
+<div class="box">
+<a href="{% url 'laboratory:order_detail' order.id %}">
+← العودة إلى الطلب
+</a>
+&nbsp;&nbsp;|&nbsp;&nbsp;
+<a href="{% url 'laboratory:laboratory_report' order.id %}">
+عرض التقرير
+</a>
+</div>
+
+</div>
+</body>
+</html>

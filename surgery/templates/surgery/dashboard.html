@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <div>
+            <h3 class="mb-1">وحدة العمليات الجراحية</h3>
+            <div class="text-muted">لوحة متابعة العمليات والطلبات الجراحية</div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a href="{% url 'surgery:order_create' %}" class="btn btn-primary">
+                + طلب عملية
+            </a>
+            <a href="{% url 'surgery:order_list' %}" class="btn btn-outline-primary">
+                جميع العمليات
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-6 col-lg-3">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="text-muted small">إجمالي الطلبات</div>
+                    <div class="fs-3 fw-bold">{{ total_orders }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-lg-3">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="text-muted small">طلبات اليوم</div>
+                    <div class="fs-3 fw-bold">{{ today_orders }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-lg-3">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="text-muted small">مجدولة</div>
+                    <div class="fs-3 fw-bold">{{ scheduled_orders }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-lg-3">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="text-muted small">قيد التنفيذ</div>
+                    <div class="fs-3 fw-bold">{{ in_progress_orders }}</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-6 col-lg-3">
+            <div class="card border-warning h-100">
+                <div class="card-body">
+                    <div class="text-muted small">مطلوبة</div>
+                    <div class="fs-4 fw-bold">{{ requested_orders }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-lg-3">
+            <div class="card border-info h-100">
+                <div class="card-body">
+                    <div class="text-muted small">تحضير</div>
+                    <div class="fs-4 fw-bold">{{ preparation_orders }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-lg-3">
+            <div class="card border-secondary h-100">
+                <div class="card-body">
+                    <div class="text-muted small">إفاقة</div>
+                    <div class="fs-4 fw-bold">{{ recovery_orders }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-lg-3">
+            <div class="card border-success h-100">
+                <div class="card-body">
+                    <div class="text-muted small">مكتملة</div>
+                    <div class="fs-4 fw-bold">{{ completed_orders }}</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <strong>آخر طلبات العمليات</strong>
+            <a href="{% url 'surgery:order_list' %}" class="btn btn-sm btn-outline-primary">
+                عرض الكل
+            </a>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>رقم الطلب</th>
+                            <th>المريض</th>
+                            <th>العملية</th>
+                            <th>الجراح</th>
+                            <th>الأولوية</th>
+                            <th>الحالة</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for order in recent_orders %}
+                        <tr>
+                            <td>{{ order.order_number }}</td>
+                            <td>
+                                <strong>{{ order.patient.full_name }}</strong>
+                                <div class="small text-muted">
+                                    {{ order.patient.patient_number }}
+                                </div>
+                            </td>
+                            <td>{{ order.surgery_type.name_ar }}</td>
+                            <td>
+                                {% if order.surgeon %}
+                                    {{ order.surgeon.full_name }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                            <td>{{ order.get_priority_display }}</td>
+                            <td>{{ order.get_status_display }}</td>
+                            <td>
+                                <a href="{% url 'surgery:order_detail' order.id %}"
+                                   class="btn btn-sm btn-outline-primary">
+                                    التفاصيل
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">
+                                لا توجد طلبات عمليات.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+
+        <div class="col-12 col-md-4">
+            <a href="{% url 'surgery:type_list' %}"
+               class="btn btn-outline-secondary w-100 py-3">
+                أنواع العمليات
+            </a>
+        </div>
+
+        <div class="col-12 col-md-4">
+            <a href="{% url 'surgery:order_list' %}"
+               class="btn btn-outline-primary w-100 py-3">
+                إدارة طلبات العمليات
+            </a>
+        </div>
+
+        <div class="col-12 col-md-4">
+            <a href="{% url 'surgery:order_create' %}"
+               class="btn btn-primary w-100 py-3">
+                إنشاء طلب عملية جديد
+            </a>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

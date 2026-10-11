@@ -1,0 +1,492 @@
+{% extends "base.html" %}
+
+{% block title %}سجل التنويم{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
+        <div>
+            <h2 class="page-title mb-1">🏥 سجل التنويم</h2>
+            <div class="text-muted">
+                إدارة ومتابعة جميع حالات دخول المرضى وخروجهم
+            </div>
+        </div>
+
+        <a href="{% url 'inpatient:admission_create' %}"
+           class="btn btn-primary">
+            ➕ تنويم مريض
+        </a>
+
+    </div>
+
+
+    <!-- Statistics -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">
+                        إجمالي النتائج
+                    </div>
+                    <div class="fs-3 fw-bold mt-1">
+                        {{ total_count }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">
+                        تنويم نشط
+                    </div>
+                    <div class="fs-3 fw-bold text-success mt-1">
+                        {{ active_count }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">
+                        حالات الخروج
+                    </div>
+                    <div class="fs-3 fw-bold text-secondary mt-1">
+                        {{ discharged_count }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">
+                        التحويلات
+                    </div>
+                    <div class="fs-3 fw-bold text-info mt-1">
+                        {{ transferred_count }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Search / Filters -->
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white">
+            <strong>🔎 البحث والتصفية</strong>
+        </div>
+
+        <div class="card-body">
+
+            <form method="get">
+
+                <div class="row g-3 align-items-end">
+
+                    <div class="col-12 col-md-7">
+
+                        <label class="form-label fw-semibold">
+                            البحث
+                        </label>
+
+                        <input
+                            type="text"
+                            name="q"
+                            value="{{ query }}"
+                            class="form-control"
+                            placeholder="اسم المريض أو رقم المريض أو رقم التنويم أو الهاتف"
+                        >
+
+                    </div>
+
+
+                    <div class="col-12 col-md-3">
+
+                        <label class="form-label fw-semibold">
+                            حالة التنويم
+                        </label>
+
+                        <select name="status" class="form-select">
+
+                            <option value="">
+                                جميع الحالات
+                            </option>
+
+                            {% for value,label in status_choices %}
+
+                                <option
+                                    value="{{ value }}"
+                                    {% if selected_status == value %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {% if value == "ADMITTED" %}
+                                        🟢 {{ label }}
+                                    {% elif value == "DISCHARGED" %}
+                                        ⚪ {{ label }}
+                                    {% elif value == "TRANSFERRED" %}
+                                        🔵 {{ label }}
+                                    {% else %}
+                                        🔴 {{ label }}
+                                    {% endif %}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="col-12 col-md-2 d-flex gap-2">
+
+                        <button type="submit"
+                                class="btn btn-primary flex-grow-1">
+                            🔍 بحث
+                        </button>
+
+                        <a href="{% url 'inpatient:admission_list' %}"
+                           class="btn btn-outline-secondary"
+                           title="مسح البحث">
+                            ↻
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- Admissions Table -->
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+
+            <strong>📋 حالات التنويم</strong>
+
+            <span class="badge bg-primary">
+                {{ total_count }}
+            </span>
+
+        </div>
+
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th class="text-nowrap">
+                                رقم التنويم
+                            </th>
+
+                            <th class="text-nowrap">
+                                المريض
+                            </th>
+
+                            <th class="text-nowrap">
+                                رقم المريض
+                            </th>
+
+                            <th class="text-nowrap">
+                                القسم
+                            </th>
+
+                            <th class="text-nowrap">
+                                الطبيب
+                            </th>
+
+                            <th class="text-nowrap">
+                                الغرفة
+                            </th>
+
+                            <th class="text-nowrap">
+                                السرير
+                            </th>
+
+                            <th class="text-nowrap">
+                                نوع التنويم
+                            </th>
+
+                            <th class="text-nowrap">
+                                الحالة
+                            </th>
+
+                            <th class="text-nowrap">
+                                تاريخ الدخول
+                            </th>
+
+                            <th class="text-nowrap">
+                                الإجراءات
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                    {% for admission in admissions %}
+
+                        <tr>
+
+                            <!-- Admission Number -->
+                            <td>
+                                <strong class="text-primary">
+                                    {{ admission.admission_number }}
+                                </strong>
+                            </td>
+
+
+                            <!-- Patient -->
+                            <td>
+
+                                <div class="fw-semibold">
+                                    {{ admission.patient.full_name }}
+                                </div>
+
+                                {% if admission.patient.gender %}
+                                    <small class="text-muted">
+                                        {{ admission.patient.get_gender_display }}
+                                    </small>
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- Patient Number -->
+                            <td>
+                                <span class="badge bg-light text-dark border">
+                                    {{ admission.patient.patient_number|default:"-" }}
+                                </span>
+                            </td>
+
+
+                            <!-- Department -->
+                            <td>
+                                {% if admission.department %}
+                                    {{ admission.department.name_ar|default:"-" }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+
+
+                            <!-- Doctor -->
+                            <td>
+
+                                {% if admission.doctor %}
+                                    {{ admission.doctor.full_name }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- Room -->
+                            <td>
+
+                                {% if admission.room %}
+                                    <span class="badge bg-info text-dark">
+                                        {{ admission.room.room_number }}
+                                    </span>
+                                {% else %}
+                                    -
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- Bed -->
+                            <td>
+
+                                {% if admission.bed %}
+                                    <span class="badge bg-secondary">
+                                        {{ admission.bed.bed_number }}
+                                    </span>
+                                {% else %}
+                                    -
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- Admission Type -->
+                            <td>
+                                {{ admission.get_admission_type_display }}
+                            </td>
+
+
+                            <!-- Status -->
+                            <td>
+
+                                {% if admission.status == "ADMITTED" %}
+
+                                    <span class="badge bg-success">
+                                        🟢 منوم
+                                    </span>
+
+                                {% elif admission.status == "DISCHARGED" %}
+
+                                    <span class="badge bg-secondary">
+                                        ⚪ خرج
+                                    </span>
+
+                                {% elif admission.status == "TRANSFERRED" %}
+
+                                    <span class="badge bg-info text-dark">
+                                        🔵 محول
+                                    </span>
+
+                                {% elif admission.status == "CANCELLED" %}
+
+                                    <span class="badge bg-danger">
+                                        🔴 ملغى
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge bg-dark">
+                                        {{ admission.get_status_display }}
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- Admission Date -->
+                            <td class="text-nowrap">
+
+                                {{ admission.admitted_at|date:"Y-m-d" }}
+
+                                <br>
+
+                                <small class="text-muted">
+                                    {{ admission.admitted_at|date:"H:i" }}
+                                </small>
+
+                            </td>
+
+
+                            <!-- Actions -->
+                            <td>
+
+                                <div class="d-flex gap-1 flex-wrap">
+
+                                    <a
+                                        href="{% url 'inpatient:admission_detail' admission.id %}"
+                                        class="btn btn-sm btn-outline-primary"
+                                        title="فتح ملف التنويم"
+                                    >
+                                        📄 الملف
+                                    </a>
+
+
+                                    {% if admission.status == "ADMITTED" %}
+
+                                        <a
+                                            href="{% url 'inpatient:admission_transfer' admission.id %}"
+                                            class="btn btn-sm btn-outline-info"
+                                            title="نقل المريض"
+                                        >
+                                            🔄 نقل
+                                        </a>
+
+
+                                        <a
+                                            href="{% url 'inpatient:admission_discharge' admission.id %}"
+                                            class="btn btn-sm btn-outline-danger"
+                                            title="خروج المريض"
+                                        >
+                                            🚪 خروج
+                                        </a>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+
+                    {% empty %}
+
+                        <tr>
+
+                            <td colspan="11"
+                                class="text-center py-5">
+
+                                <div class="fs-1 mb-2">
+                                    🏥
+                                </div>
+
+                                <h5>
+                                    لا توجد حالات تنويم
+                                </h5>
+
+                                {% if query or selected_status %}
+
+                                    <div class="text-muted mb-3">
+                                        لم يتم العثور على نتائج مطابقة للبحث أو الفلتر.
+                                    </div>
+
+                                    <a
+                                        href="{% url 'inpatient:admission_list' %}"
+                                        class="btn btn-outline-primary"
+                                    >
+                                        عرض جميع السجلات
+                                    </a>
+
+                                {% else %}
+
+                                    <div class="text-muted">
+                                        لم يتم تسجيل أي حالة تنويم حتى الآن.
+                                    </div>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

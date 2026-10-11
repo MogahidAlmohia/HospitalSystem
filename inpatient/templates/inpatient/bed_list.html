@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}أسرة التنويم{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="page-title mb-1">🛏️ أسرة التنويم</h2>
+        <div class="text-muted">حالة الأسرة والغرف</div>
+    </div>
+
+    {% if can_manage %}
+    <a href="{% url 'inpatient:bed_create' %}" class="btn btn-primary">
+        ➕ إضافة سرير
+    </a>
+    {% endif %}
+</div>
+
+<div class="card p-3">
+<table class="table table-hover">
+<thead>
+<tr>
+    <th>الغرفة</th>
+    <th>السرير</th>
+    <th>القسم</th>
+    <th>الحالة</th>
+    <th>ملاحظات</th>
+</tr>
+</thead>
+<tbody>
+{% for bed in beds %}
+<tr>
+    <td>{{ bed.room.room_number }} - {{ bed.room.name }}</td>
+    <td><strong>{{ bed.bed_number }}</strong></td>
+    <td>{{ bed.room.department.name_ar|default:"-" }}</td>
+    <td>
+        {% if bed.status == "AVAILABLE" %}
+            <span class="badge bg-success">متاح</span>
+        {% elif bed.status == "OCCUPIED" %}
+            <span class="badge bg-danger">مشغول</span>
+        {% elif bed.status == "RESERVED" %}
+            <span class="badge bg-warning text-dark">محجوز</span>
+        {% elif bed.status == "MAINTENANCE" %}
+            <span class="badge bg-secondary">صيانة</span>
+        {% else %}
+            <span class="badge bg-dark">غير نشط</span>
+        {% endif %}
+    </td>
+    <td>{{ bed.notes|default:"-" }}</td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="5" class="text-center text-muted py-4">
+        لا توجد أسرة مسجلة.
+    </td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}

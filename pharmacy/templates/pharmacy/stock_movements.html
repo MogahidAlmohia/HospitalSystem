@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-3" dir="rtl">
+
+    <div class="mb-3">
+        <h3>📊 حركة مخزون الصيدلية</h3>
+    </div>
+
+    <div class="card shadow-sm">
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead class="table-primary">
+                    <tr>
+                        <th>التاريخ</th>
+                        <th>الدواء</th>
+                        <th>الحركة</th>
+                        <th>الكمية</th>
+                        <th>الرصيد بعد الحركة</th>
+                        <th>المرجع</th>
+                        <th>المستخدم</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                {% for movement in movements %}
+
+                    <tr>
+
+                        <td>
+                            {{ movement.created_at|date:"Y-m-d H:i" }}
+                        </td>
+
+                        <td>
+                            {{ movement.medicine.name_ar }}
+                        </td>
+
+                        <td>
+                            {% if movement.movement_type == "IN" %}
+                                <span class="badge bg-success">
+                                    إدخال
+                                </span>
+                            {% elif movement.movement_type == "OUT" %}
+                                <span class="badge bg-danger">
+                                    صرف
+                                </span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">
+                                    تعديل
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td>{{ movement.quantity }}</td>
+
+                        <td>{{ movement.balance_after }}</td>
+
+                        <td>{{ movement.reference|default:"-" }}</td>
+
+                        <td>
+                            {{ movement.created_by.username|default:"-" }}
+                        </td>
+
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+                        <td colspan="7"
+                            class="text-center py-4">
+                            لا توجد حركات مخزون.
+                        </td>
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

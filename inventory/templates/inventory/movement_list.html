@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div>
+            <h3>سجل حركات المخزون</h3>
+            <div class="text-muted">سجل الاستلام والصرف والإرجاع والتسويات والتحويلات</div>
+        </div>
+        <a href="{% url 'inventory:dashboard' %}" class="btn btn-outline-secondary">لوحة المخزون</a>
+    </div>
+
+    <form method="get" class="card shadow-sm border-0 mb-3">
+        <div class="card-body">
+            <div class="row g-2">
+
+                <div class="col-12 col-md-6">
+                    <label class="form-label">بحث</label>
+                    <input
+                        type="text"
+                        name="q"
+                        value="{{ search_query }}"
+                        class="form-control"
+                        placeholder="الصنف أو الرمز أو السبب..."
+                    >
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label class="form-label">نوع الحركة</label>
+                    <select name="movement_type" class="form-select">
+                        <option value="">كل الحركات</option>
+                        {% for value, label in movement_types %}
+                            <option value="{{ value }}"
+                                {% if movement_type == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <label class="form-label">المستودع</label>
+                    <select name="warehouse" class="form-select">
+                        <option value="">كل المستودعات</option>
+                        {% for warehouse in warehouses %}
+                            <option value="{{ warehouse.id }}"
+                                {% if warehouse_id == warehouse.id|stringformat:"s" %}selected{% endif %}>
+                                {{ warehouse.name_ar }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <label class="form-label">من تاريخ</label>
+                    <input
+                        type="date"
+                        name="date_from"
+                        value="{{ date_from }}"
+                        class="form-control"
+                    >
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <label class="form-label">إلى تاريخ</label>
+                    <input
+                        type="date"
+                        name="date_to"
+                        value="{{ date_to }}"
+                        class="form-control"
+                    >
+                </div>
+
+                <div class="col-12 col-md-2 d-flex align-items-end">
+                    <button class="btn btn-primary w-100">
+                        بحث
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </form>
+
+    <!-- Movement Totals -->
+    <div class="row g-2 mb-3">
+
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="small text-muted">عدد الحركات</div>
+                    <div class="fs-4 fw-bold">
+                        {{ movement_totals.count }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="small text-muted">إجمالي الاستلام</div>
+                    <div class="fs-4 fw-bold text-success">
+                        {{ movement_totals.receipt }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="small text-muted">إجمالي الصرف</div>
+                    <div class="fs-4 fw-bold text-danger">
+                        {{ movement_totals.issue }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="small text-muted">إجمالي الإرجاع</div>
+                    <div class="fs-4 fw-bold text-info">
+                        {{ movement_totals.return }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="small text-muted">تحويل وارد</div>
+                    <div class="fw-bold">
+                        {{ movement_totals.transfer_in }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="small text-muted">تحويل صادر</div>
+                    <div class="fw-bold">
+                        {{ movement_totals.transfer_out }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="small text-muted">التسويات</div>
+                    <div class="fw-bold">
+                        {{ movement_totals.adjustment }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="small text-muted">الإتلاف / الانتهاء</div>
+                    <div class="fw-bold">
+                        {{ movement_totals.disposal|add:movement_totals.expiry }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>التاريخ</th>
+                        <th>الصنف</th>
+                        <th>المستودع</th>
+                        <th>Batch</th>
+                        <th>نوع الحركة</th>
+                        <th>الكمية</th>
+                        <th>المرجع</th>
+                        <th>المستخدم</th>
+                        <th>السبب</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for movement in movements %}
+                    <tr>
+                        <td>{{ movement.created_at|date:"Y-m-d H:i" }}</td>
+                        <td>
+                            <strong>{{ movement.batch.item.name_ar }}</strong>
+                            <small class="d-block text-muted">{{ movement.batch.item.code }}</small>
+                        </td>
+                        <td>{{ movement.batch.warehouse.name_ar }}</td>
+                        <td>{{ movement.batch.batch_number|default:"—" }}</td>
+                        <td>{{ movement.get_movement_type_display }}</td>
+                        <td class="fw-bold">{{ movement.quantity }}</td>
+                        <td>{{ movement.reference_type|default:"—" }}</td>
+                        <td>{{ movement.performed_by }}</td>
+                        <td>{{ movement.reason|default:"—" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="9" class="text-center text-muted py-4">لا توجد حركات مخزون.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

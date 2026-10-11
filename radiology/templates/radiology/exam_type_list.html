@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}🩻 أنواع فحوصات الأشعة{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-pro">
+
+    <div class="command-header">
+        <div class="command-content">
+            <h1 class="command-title">
+                🩻 أنواع فحوصات الأشعة
+            </h1>
+        </div>
+    </div>
+
+
+    <div class="pro-panel p-4">
+
+        <div class="d-flex justify-content-between mb-3">
+
+            <h3>
+                قائمة الفحوصات
+            </h3>
+
+            <a
+                href="{% url 'radiology:exam_type_create' %}"
+                class="btn btn-primary">
+                ➕ إضافة فحص
+            </a>
+
+        </div>
+
+
+        {% if exam_types %}
+
+        <div class="table-responsive">
+
+            <table class="table table-hover">
+
+                <thead>
+                    <tr>
+                        <th>الكود</th>
+                        <th>العربي</th>
+                        <th>English</th>
+                        <th>Modality</th>
+                        <th>السعر</th>
+                        <th>الحالة</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                {% for exam in exam_types %}
+
+                    <tr>
+
+                        <td>
+                            <strong>{{ exam.code }}</strong>
+                        </td>
+
+                        <td>
+                            {{ exam.name_ar }}
+                        </td>
+
+                        <td>
+                            {{ exam.name_en }}
+                        </td>
+
+                        <td>
+                            {{ exam.get_modality_display }}
+                        </td>
+
+                        <td>
+                            {{ exam.price }}
+                        </td>
+
+                        <td>
+
+                            {% if exam.is_active %}
+                                <span class="badge bg-success">
+                                    فعال
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary">
+                                    غير فعال
+                                </span>
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <div class="alert alert-warning">
+
+            لا توجد أنواع فحوصات مسجلة.
+
+            <a href="{% url 'radiology:exam_type_create' %}">
+                أضف أول فحص الآن.
+            </a>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block title %}تسجيل تشخيص - {{ patient.full_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">🩺 تسجيل تشخيص / مرض</h2>
+            <div class="text-muted">
+                إضافة تشخيص سريري إلى ملف المريض والزيارة الحالية
+            </div>
+        </div>
+
+        <a href="{% url 'patients:visit_detail' visit.id %}"
+           class="btn btn-outline-secondary">
+            ↩ العودة للزيارة
+        </a>
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-12 col-lg-4">
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+
+                    <h5 class="fw-bold mb-3">👤 بيانات المريض</h5>
+
+                    <div class="mb-2">
+                        <span class="text-muted">الاسم</span>
+                        <div class="fw-bold">{{ patient.full_name }}</div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <span class="text-muted small">رقم المريض</span>
+                            <div class="fw-semibold">{{ patient.patient_number }}</div>
+                        </div>
+
+                        <div class="col-6">
+                            <span class="text-muted small">الجنس</span>
+                            <div class="fw-semibold">
+                                {{ patient.get_gender_display }}
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <span class="text-muted small">العمر</span>
+                            <div class="fw-semibold">{{ patient.age|default:"-" }}</div>
+                        </div>
+
+                        <div class="col-6">
+                            <span class="text-muted small">فصيلة الدم</span>
+                            <div class="fw-semibold">{{ patient.blood_group|default:"-" }}</div>
+                        </div>
+                    </div>
+
+                    {% if patient.allergies %}
+                    <div class="alert alert-danger mt-3 mb-0">
+                        <strong>⚠️ الحساسية:</strong><br>
+                        {{ patient.allergies }}
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+
+                    <h5 class="fw-bold mb-3">🩺 بيانات الزيارة</h5>
+
+                    <div class="mb-2">
+                        <span class="text-muted small">رقم الزيارة</span>
+                        <div class="fw-semibold">{{ visit.visit_number }}</div>
+                    </div>
+
+                    <div class="mb-2">
+                        <span class="text-muted small">القسم</span>
+                        <div class="fw-semibold">
+                            {{ visit.department.name_ar|default:"-" }}
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <span class="text-muted small">الطبيب</span>
+                        <div class="fw-semibold">
+                            {{ visit.doctor.full_name|default:"-" }}
+                        </div>
+                    </div>
+
+                    <div>
+                        <span class="text-muted small">سبب الزيارة</span>
+                        <div>{{ visit.reason|default:"-" }}</div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-12 col-lg-8">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h4 class="fw-bold mb-1">إضافة التشخيص</h4>
+                    <div class="text-muted">
+                        أدخل التشخيص السريري بدقة، ويمكن إضافة رمز ICD-10 والملاحظات.
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                        {% endif %}
+
+                        <div class="row g-3">
+
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">
+                                    التشخيص / المرض *
+                                </label>
+                                {{ form.diagnosis_name }}
+                                {% for error in form.diagnosis_name.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold">
+                                    التشخيص بالإنجليزية
+                                </label>
+                                {{ form.diagnosis_name_en }}
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold">
+                                    رمز ICD-10
+                                </label>
+                                {{ form.icd10_code }}
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold">
+                                    نوع التشخيص
+                                </label>
+                                {{ form.diagnosis_type }}
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold">
+                                    حالة التشخيص
+                                </label>
+                                {{ form.status }}
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-check p-3 border rounded bg-light">
+                                    {{ form.is_chronic }}
+                                    <label class="form-check-label fw-semibold">
+                                        مرض مزمن
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">
+                                    ملاحظات سريرية
+                                </label>
+                                {{ form.notes }}
+                            </div>
+
+                        </div>
+
+                        <div class="d-flex flex-wrap justify-content-end gap-2 mt-4">
+
+                            <a href="{% url 'patients:visit_detail' visit.id %}"
+                               class="btn btn-outline-secondary">
+                                إلغاء
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-primary px-4">
+                                💾 حفظ التشخيص
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+{% endblock %}

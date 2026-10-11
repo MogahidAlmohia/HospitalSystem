@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block title %}نتائج {{ department.name_ar }}{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+
+    <div>
+        <h3 class="fw-bold">
+            📊 نتائج التحاليل
+        </h3>
+
+        <div class="text-muted">
+            {{ department.name_ar }}
+        </div>
+    </div>
+
+    <a href="{% url 'departments:dashboard' department.id %}"
+       class="btn btn-primary">
+        ← لوحة القسم
+    </a>
+
+</div>
+
+
+<div class="row g-2 mb-4">
+
+    <div class="col-6 col-md-3">
+        <a
+            href="?filter=pending"
+            class="btn btn-outline-warning w-100"
+        >
+            ⏳ قيد العمل
+        </a>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <a
+            href="?filter=completed"
+            class="btn btn-outline-success w-100"
+        >
+            ✅ مكتملة
+        </a>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <a
+            href="?filter=unverified"
+            class="btn btn-outline-primary w-100"
+        >
+            ⚠️ تحتاج اعتماد
+        </a>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <a
+            href="?filter=critical"
+            class="btn btn-outline-danger w-100"
+        >
+            🚨 حرجة
+        </a>
+    </div>
+
+</div>
+
+
+<div class="card border-0 shadow-sm mb-4">
+
+    <div class="card-body">
+
+        <form method="get" class="row g-2">
+
+            <div class="col-md-10">
+
+                <input
+                    type="text"
+                    name="q"
+                    value="{{ query }}"
+                    class="form-control"
+                    placeholder="ابحث باسم المريض أو رقم الطلب أو اسم الفحص..."
+                >
+
+            </div>
+
+            <div class="col-md-2">
+
+                <button class="btn btn-primary w-100">
+                    🔍 بحث
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<div class="card border-0 shadow-sm">
+
+    <div class="card-header bg-white fw-bold">
+        النتائج: {{ result_count }}
+    </div>
+
+    <div class="table-responsive">
+
+        <table class="table table-hover align-middle mb-0">
+
+            <thead>
+                <tr>
+                    <th>المريض</th>
+                    <th>رقم الطلب</th>
+                    <th>الفحص</th>
+                    <th>النتيجة</th>
+                    <th>Flag</th>
+                    <th>الحالة</th>
+                    <th>الاعتماد</th>
+                    <th>التاريخ</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+            {% for item in results %}
+
+            <tr>
+
+                <td>
+                    {{ item.order.patient.full_name }}
+                </td>
+
+                <td>
+                    {{ item.order.order_number }}
+                </td>
+
+                <td>
+                    <strong>
+                        {{ item.test.name_en }}
+                    </strong>
+                </td>
+
+                <td>
+                    {{ item.result|default:"-" }}
+                </td>
+
+                <td>
+
+                    {% if item.result_flag %}
+                        <span class="badge bg-warning text-dark">
+                            {{ item.result_flag }}
+                        </span>
+                    {% else %}
+                        -
+                    {% endif %}
+
+                </td>
+
+                <td>
+                    {{ item.get_status_display }}
+                </td>
+
+                <td>
+
+                    {% if item.verified %}
+
+                        <span class="badge bg-success">
+                            معتمد
+                        </span>
+
+                    {% else %}
+
+                        <span class="badge bg-warning text-dark">
+                            غير معتمد
+                        </span>
+
+                    {% endif %}
+
+                </td>
+
+                <td>
+                    {{ item.updated_at|date:"Y-m-d H:i" }}
+                </td>
+
+            </tr>
+
+            {% empty %}
+
+            <tr>
+                <td colspan="8"
+                    class="text-center text-muted p-5">
+                    لا توجد نتائج.
+                </td>
+            </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

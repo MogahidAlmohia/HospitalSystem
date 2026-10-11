@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div>
+            <h3>رصيد المخزون</h3>
+            <div class="text-muted">عرض الدفعات والكميات الحالية</div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{% url 'inventory:receive' %}" class="btn btn-primary">استلام</a>
+            <a href="{% url 'inventory:issue' %}" class="btn btn-warning">صرف</a>
+            <a href="{% url 'inventory:adjustment' %}" class="btn btn-outline-secondary">تعديل رصيد</a>
+        </div>
+    </div>
+
+    <form method="get" class="card shadow-sm border-0 mb-3">
+        <div class="card-body">
+            <div class="row g-2">
+                <div class="col-12 col-md-4">{{ form.item }}</div>
+                <div class="col-12 col-md-4">{{ form.warehouse }}</div>
+                <div class="col-12 col-md-3">{{ form.batch_number }}</div>
+                <div class="col-12 col-md-1">
+                    <button class="btn btn-primary w-100">بحث</button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>الصنف</th>
+                        <th>المستودع</th>
+                        <th>الموقع</th>
+                        <th>Batch</th>
+                        <th>Expiry</th>
+                        <th>الكمية</th>
+                        <th>التكلفة</th>
+                        <th>المورد</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for batch in batches %}
+                    <tr>
+                        <td>
+                            <strong>{{ batch.item.name_ar }}</strong>
+                            <small class="d-block text-muted">{{ batch.item.code }}</small>
+                        </td>
+                        <td>{{ batch.warehouse.name_ar }}</td>
+                        <td>{{ batch.location.name_ar }}</td>
+                        <td>{{ batch.batch_number|default:"—" }}</td>
+                        <td>
+                            {% if batch.expiry_date %}
+                                {% if batch.expiry_date < today %}
+                                    <span class="text-danger fw-bold">{{ batch.expiry_date }}</span>
+                                {% else %}
+                                    {{ batch.expiry_date }}
+                                {% endif %}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td class="fw-bold">{{ batch.quantity }}</td>
+                        <td>{{ batch.unit_cost }}</td>
+                        <td>{{ batch.supplier.name_ar|default:"—" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="8" class="text-center text-muted py-4">لا توجد دفعات مخزون.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

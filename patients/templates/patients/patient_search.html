@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}بحث المرضى{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">🔎 البحث عن مريض</h2>
+
+<form method="get" class="card shadow-sm mb-4">
+    <div class="card-body row g-2">
+        <div class="col-md-10">
+            <input
+                type="text"
+                name="q"
+                value="{{ query }}"
+                class="form-control"
+                placeholder="الاسم / رقم المريض / الهاتف / الرقم الوطني"
+            >
+        </div>
+
+        <div class="col-md-2">
+            <button class="btn btn-primary w-100">بحث</button>
+        </div>
+    </div>
+</form>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        {% for patient in patients %}
+        <div class="border-bottom py-3 d-flex justify-content-between">
+            <div>
+                <strong>{{ patient.full_name }}</strong>
+                <div class="text-muted">
+                    رقم المريض: {{ patient.patient_number }}
+                    | الهاتف: {{ patient.phone|default:"-" }}
+                </div>
+            </div>
+
+            <a
+                href="{% url 'patients:detail' patient.id %}"
+                class="btn btn-outline-primary btn-sm"
+            >
+                فتح الملف
+            </a>
+        </div>
+        {% empty %}
+        <div class="text-center text-muted py-4">
+            لا توجد نتائج.
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

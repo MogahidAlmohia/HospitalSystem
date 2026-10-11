@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-3" dir="rtl">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3>💊 الوصفة {{ prescription.prescription_number }}</h3>
+            <div class="text-muted">
+                {{ prescription.patient.full_name }}
+                — {{ prescription.patient.patient_number }}
+            </div>
+        </div>
+
+        {% if prescription.status != "DISPENSED" and prescription.status != "CANCELLED" %}
+            <form method="post"
+                  action="{% url 'pharmacy:prescription_dispense' prescription.id %}">
+                {% csrf_token %}
+                <button class="btn btn-success"
+                        onclick="return confirm('هل تريد صرف جميع أدوية الوصفة؟');">
+                    💊 صرف الوصفة
+                </button>
+            </form>
+        {% endif %}
+    </div>
+
+    <div class="row g-3">
+
+        <div class="col-lg-4">
+
+            <div class="card shadow-sm mb-3">
+                <div class="card-header">
+                    <strong>بيانات الوصفة</strong>
+                </div>
+
+                <div class="card-body">
+
+                    <p>
+                        <strong>المريض:</strong>
+                        {{ prescription.patient.full_name }}
+                    </p>
+
+                    <p>
+                        <strong>الطبيب:</strong>
+                        {{ prescription.doctor.full_name|default:"-" }}
+                    </p>
+
+                    <p>
+                        <strong>القسم:</strong>
+                        {{ prescription.department.name_ar|default:"-" }}
+                    </p>
+
+                    <p>
+                        <strong>الحالة:</strong>
+                        {{ prescription.get_status_display }}
+                    </p>
+
+                    <p>
+                        <strong>التشخيص:</strong><br>
+                        {{ prescription.diagnosis|default:"-" }}
+                    </p>
+
+                    <p>
+                        <strong>ملاحظات:</strong><br>
+                        {{ prescription.notes|default:"-" }}
+                    </p>
+
+                </div>
+            </div>
+
+            {% if prescription.status != "DISPENSED" and prescription.status != "CANCELLED" %}
+
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <strong>➕ إضافة دواء</strong>
+                </div>
+
+                <div class="card-body">
+
+                    <form method="post"
+                          action="{% url 'pharmacy:prescription_add_item' prescription.id %}">
+
+                        {% csrf_token %}
+
+                        {% for field in item_form %}
+                            <div class="mb-2">
+                                <label class="form-label">
+                                    {{ field.label }}
+                                </label>
+                                {{ field }}
+                            </div>
+                        {% endfor %}
+
+                        <button class="btn btn-primary w-100">
+                            إضافة الدواء
+                        </button>
+
+                    </form>
+
+                </div>
+            </div>
+
+            {% endif %}
+
+        </div>
+
+        <div class="col-lg-8">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header">
+                    <strong>💊 أدوية الوصفة</strong>
+                </div>
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-primary">
+                            <tr>
+                                <th>الدواء</th>
+                                <th>الكمية</th>
+                                <th>الجرعة</th>
+                                <th>التكرار</th>
+                                <th>المدة</th>
+                                <th>المصروف</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                        {% for item in prescription.items.all %}
+
+                            <tr>
+                                <td>
+                                    <strong>
+                                        {{ item.medicine.name_ar }}
+                                    </strong>
+                                    <br>
+                                    <small class="text-muted">
+                                        {{ item.medicine.name_en }}
+                                    </small>
+                                </td>
+
+                                <td>{{ item.quantity }}</td>
+                                <td>{{ item.dose|default:"-" }}</td>
+                                <td>{{ item.frequency|default:"-" }}</td>
+                                <td>{{ item.duration|default:"-" }}</td>
+                                <td>{{ item.dispensed_quantity }}</td>
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+                                <td colspan="6"
+                                    class="text-center py-4">
+                                    لم تتم إضافة أدوية بعد.
+                                </td>
+                            </tr>
+
+                        {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>مركز التقارير | HIS / LIS</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #f3f7fb;
+            color: #17324d;
+            font-family:
+                Tahoma,
+                Arial,
+                "Noto Sans Arabic",
+                sans-serif;
+        }
+
+        .page {
+            max-width: 1450px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0876c9, #0b4f91);
+            color: white;
+            border-radius: 18px;
+            padding: 26px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(0, 75, 130, .16);
+        }
+
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .header h1 {
+            margin: 0 0 8px;
+            font-size: 28px;
+        }
+
+        .header p {
+            margin: 0;
+            opacity: .92;
+        }
+
+        .date {
+            background: rgba(255,255,255,.15);
+            padding: 10px 15px;
+            border-radius: 12px;
+            white-space: nowrap;
+        }
+
+        .section-title {
+            font-size: 21px;
+            font-weight: 800;
+            margin: 28px 0 14px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 14px;
+        }
+
+        .stat {
+            background: white;
+            border-radius: 15px;
+            padding: 18px;
+            box-shadow: 0 4px 16px rgba(20,60,100,.07);
+            border: 1px solid #e5edf5;
+        }
+
+        .stat-icon {
+            font-size: 27px;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: #64788b;
+            font-size: 14px;
+            margin-bottom: 7px;
+        }
+
+        .stat-value {
+            font-size: 27px;
+            font-weight: 900;
+            color: #0a5da8;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #e2ebf3;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(20,60,100,.06);
+            transition: .2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 22px rgba(20,60,100,.10);
+        }
+
+        .card-icon {
+            font-size: 34px;
+            margin-bottom: 10px;
+        }
+
+        .card h3 {
+            margin: 0 0 8px;
+            color: #15476d;
+        }
+
+        .card p {
+            margin: 0 0 15px;
+            color: #718294;
+            line-height: 1.7;
+            font-size: 14px;
+        }
+
+        .button {
+            display: inline-block;
+            text-decoration: none;
+            background: #0876c9;
+            color: white;
+            padding: 9px 14px;
+            border-radius: 9px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .button.secondary {
+            background: #eef5fb;
+            color: #0964a9;
+        }
+
+        .table-box {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid #e2ebf3;
+            overflow-x: auto;
+            box-shadow: 0 4px 15px rgba(20,60,100,.06);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px;
+        }
+
+        th,
+        td {
+            padding: 13px 15px;
+            text-align: right;
+            border-bottom: 1px solid #edf2f6;
+        }
+
+        th {
+            background: #f5f9fc;
+            color: #315875;
+            font-size: 14px;
+        }
+
+        td {
+            font-size: 14px;
+        }
+
+        .number {
+            font-weight: 800;
+            color: #0868b2;
+        }
+
+        .footer {
+            margin-top: 25px;
+            padding: 15px;
+            text-align: center;
+            color: #728497;
+            font-size: 13px;
+        }
+
+        @media (max-width: 1100px) {
+            .stats {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 650px) {
+            .page {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 23px;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            .stat {
+                padding: 14px;
+            }
+
+            .stat-value {
+                font-size: 23px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="page">
+
+    <!-- ================================================== -->
+    <!-- HEADER -->
+    <!-- ================================================== -->
+
+    <div class="header">
+        <div class="header-row">
+
+            <div>
+                <h1>📊 مركز التقارير</h1>
+                <p>
+                    مركز التقارير والإحصائيات لنظام إدارة المستشفى
+                    HIS / LIS
+                </p>
+            </div>
+
+            <div class="date">
+                📅 {{ today|date:"d/m/Y" }}
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- ================================================== -->
+    <!-- SUMMARY -->
+    <!-- ================================================== -->
+
+    <div class="section-title">
+        📈 المؤشرات العامة
+    </div>
+
+    <div class="stats">
+
+        <div class="stat">
+            <div class="stat-icon">👥</div>
+            <div class="stat-label">إجمالي المرضى</div>
+            <div class="stat-value">{{ total_patients }}</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-icon">🗓️</div>
+            <div class="stat-label">زيارات اليوم</div>
+            <div class="stat-value">{{ today_visits }}</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-icon">🧪</div>
+            <div class="stat-label">طلبات المختبر اليوم</div>
+            <div class="stat-value">{{ today_lab_orders }}</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-label">طلبات مختبر معلقة</div>
+            <div class="stat-value">{{ pending_lab_orders }}</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-icon">🚨</div>
+            <div class="stat-label">نتائج حرجة غير معتمدة</div>
+            <div class="stat-value">{{ critical_results }}</div>
+        </div>
+
+    </div>
+
+
+    <!-- ================================================== -->
+    <!-- REPORT CATEGORIES -->
+    <!-- ================================================== -->
+
+    <div class="section-title">
+        📚 أنواع التقارير
+    </div>
+
+    <div class="cards">
+
+        <div class="card">
+            <div class="card-icon">🏥</div>
+            <h3>تقارير المستشفى</h3>
+            <p>
+                مؤشرات المرضى والزيارات والنشاط العام للمستشفى.
+            </p>
+            <a class="button secondary" href="{% url 'reports:dashboard' %}">
+                عرض المؤشرات
+            </a>
+        </div>
+
+        <div class="card">
+            <div class="card-icon">🧪</div>
+            <h3>تقارير المختبر</h3>
+            <p>
+                الوصول إلى منظومة تقارير المختبر ونتائج الفحوصات
+                والتقارير النهائية.
+            </p>
+            <a class="button" href="{% url 'laboratory:dashboard' %}">
+                مركز المختبر
+            </a>
+        </div>
+
+        <div class="card">
+            <div class="card-icon">📄</div>
+            <h3>إعدادات التقارير</h3>
+            <p>
+                التحكم في شكل ومحتوى ولغة وتقسيمات تقرير المختبر.
+            </p>
+            <a class="button secondary"
+               href="{% url 'laboratory:report_settings' %}">
+                إعدادات التقرير
+            </a>
+        </div>
+
+        <div class="card">
+            <div class="card-icon">🏢</div>
+            <h3>تقارير الأقسام</h3>
+            <p>
+                متابعة نشاط الأقسام والمرضى والزيارات وطلبات المختبر.
+            </p>
+            <a class="button" href="{% url 'departments:list' %}">
+                مركز الأقسام
+            </a>
+        </div>
+
+    </div>
+
+
+    <!-- ================================================== -->
+    <!-- LAB REPORT SUMMARY -->
+    <!-- ================================================== -->
+
+    <div class="section-title">
+        🧪 ملخص تقارير المختبر
+    </div>
+
+    <div class="cards">
+
+        <div class="card">
+            <div class="card-icon">📋</div>
+            <h3>إجمالي الطلبات</h3>
+            <p>جميع طلبات الفحوصات المسجلة في النظام.</p>
+            <div class="number">{{ total_lab_orders }}</div>
+        </div>
+
+        <div class="card">
+            <div class="card-icon">📅</div>
+            <h3>طلبات اليوم</h3>
+            <p>طلبات المختبر المسجلة خلال اليوم الحالي.</p>
+            <div class="number">{{ today_lab_orders }}</div>
+        </div>
+
+        <div class="card">
+            <div class="card-icon">✅</div>
+            <h3>طلبات مكتملة</h3>
+            <p>الطلبات التي تم استكمال نتائجها.</p>
+            <div class="number">{{ completed_lab_orders }}</div>
+        </div>
+
+        <div class="card">
+            <div class="card-icon">🚨</div>
+            <h3>النتائج الحرجة</h3>
+            <p>نتائج حرجة تحتاج إلى المتابعة والاعتماد.</p>
+            <div class="number">{{ critical_results }}</div>
+        </div>
+
+    </div>
+
+
+    <!-- ================================================== -->
+    <!-- DEPARTMENTS -->
+    <!-- ================================================== -->
+
+    <div class="section-title">
+        🏢 إحصائيات الأقسام
+    </div>
+
+    <div class="table-box">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>القسم</th>
+                    <th>المرضى</th>
+                    <th>الزيارات</th>
+                    <th>زيارات اليوم</th>
+                    <th>طلبات المختبر</th>
+                    <th>الإجراء</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+            {% for item in department_stats %}
+
+                <tr>
+
+                    <td>
+                        <strong>
+                            {{ item.department.name_ar }}
+                        </strong>
+
+                        {% if item.department.name_en %}
+                            <br>
+                            <small>
+                                {{ item.department.name_en }}
+                            </small>
+                        {% endif %}
+                    </td>
+
+                    <td class="number">
+                        {{ item.patient_count }}
+                    </td>
+
+                    <td class="number">
+                        {{ item.visit_count }}
+                    </td>
+
+                    <td class="number">
+                        {{ item.today_visit_count }}
+                    </td>
+
+                    <td class="number">
+                        {{ item.lab_count }}
+                    </td>
+
+                    <td>
+                        <a
+                            class="button secondary"
+                            href="{% url 'departments:dashboard' item.department.id %}"
+                        >
+                            فتح القسم
+                        </a>
+                    </td>
+
+                </tr>
+
+            {% empty %}
+
+                <tr>
+                    <td colspan="6">
+                        لا توجد أقسام نشطة حاليًا.
+                    </td>
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    <!-- ================================================== -->
+    <!-- FOOTER -->
+    <!-- ================================================== -->
+
+    <div class="footer">
+        HIS / LIS — مركز التقارير العام
+    </div>
+
+</div>
+
+</body>
+</html>

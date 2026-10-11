@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}المخزون الحالي{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+<h3>المخزون الحالي</h3>
+{% if can_movement %}
+<div class="d-flex flex-wrap gap-2">
+<a class="btn btn-primary" href="{% url 'inventory:receive' %}">استلام</a>
+<a class="btn btn-outline-primary" href="{% url 'inventory:issue' %}">صرف</a>
+<a class="btn btn-outline-secondary" href="{% url 'inventory:return' %}">مرتجع</a>
+<a class="btn btn-outline-secondary" href="{% url 'inventory:adjustment' %}">تسوية</a>
+</div>
+{% endif %}
+</div>
+
+<form method="get" class="card card-body shadow-sm mb-3">
+<div class="input-group">
+<input class="form-control" name="q" value="{{ query }}" placeholder="ابحث عن صنف أو Batch أو مستودع">
+<button class="btn btn-outline-primary">بحث</button>
+</div>
+</form>
+
+<div class="card shadow-sm">
+<div class="card-body p-0">
+{% if batches %}
+<div class="table-responsive">
+<table class="table table-hover mb-0 align-middle">
+<thead>
+<tr>
+<th>الصنف</th>
+<th>Batch</th>
+<th>المستودع</th>
+<th>الموقع</th>
+<th>الكمية</th>
+<th>التكلفة</th>
+<th>الانتهاء</th>
+</tr>
+</thead>
+<tbody>
+{% for row in batches %}
+<tr>
+<td>{{ row.item.name_ar }}<small class="d-block text-muted">{{ row.item.code }}</small></td>
+<td>{{ row.batch_number|default:"—" }}</td>
+<td>{{ row.warehouse.name_ar }}</td>
+<td>{{ row.location.name_ar }}</td>
+<td><strong>{{ row.quantity }}</strong></td>
+<td>{{ row.unit_cost }}</td>
+<td>
+{% if row.expiry_date %}
+{{ row.expiry_date }}
+{% else %}
+—
+{% endif %}
+</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% else %}
+<div class="p-5 text-center text-muted">
+لا توجد دفعات مخزون مسجلة حاليًا.
+</div>
+{% endif %}
+</div>
+</div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+{% if test %}Edit Laboratory Test{% else %}Add Laboratory Test{% endif %}
+</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f4f7fb;
+}
+.header{
+    background:#173b57;
+    color:white;
+    padding:22px;
+}
+.container{
+    max-width:1000px;
+    margin:25px auto;
+    padding:0 15px;
+}
+.box{
+    background:white;
+    padding:25px;
+    border-radius:14px;
+    box-shadow:0 3px 15px #0001;
+}
+.grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:18px;
+}
+.field{
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+}
+.field.full{
+    grid-column:1/-1;
+}
+label{
+    font-weight:bold;
+}
+input,select,textarea{
+    width:100%;
+    padding:11px;
+    border:1px solid #ccd5df;
+    border-radius:7px;
+}
+textarea{
+    min-height:90px;
+    resize:vertical;
+}
+.actions{
+    margin-top:25px;
+    display:flex;
+    gap:10px;
+}
+button,.btn{
+    padding:11px 20px;
+    border:0;
+    border-radius:7px;
+    color:white;
+    background:#173b57;
+    text-decoration:none;
+    cursor:pointer;
+}
+.save{background:#198754}
+.cancel{background:#6c757d}
+.checkbox{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+.checkbox input{
+    width:auto;
+}
+@media(max-width:700px){
+    .grid{grid-template-columns:1fr}
+    .field.full{grid-column:auto}
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+<h1>
+{% if test %}
+تعديل الفحص | Edit Laboratory Test
+{% else %}
+إضافة فحص جديد | New Laboratory Test
+{% endif %}
+</h1>
+</div>
+
+<div class="container">
+
+<div class="box">
+
+<form method="post">
+{% csrf_token %}
+
+<div class="grid">
+
+<div class="field">
+<label>Test Code *</label>
+<input type="text"
+       name="code"
+       required
+       value="{{ test.code|default:'' }}">
+</div>
+
+<div class="field">
+<label>Test Name English *</label>
+<input type="text"
+       name="name_en"
+       required
+       value="{{ test.name_en|default:'' }}">
+</div>
+
+<div class="field">
+<label>اسم الفحص بالعربي</label>
+<input type="text"
+       name="name_ar"
+       value="{{ test.name_ar|default:'' }}">
+</div>
+
+<div class="field">
+    <label>Short Test Name English</label>
+    <input type="text"
+           name="short_name_en"
+           maxlength="100"
+           placeholder="CBC, Hb, ALT..."
+           value="{{ test.short_name_en|default:'' }}">
+</div>
+
+<div class="field">
+    <label>الاسم المختصر بالعربي</label>
+    <input type="text"
+           name="short_name_ar"
+           maxlength="100"
+           placeholder="صورة دم كاملة، هيموغلوبين..."
+           value="{{ test.short_name_ar|default:'' }}">
+</div>
+
+<div class="field">
+<label>Laboratory Department</label>
+<select name="department">
+<option value="">-- اختر القسم --</option>
+
+{% for department in departments %}
+<option value="{{ department.id }}"
+{% if test and test.department_id == department.id %}
+selected
+{% endif %}>
+{{ department.name_ar }} - {{ department.name_en }}
+</option>
+{% endfor %}
+
+</select>
+</div>
+
+<div class="field">
+<label>Sample Type</label>
+<select name="sample_type">
+
+{% for value,label in sample_types %}
+<option value="{{ value }}"
+{% if test and test.sample_type == value %}
+selected
+{% elif not test and value == "SERUM" %}
+selected
+{% endif %}>
+{{ label }}
+</option>
+{% endfor %}
+
+</select>
+</div>
+
+<div class="field">
+<label>Unit</label>
+<input type="text"
+       name="unit"
+       placeholder="mg/dL, mmol/L, %, IU/L..."
+       value="{{ test.unit|default:'' }}">
+</div>
+
+<div class="field">
+<label>Device / Analyzer</label>
+<input type="text"
+       name="device"
+       placeholder="Mindray BS-200, CL-900i..."
+       value="{{ test.device|default:'' }}">
+</div>
+
+<div class="field">
+<label>Reagent</label>
+<input type="text"
+       name="reagent"
+       placeholder="Reagent name / Kit"
+       value="{{ test.reagent|default:'' }}">
+</div>
+
+<div class="field full">
+<label>Reference Range</label>
+<input type="text"
+       name="reference_range"
+       placeholder="Example: 70 - 110"
+       value="{{ test.reference_range|default:'' }}">
+</div>
+
+<div class="field">
+<label>Price</label>
+<input type="number"
+       name="price"
+       step="0.01"
+       min="0"
+       value="{{ test.price|default:'0' }}">
+</div>
+
+<div class="field">
+<label>الحالة</label>
+
+<div class="checkbox">
+<input type="checkbox"
+       name="is_active"
+       id="is_active"
+       {% if not test or test.is_active %}
+       checked
+       {% endif %}>
+
+<label for="is_active">
+Active / فعال
+</label>
+</div>
+
+</div>
+
+</div>
+
+<div class="actions">
+
+<button class="save" type="submit">
+{% if test %}
+حفظ التعديلات
+{% else %}
+إضافة الفحص
+{% endif %}
+</button>
+
+<a class="btn cancel"
+href="{% url 'laboratory:test_list' %}">
+إلغاء
+</a>
+
+</div>
+
+</form>
+
+</div>
+</div>
+
+</body>
+</html>

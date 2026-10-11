@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}الطوارئ{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+        <h2 class="page-title mb-1">🚑 قسم الطوارئ</h2>
+        <div class="text-muted">
+            إدارة واستقبال ومتابعة حالات الطوارئ
+        </div>
+    </div>
+
+    <div>
+        <a href="{% url 'emergency:create' %}"
+           class="btn btn-danger">
+            ➕ تسجيل حالة طوارئ
+        </a>
+
+        <a href="{% url 'emergency:search' %}"
+           class="btn btn-outline-primary">
+            🔎 البحث
+        </a>
+    </div>
+
+</div>
+
+<div class="row g-3 mb-4">
+
+    <div class="col-6 col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="fs-3">🚑</div>
+                <h3>{{ today_cases }}</h3>
+                <div class="text-muted">حالات اليوم</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="fs-3">⏳</div>
+                <h3>{{ waiting_cases }}</h3>
+                <div class="text-muted">بانتظار التقييم</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="fs-3">🩺</div>
+                <h3>{{ under_care }}</h3>
+                <div class="text-muted">قيد المعالجة</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="fs-3">🛏️</div>
+                <h3>{{ admitted }}</h3>
+                <div class="text-muted">تم تنويمهم</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="card">
+
+    <div class="card-body">
+
+        <h5 class="mb-3">آخر حالات الطوارئ</h5>
+
+        <div class="table-responsive">
+
+            <table class="table table-hover">
+
+                <thead>
+                    <tr>
+                        <th>رقم الحالة</th>
+                        <th>المريض</th>
+                        <th>الفرز</th>
+                        <th>الطبيب</th>
+                        <th>وقت الوصول</th>
+                        <th>الحالة</th>
+                        <th></th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                {% for case in recent_cases %}
+
+                <tr>
+
+                    <td>
+                        <strong>{{ case.case_number }}</strong>
+                    </td>
+
+                    <td>
+                        {{ case.patient.full_name }}
+                        <br>
+                        <small class="text-muted">
+                            {{ case.patient.patient_number }}
+                        </small>
+                    </td>
+
+                    <td>
+                        {% if case.triage_level == "RED" %}
+                            <span class="badge bg-danger">
+                                أحمر
+                            </span>
+                        {% elif case.triage_level == "ORANGE" %}
+                            <span class="badge bg-warning text-dark">
+                                برتقالي
+                            </span>
+                        {% elif case.triage_level == "YELLOW" %}
+                            <span class="badge bg-warning text-dark">
+                                أصفر
+                            </span>
+                        {% elif case.triage_level == "GREEN" %}
+                            <span class="badge bg-success">
+                                أخضر
+                            </span>
+                        {% else %}
+                            <span class="badge bg-info">
+                                أزرق
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if case.doctor %}
+                            {{ case.doctor.full_name }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {{ case.arrival_at|date:"Y-m-d H:i" }}
+                    </td>
+
+                    <td>
+                        {{ case.get_status_display }}
+                    </td>
+
+                    <td>
+                        <a href="{% url 'emergency:detail' case.id %}"
+                           class="btn btn-sm btn-outline-primary">
+                            فتح
+                        </a>
+                    </td>
+
+                </tr>
+
+                {% empty %}
+
+                <tr>
+                    <td colspan="7"
+                        class="text-center text-muted py-5">
+                        لا توجد حالات طوارئ حتى الآن.
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

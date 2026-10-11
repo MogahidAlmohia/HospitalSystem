@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}متبرعو الدم{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-people text-primary"></i>
+                متبرعو الدم
+            </h2>
+            <p class="text-muted mb-0">إدارة بيانات المتبرعين بالدم</p>
+        </div>
+
+        <div class="d-flex gap-2 mt-2 mt-md-0">
+            <a href="{% url 'blood_bank:dashboard' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-right"></i> بنك الدم
+            </a>
+            <a href="{% url 'blood_bank:donor_create' %}" class="btn btn-primary">
+                <i class="bi bi-person-plus"></i> إضافة متبرع
+            </a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-2">
+
+                <div class="col-12 col-md-5">
+                    <label class="form-label">بحث</label>
+                    <input
+                        type="text"
+                        name="q"
+                        value="{{ request.GET.q|default:'' }}"
+                        class="form-control"
+                        placeholder="رقم المتبرع أو الاسم أو الهاتف..."
+                    >
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <label class="form-label">فصيلة الدم</label>
+                    <select name="blood_group" class="form-select">
+                        <option value="">كل الفصائل</option>
+                        {% for value,label in blood_groups %}
+                            <option value="{{ value }}"
+                                {% if request.GET.blood_group == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-6 col-md-2">
+                    <label class="form-label">الحالة</label>
+                    <select name="active" class="form-select">
+                        <option value="">الكل</option>
+                        <option value="1" {% if request.GET.active == "1" %}selected{% endif %}>
+                            نشط
+                        </option>
+                        <option value="0" {% if request.GET.active == "0" %}selected{% endif %}>
+                            غير نشط
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-12 col-md-2 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-primary flex-fill">
+                        <i class="bi bi-search"></i> بحث
+                    </button>
+
+                    <a href="{% url 'blood_bank:donor_list' %}"
+                       class="btn btn-outline-secondary"
+                       title="إلغاء البحث">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <strong>
+                <i class="bi bi-list-ul"></i>
+                قائمة المتبرعين
+            </strong>
+
+            <span class="badge bg-primary">
+                {{ donors|length }} متبرع
+            </span>
+        </div>
+
+        <div class="card-body p-0">
+
+            {% if donors %}
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th>رقم المتبرع</th>
+                            <th>الاسم</th>
+                            <th>فصيلة الدم</th>
+                            <th>الهاتف</th>
+                            <th>آخر تبرع</th>
+                            <th>الحالة</th>
+                            <th class="text-center">الإجراءات</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                    {% for donor in donors %}
+                    <tr>
+
+                        <td>
+                            <strong>{{ donor.donor_number }}</strong>
+                        </td>
+
+                        <td>
+                            {{ donor.full_name }}
+                        </td>
+
+                        <td>
+                            <span class="badge bg-danger fs-6">
+                                {{ donor.blood_group }}
+                            </span>
+                        </td>
+
+                        <td>
+                            {% if donor.phone %}
+                                {{ donor.phone }}
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if donor.last_donation_date %}
+                                {{ donor.last_donation_date|date:"Y-m-d" }}
+                            {% else %}
+                                <span class="text-muted">لم يتبرع بعد</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if donor.is_active %}
+                                <span class="badge bg-success">
+                                    نشط
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary">
+                                    غير نشط
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-center">
+
+                            <a href="{% url 'blood_bank:donor_update' donor.id %}"
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil"></i>
+                                تعديل
+                            </a>
+
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+
+            {% else %}
+
+            <div class="text-center py-5">
+
+                <i class="bi bi-person-x fs-1 text-muted"></i>
+
+                <h5 class="mt-3">
+                    لا يوجد متبرعون
+                </h5>
+
+                <p class="text-muted">
+                    لم يتم العثور على متبرعين مطابقين للبحث.
+                </p>
+
+                <a href="{% url 'blood_bank:donor_create' %}"
+                   class="btn btn-primary">
+                    <i class="bi bi-person-plus"></i>
+                    إضافة أول متبرع
+                </a>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,867 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>.settings-page{max-width:1100px;margin:auto}.card,.settings-card{border:1px solid #e5eaf1;box-shadow:0 8px 24px rgba(15,23,42,.06);border-radius:16px}</style>
+
+<style>
+.report-settings{
+    max-width:1200px;
+    margin:25px auto;
+    padding:0 15px;
+}
+
+.settings-header{
+    background:linear-gradient(135deg,#0d6efd,#084298);
+    color:#fff;
+    border-radius:18px;
+    padding:25px;
+    margin-bottom:20px;
+    box-shadow:0 8px 25px rgba(0,0,0,.12);
+}
+
+.settings-header h2{
+    margin:0;
+    font-weight:700;
+}
+
+.settings-header p{
+    margin:7px 0 0;
+    opacity:.9;
+}
+
+.settings-card{
+    background:#fff;
+    border-radius:16px;
+    padding:22px;
+    margin-bottom:18px;
+    box-shadow:0 5px 18px rgba(0,0,0,.08);
+    border:1px solid #e9ecef;
+}
+
+.settings-card h4{
+    font-weight:700;
+    border-bottom:2px solid #f1f3f5;
+    padding-bottom:12px;
+    margin-bottom:20px;
+}
+
+.form-label{
+    font-weight:600;
+}
+
+.section-note{
+    color:#6c757d;
+    font-size:13px;
+    margin-top:-10px;
+    margin-bottom:18px;
+}
+
+.check-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:10px;
+}
+
+.check-item{
+    border:1px solid #e9ecef;
+    border-radius:10px;
+    padding:10px 12px;
+    background:#f8f9fa;
+}
+
+.check-item label{
+    margin:0;
+    cursor:pointer;
+    width:100%;
+}
+
+.color-box{
+    display:flex;
+    gap:10px;
+    align-items:center;
+}
+
+.color-box input[type=color]{
+    width:55px;
+    height:40px;
+    padding:2px;
+}
+
+.sticky-actions{
+    position:sticky;
+    bottom:10px;
+    z-index:20;
+    background:rgba(255,255,255,.96);
+    padding:12px;
+    border-radius:14px;
+    box-shadow:0 5px 20px rgba(0,0,0,.15);
+    border:1px solid #dee2e6;
+}
+
+.preview-badge{
+    display:inline-block;
+    padding:5px 10px;
+    border-radius:20px;
+    background:#e9f2ff;
+    color:#0d6efd;
+    font-size:12px;
+    font-weight:700;
+}
+</style>
+
+<div class="report-settings" dir="rtl">
+
+    <div class="settings-header">
+        <h2>⚙️ إعدادات تقارير المختبر</h2>
+        <p>
+            التحكم الكامل في تصميم التقرير، بيانات المريض، النتائج، التوقيعات،
+            الطباعة وملف PDF.
+        </p>
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- بيانات المنشأة -->
+        <div class="settings-card">
+            <h4>🏥 بيانات المنشأة والمختبر</h4>
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <label class="form-label">اسم المستشفى بالعربي</label>
+                    <input type="text" name="hospital_name_ar"
+                           class="form-control"
+                           value="{{ settings.hospital_name_ar }}">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Hospital Name</label>
+                    <input type="text" name="hospital_name_en"
+                           class="form-control"
+                           value="{{ settings.hospital_name_en }}">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">اسم المختبر بالعربي</label>
+                    <input type="text" name="laboratory_name_ar"
+                           class="form-control"
+                           value="{{ settings.laboratory_name_ar }}">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Laboratory Name</label>
+                    <input type="text" name="laboratory_name_en"
+                           class="form-control"
+                           value="{{ settings.laboratory_name_en }}">
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">العنوان</label>
+                    <input type="text" name="address"
+                           class="form-control"
+                           value="{{ settings.address }}">
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">الهاتف</label>
+                    <input type="text" name="phone"
+                           class="form-control"
+                           value="{{ settings.phone }}">
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">البريد الإلكتروني</label>
+                    <input type="email" name="email"
+                           class="form-control"
+                           value="{{ settings.email }}">
+                </div>
+
+                <div class="col-md-8">
+                    <label class="form-label">شعار المستشفى / المختبر</label>
+                    <input type="file" name="logo"
+                           class="form-control"
+                           accept="image/*">
+                </div>
+
+                <div class="col-md-4">
+                    {% if settings.logo %}
+                        <label class="form-label d-block">الشعار الحالي</label>
+                        <img src="{{ settings.logo.url }}"
+                             style="max-height:70px;max-width:180px;">
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+
+        <!-- عنوان التقرير -->
+        <div class="settings-card">
+            <h4>📄 عنوان التقرير</h4>
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <label class="form-label">عنوان التقرير بالعربي</label>
+                    <input type="text" name="report_title_ar"
+                           class="form-control"
+                           value="{{ settings.report_title_ar }}">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Report Title</label>
+                    <input type="text" name="report_title_en"
+                           class="form-control"
+                           value="{{ settings.report_title_en }}">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">العنوان الفرعي بالعربي</label>
+                    <input type="text" name="report_subtitle_ar"
+                           class="form-control"
+                           value="{{ settings.report_subtitle_ar }}">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Report Subtitle</label>
+                    <input type="text" name="report_subtitle_en"
+                           class="form-control"
+                           value="{{ settings.report_subtitle_en }}">
+                </div>
+
+            </div>
+        </div>
+
+        <!-- بيانات التقرير -->
+        <div class="settings-card">
+            <h4>🔢 بيانات التقرير</h4>
+
+            <div class="check-grid">
+
+                <div class="check-item">
+                    <label>
+                        <input type="checkbox" name="show_report_number"
+                               {% if settings.show_report_number %}checked{% endif %}>
+                        رقم التقرير
+                    </label>
+                </div>
+
+                <div class="check-item">
+                    <label>
+                        <input type="checkbox" name="show_report_date"
+                               {% if settings.show_report_date %}checked{% endif %}>
+                        تاريخ التقرير
+                    </label>
+                </div>
+
+                <div class="check-item">
+                    <label>
+                        <input type="checkbox" name="show_report_time"
+                               {% if settings.show_report_time %}checked{% endif %}>
+                        وقت التقرير
+                    </label>
+                </div>
+
+                <div class="check-item">
+                    <label>
+                        <input type="checkbox" name="show_generated_datetime"
+                               {% if settings.show_generated_datetime %}checked{% endif %}>
+                        تاريخ ووقت الإنشاء
+                    </label>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- بيانات المريض -->
+        <div class="settings-card">
+            <h4>👤 بيانات المريض</h4>
+
+            <div class="check-grid">
+
+                <div class="check-item">
+                    <label><input type="checkbox" name="show_patient_number" {% if settings.show_patient_number %}checked{% endif %}> رقم المريض</label>
+                </div>
+
+                <div class="check-item">
+                    <label><input type="checkbox" name="show_patient_name" {% if settings.show_patient_name %}checked{% endif %}> اسم المريض</label>
+                </div>
+
+                <div class="check-item">
+                    <label><input type="checkbox" name="show_patient_age" {% if settings.show_patient_age %}checked{% endif %}> العمر</label>
+                </div>
+
+                <div class="check-item">
+                    <label><input type="checkbox" name="show_patient_gender" {% if settings.show_patient_gender %}checked{% endif %}> الجنس</label>
+                </div>
+
+                <div class="check-item">
+                    <label><input type="checkbox" name="show_patient_phone" {% if settings.show_patient_phone %}checked{% endif %}> الهاتف</label>
+                </div>
+
+                <div class="check-item">
+                    <label><input type="checkbox" name="show_patient_address" {% if settings.show_patient_address %}checked{% endif %}> العنوان</label>
+                </div>
+
+                <div class="check-item">
+                    <label><input type="checkbox" name="show_visit_number" {% if settings.show_visit_number %}checked{% endif %}> رقم الزيارة</label>
+                </div>
+
+                <div class="check-item">
+                    <label><input type="checkbox" name="show_requesting_department" {% if settings.show_requesting_department %}checked{% endif %}> القسم الطالب</label>
+                </div>
+
+                <div class="check-item">
+                    <label><input type="checkbox" name="show_requesting_doctor" {% if settings.show_requesting_doctor %}checked{% endif %}> الطبيب الطالب</label>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- نتائج المختبر -->
+        <div class="settings-card">
+            <h4>🧪 أعمدة نتائج المختبر</h4>
+
+            <div class="check-grid">
+
+                <div class="check-item"><label><input type="checkbox" name="show_test_code" {% if settings.show_test_code %}checked{% endif %}> Test Code</label></div>
+
+                <div class="check-item"><label><input type="checkbox" name="show_test_name" {% if settings.show_test_name %}checked{% endif %}> Test Name</label></div>
+
+                <div class="check-item"><label><input type="checkbox" name="show_result" {% if settings.show_result %}checked{% endif %}> Result</label></div>
+
+                <div class="check-item"><label><input type="checkbox" name="show_unit" {% if settings.show_unit %}checked{% endif %}> Unit</label></div>
+
+                <div class="check-item"><label><input type="checkbox" name="show_reference_range" {% if settings.show_reference_range %}checked{% endif %}> Reference Range</label></div>
+
+                <div class="check-item"><label><input type="checkbox" name="show_result_flag" {% if settings.show_result_flag %}checked{% endif %}> H / L / NORMAL</label></div>
+
+                <div class="check-item"><label><input type="checkbox" name="show_critical_status" {% if settings.show_critical_status %}checked{% endif %}> Critical Status</label></div>
+
+                <div class="check-item"><label><input type="checkbox" name="show_sample_type" {% if settings.show_sample_type %}checked{% endif %}> Sample Type</label></div>
+
+                <div class="check-item"><label><input type="checkbox" name="show_device" {% if settings.show_device %}checked{% endif %}> Device</label></div>
+
+                <div class="check-item"><label><input type="checkbox" name="show_reagent" {% if settings.show_reagent %}checked{% endif %}> Reagent</label></div>
+
+            </div>
+        </div>
+
+        <!-- الملاحظات -->
+        <div class="settings-card">
+            <h4>📝 الملاحظات</h4>
+
+            <div class="check-grid">
+
+                <div class="check-item">
+                    <label>
+                        <input type="checkbox" name="show_examiner_notes"
+                               {% if settings.show_examiner_notes %}checked{% endif %}>
+                        إظهار ملاحظات الفاحص
+                    </label>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- التوقيعات -->
+        <div class="settings-card">
+            <h4>✍️ التوقيعات والاعتماد</h4>
+
+            <div class="check-grid">
+
+                <div class="check-item"><label><input type="checkbox" name="show_examiner_signature" {% if settings.show_examiner_signature %}checked{% endif %}> توقيع الفاحص</label></div>
+
+                <div class="check-item"><label><input type="checkbox" name="show_verifier_signature" {% if settings.show_verifier_signature %}checked{% endif %}> اعتماد النتيجة</label></div>
+
+                <div class="check-item"><label><input type="checkbox" name="show_director_signature" {% if settings.show_director_signature %}checked{% endif %}> مدير المختبر</label></div>
+
+            </div>
+
+            <div class="row g-3 mt-2">
+
+                <div class="col-md-4">
+                    <label class="form-label">تسمية توقيع الفاحص</label>
+                    <input type="text" name="examiner_signature_label"
+                           class="form-control"
+                           value="{{ settings.examiner_signature_label }}">
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">تسمية الاعتماد</label>
+                    <input type="text" name="verifier_signature_label"
+                           class="form-control"
+                           value="{{ settings.verifier_signature_label }}">
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">تسمية المدير</label>
+                    <input type="text" name="director_signature_label"
+                           class="form-control"
+                           value="{{ settings.director_signature_label }}">
+                </div>
+
+            </div>
+        </div>
+
+        <!-- التصميم -->
+        <div class="settings-card">
+            <h4>🎨 تصميم التقرير</h4>
+
+            <div class="row g-3">
+
+                <div class="col-md-3">
+                    <label class="form-label">اللون الرئيسي</label>
+                    <div class="color-box">
+                        <input type="color" name="accent_color"
+                               value="{{ settings.accent_color }}">
+                        <input type="text" class="form-control"
+                               value="{{ settings.accent_color }}"
+                               oninput="this.previousElementSibling.value=this.value">
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">لون رأس الجدول</label>
+                    <div class="color-box">
+                        <input type="color" name="table_header_color"
+                               value="{{ settings.table_header_color }}">
+                        <input type="text" class="form-control"
+                               value="{{ settings.table_header_color }}"
+                               oninput="this.previousElementSibling.value=this.value">
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">لون نص رأس الجدول</label>
+                    <div class="color-box">
+                        <input type="color" name="table_header_text_color"
+                               value="{{ settings.table_header_text_color }}">
+                        <input type="text" class="form-control"
+                               value="{{ settings.table_header_text_color }}"
+                               oninput="this.previousElementSibling.value=this.value">
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">لون الخلفية</label>
+                    <div class="color-box">
+                        <input type="color" name="report_background_color"
+                               value="{{ settings.report_background_color }}">
+                        <input type="text" class="form-control"
+                               value="{{ settings.report_background_color }}"
+                               oninput="this.previousElementSibling.value=this.value">
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">مكان الشعار</label>
+                    <select name="logo_position" class="form-select">
+                        <option value="LEFT" {% if settings.logo_position == "LEFT" %}selected{% endif %}>يسار</option>
+                        <option value="CENTER" {% if settings.logo_position == "CENTER" %}selected{% endif %}>وسط</option>
+                        <option value="RIGHT" {% if settings.logo_position == "RIGHT" %}selected{% endif %}>يمين</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">حجم خط التقرير</label>
+                    <input type="number" step="0.1"
+                           name="report_font_size"
+                           class="form-control"
+                           value="{{ settings.report_font_size }}">
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">حجم خط جدول النتائج</label>
+                    <input type="number" step="0.1"
+                           name="table_font_size"
+                           class="form-control"
+                           value="{{ settings.table_font_size }}">
+                </div>
+
+            </div>
+
+            <div class="check-grid mt-3">
+
+                <div class="check-item">
+                    <label>
+                        <input type="checkbox" name="show_logo"
+                               {% if settings.show_logo %}checked{% endif %}>
+                        إظهار الشعار
+                    </label>
+                </div>
+
+                <div class="check-item">
+                    <label>
+                        <input type="checkbox" name="print_color"
+                               {% if settings.print_color %}checked{% endif %}>
+                        الطباعة بالألوان
+                    </label>
+                </div>
+
+                <div class="check-item">
+                    <label>
+                        <input type="checkbox" name="rtl_layout"
+                               {% if settings.rtl_layout %}checked{% endif %}>
+                        اتجاه عربي RTL
+                    </label>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- العلامة المائية -->
+        <div class="settings-card">
+            <h4>💧 العلامة المائية</h4>
+
+            <div class="check-grid">
+
+                <div class="check-item">
+                    <label>
+                        <input type="checkbox" name="watermark_enabled"
+                               {% if settings.watermark_enabled %}checked{% endif %}>
+                        تفعيل العلامة المائية
+                    </label>
+                </div>
+
+            </div>
+
+            <div class="row g-3 mt-2">
+
+                <div class="col-md-8">
+                    <label class="form-label">نص العلامة المائية</label>
+                    <input type="text" name="watermark_text"
+                           class="form-control"
+                           value="{{ settings.watermark_text }}">
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">شفافية العلامة</label>
+                    <input type="number" step="0.01" min="0" max="1"
+                           name="watermark_opacity"
+                           class="form-control"
+                           value="{{ settings.watermark_opacity }}">
+                </div>
+
+            </div>
+        </div>
+
+        <!-- الورق -->
+        <div class="settings-card">
+            <h4>🖨️ إعدادات الورق والطباعة</h4>
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <label class="form-label">حجم الورق</label>
+                    <select name="paper_size" class="form-select">
+                        <option value="A4" {% if settings.paper_size == "A4" %}selected{% endif %}>A4</option>
+                        <option value="A5" {% if settings.paper_size == "A5" %}selected{% endif %}>A5</option>
+                        <option value="LETTER" {% if settings.paper_size == "LETTER" %}selected{% endif %}>Letter</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">اتجاه الصفحة</label>
+                    <select name="orientation" class="form-select">
+                        <option value="PORTRAIT" {% if settings.orientation == "PORTRAIT" %}selected{% endif %}>عمودي Portrait</option>
+                        <option value="LANDSCAPE" {% if settings.orientation == "LANDSCAPE" %}selected{% endif %}>أفقي Landscape</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">الهامش العلوي mm</label>
+                    <input type="number" step="0.1" name="margin_top" class="form-control" value="{{ settings.margin_top }}">
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">الهامش السفلي mm</label>
+                    <input type="number" step="0.1" name="margin_bottom" class="form-control" value="{{ settings.margin_bottom }}">
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">الهامش الأيسر mm</label>
+                    <input type="number" step="0.1" name="margin_left" class="form-control" value="{{ settings.margin_left }}">
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">الهامش الأيمن mm</label>
+                    <input type="number" step="0.1" name="margin_right" class="form-control" value="{{ settings.margin_right }}">
+                </div>
+
+            </div>
+
+            <div class="check-grid mt-3">
+
+                <div class="check-item">
+                    <label>
+                        <input type="checkbox" name="show_page_number"
+                               {% if settings.show_page_number %}checked{% endif %}>
+                        إظهار رقم الصفحة
+                    </label>
+                </div>
+
+                <div class="check-item">
+                    <label>
+                        <input type="checkbox" name="show_print_datetime"
+                               {% if settings.show_print_datetime %}checked{% endif %}>
+                        إظهار تاريخ الطباعة
+                    </label>
+                </div>
+
+            </div>
+        </div>
+
+        
+<!-- لغة التقرير وأسماء التحاليل -->
+<div class="settings-card">
+    <h4>🌐 لغة التقرير وأسماء التحاليل</h4>
+
+    <div class="row g-3">
+
+        <div class="col-md-4">
+            <label class="form-label">🌐 لغة التقرير</label>
+            <select name="report_language" class="form-select">
+                <option value="AR"
+                    {% if settings.report_language == "AR" %}selected{% endif %}>
+                    العربية
+                </option>
+
+                <option value="EN"
+                    {% if settings.report_language == "EN" %}selected{% endif %}>
+                    English
+                </option>
+
+                <option value="BOTH"
+                    {% if settings.report_language == "BOTH" %}selected{% endif %}>
+                    العربية + English
+                </option>
+            </select>
+
+            <div class="form-text">
+                تحدد لغة عناوين وبيانات التقرير.
+            </div>
+        </div>
+
+
+        <div class="col-md-4">
+            <label class="form-label">🧪 لغة أسماء التحاليل</label>
+            <select name="test_name_language" class="form-select">
+                <option value="AR"
+                    {% if settings.test_name_language == "AR" %}selected{% endif %}>
+                    العربية
+                </option>
+
+                <option value="EN"
+                    {% if settings.test_name_language == "EN" %}selected{% endif %}>
+                    English
+                </option>
+
+                <option value="BOTH"
+                    {% if settings.test_name_language == "BOTH" %}selected{% endif %}>
+                    العربية + English
+                </option>
+            </select>
+
+            <div class="form-text">
+                تحدد اللغة المستخدمة في اسم الفحص.
+            </div>
+        </div>
+
+
+        <div class="col-md-4">
+            <label class="form-label">✂️ طريقة عرض اسم التحليل</label>
+            <select name="test_name_display" class="form-select">
+
+                <option value="FULL"
+                    {% if settings.test_name_display == "FULL" %}selected{% endif %}>
+                    الاسم الكامل
+                </option>
+
+                <option value="SHORT"
+                    {% if settings.test_name_display == "SHORT" %}selected{% endif %}>
+                    الاسم المختصر
+                </option>
+
+                <option value="FULL_SHORT"
+                    {% if settings.test_name_display == "FULL_SHORT" %}selected{% endif %}>
+                    الاسم الكامل + المختصر
+                </option>
+
+            </select>
+
+            <div class="form-text">
+                مثال: Complete Blood Count (CBC)
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- أحجام أعمدة جدول النتائج -->
+<div class="settings-card">
+    <h4>📐 أحجام أعمدة جدول النتائج</h4>
+
+    <div class="check-item mb-3">
+        <label>
+            <input
+                type="checkbox"
+                name="auto_column_widths"
+                {% if settings.auto_column_widths %}checked{% endif %}
+            >
+            ضبط أحجام الأعمدة تلقائياً حسب عرض الصفحة
+        </label>
+    </div>
+
+    <div class="row g-3">
+
+        <div class="col-md-3">
+            <label class="form-label"># رقم</label>
+            <input type="number" step="0.1"
+                   name="column_width_number"
+                   class="form-control"
+                   value="{{ settings.column_width_number }}">
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Test التحليل</label>
+            <input type="number" step="0.1"
+                   name="column_width_test"
+                   class="form-control"
+                   value="{{ settings.column_width_test }}">
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Code الكود</label>
+            <input type="number" step="0.1"
+                   name="column_width_test_code"
+                   class="form-control"
+                   value="{{ settings.column_width_test_code }}">
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Result النتيجة</label>
+            <input type="number" step="0.1"
+                   name="column_width_result"
+                   class="form-control"
+                   value="{{ settings.column_width_result }}">
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Unit الوحدة</label>
+            <input type="number" step="0.1"
+                   name="column_width_unit"
+                   class="form-control"
+                   value="{{ settings.column_width_unit }}">
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Reference المجال المرجعي</label>
+            <input type="number" step="0.1"
+                   name="column_width_reference"
+                   class="form-control"
+                   value="{{ settings.column_width_reference }}">
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Flag العلامة</label>
+            <input type="number" step="0.1"
+                   name="column_width_flag"
+                   class="form-control"
+                   value="{{ settings.column_width_flag }}">
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Critical الحالات الحرجة</label>
+            <input type="number" step="0.1"
+                   name="column_width_critical"
+                   class="form-control"
+                   value="{{ settings.column_width_critical }}">
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Sample العينة</label>
+            <input type="number" step="0.1"
+                   name="column_width_sample"
+                   class="form-control"
+                   value="{{ settings.column_width_sample }}">
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Device الجهاز</label>
+            <input type="number" step="0.1"
+                   name="column_width_device"
+                   class="form-control"
+                   value="{{ settings.column_width_device }}">
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Reagent الكاشف</label>
+            <input type="number" step="0.1"
+                   name="column_width_reagent"
+                   class="form-control"
+                   value="{{ settings.column_width_reagent }}">
+        </div>
+
+    </div>
+
+    <div class="alert alert-info mt-3 mb-0">
+        💡 القيم بوحدة mm. عند تفعيل الضبط التلقائي سيقوم النظام بتصغير الأعمدة
+        أو توزيع المساحة المتبقية بما يتناسب مع حجم الورق واتجاه التقرير.
+    </div>
+</div>
+
+<!-- التذييل -->
+        <div class="settings-card">
+            <h4>📌 تذييل التقرير</h4>
+
+            <div class="check-grid mb-3">
+
+                <div class="check-item">
+                    <label>
+                        <input type="checkbox" name="show_footer"
+                               {% if settings.show_footer %}checked{% endif %}>
+                        إظهار التذييل
+                    </label>
+                </div>
+
+            </div>
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <label class="form-label">التذييل بالعربي</label>
+                    <textarea name="report_footer"
+                              class="form-control"
+                              rows="3">{{ settings.report_footer }}</textarea>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Footer English</label>
+                    <textarea name="report_footer_en"
+                              class="form-control"
+                              rows="3">{{ settings.report_footer_en }}</textarea>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="sticky-actions d-flex gap-2 justify-content-center">
+
+            <button type="submit"
+                    class="btn btn-primary btn-lg px-5">
+                💾 حفظ جميع إعدادات التقرير
+            </button>
+
+            <a href="{% url 'laboratory:dashboard' %}"
+               class="btn btn-outline-secondary btn-lg">
+                العودة للوحة التحكم
+            </a>
+
+        </div>
+
+    </form>
+</div>
+
+{% endblock %}

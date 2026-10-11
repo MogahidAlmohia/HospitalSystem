@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}مواقع التخزين{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+<h3 class="mb-3">مواقع التخزين</h3>
+
+{% if can_create %}
+<div class="card shadow-sm mb-3">
+<div class="card-body">
+<form method="post">
+{% csrf_token %}
+<div class="row g-2">
+{% for field in form %}
+<div class="col-12 col-md-6">
+<label class="form-label">{{ field.label }}</label>
+{{ field }}
+{% for error in field.errors %}<small class="text-danger d-block">{{ error }}</small>{% endfor %}
+</div>
+{% endfor %}
+</div>
+<button class="btn btn-primary mt-3">إضافة موقع</button>
+</form>
+</div>
+</div>
+{% endif %}
+
+<div class="card shadow-sm">
+<div class="card-body p-0">
+{% if locations %}
+<div class="table-responsive">
+<table class="table table-hover mb-0">
+<thead><tr><th>المستودع</th><th>الرمز</th><th>الموقع</th><th>الحالة</th></tr></thead>
+<tbody>
+{% for row in locations %}
+<tr>
+<td>{{ row.warehouse.name_ar }}</td>
+<td>{{ row.code }}</td>
+<td>{{ row.name_ar }}<small class="d-block text-muted">{{ row.name_en }}</small></td>
+<td>{% if row.is_active %}نشط{% else %}غير نشط{% endif %}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% else %}
+<div class="p-5 text-center text-muted">لا توجد مواقع تخزين مسجلة حاليًا.</div>
+{% endif %}
+</div>
+</div>
+</div>
+{% endblock %}

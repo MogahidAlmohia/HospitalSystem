@@ -1,0 +1,369 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <div>
+            <h2 class="mb-1">إدارة المخزون</h2>
+            <div class="text-muted">المخزون العام للمستشفى</div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{% url 'inventory:receive' %}" class="btn btn-primary">+ استلام</a>
+            <a href="{% url 'inventory:issue' %}" class="btn btn-warning">− صرف</a>
+            <a href="{% url 'inventory:stock_list' %}" class="btn btn-outline-primary">رصيد المخزون</a>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-6 col-xl-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="text-muted small">الأصناف النشطة</div>
+                    <div class="fs-3 fw-bold">{{ active_items }}</div>
+                    <a href="{% url 'inventory:item_list' %}" class="small">عرض الأصناف</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="text-muted small">المستودعات النشطة</div>
+                    <div class="fs-3 fw-bold">{{ active_warehouses }}</div>
+                    <a href="{% url 'inventory:warehouse_list' %}" class="small">عرض المستودعات</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="text-muted small">الأصناف منخفضة المخزون</div>
+                    <div class="fs-3 fw-bold text-warning">{{ low_stock_count }}</div>
+                    <a href="{% url 'inventory:stock_list' %}" class="small">فحص المخزون</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="text-muted small">دفعات منتهية</div>
+                    <div class="fs-3 fw-bold text-danger">{{ expired_count }}</div>
+                    <a href="{% url 'inventory:stock_list' %}" class="small">عرض الدفعات</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="text-muted">إجمالي الكمية الحالية</div>
+                    <div class="fs-4 fw-bold">{{ total_stock }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="text-muted">دفعات تنتهي خلال 30 يومًا</div>
+                    <div class="fs-4 fw-bold text-warning">{{ expiring_count }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="text-muted">قيمة المخزون الحالية</div>
+                    <div class="fs-4 fw-bold">
+                        {{ total_stock_value|floatformat:2 }}
+                    </div>
+                    <div class="small text-muted">حسب تكلفة الوحدة لكل Batch</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="text-muted">التحويلات المعلقة</div>
+                    <div class="fs-4 fw-bold">{{ pending_transfers }}</div>
+                    <a href="{% url 'inventory:transfer_list' %}">إدارة التحويلات</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- =====================================================
+         INVENTORY ALERTS
+         ===================================================== -->
+
+    <div class="row g-3 mb-4">
+
+        <!-- Low Stock -->
+        <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-warning bg-opacity-10 border-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <strong class="text-warning">
+                            ⚠️ أصناف منخفضة المخزون
+                        </strong>
+                        <span class="badge bg-warning text-dark">
+                            {{ low_stock_items|length }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="card-body p-0">
+                    {% if low_stock_items %}
+                        <div class="list-group list-group-flush">
+                            {% for item in low_stock_items|slice:":8" %}
+                                <div class="list-group-item">
+                                    <div class="fw-bold">
+                                        {{ item.name_ar }}
+                                    </div>
+
+                                    <div class="small text-muted">
+                                        {{ item.code }}
+                                    </div>
+
+                                    <div class="d-flex justify-content-between mt-2">
+                                        <span>
+                                            الرصيد:
+                                            <strong class="text-danger">
+                                                {{ item.current_quantity }}
+                                            </strong>
+                                        </span>
+
+                                        <span>
+                                            حد الطلب:
+                                            <strong>
+                                                {{ item.reorder_level }}
+                                            </strong>
+                                        </span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        {% if low_stock_items|length > 8 %}
+                            <div class="text-center small text-muted py-2">
+                                يتم عرض أول 8 أصناف فقط.
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center text-success py-4">
+                            <div class="fs-3">✓</div>
+                            <div>لا توجد أصناف منخفضة المخزون.</div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Expired Batches -->
+        <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-danger bg-opacity-10 border-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <strong class="text-danger">
+                            🔴 دفعات منتهية الصلاحية
+                        </strong>
+                        <span class="badge bg-danger">
+                            {{ expired_batches|length }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="card-body p-0">
+                    {% if expired_batches %}
+                        <div class="list-group list-group-flush">
+                            {% for batch in expired_batches|slice:":8" %}
+                                <div class="list-group-item">
+                                    <div class="fw-bold">
+                                        {{ batch.item.name_ar }}
+                                    </div>
+
+                                    <div class="small text-muted">
+                                        Batch:
+                                        {{ batch.batch_number|default:"غير محدد" }}
+                                    </div>
+
+                                    <div class="d-flex justify-content-between mt-2">
+                                        <span>
+                                            الكمية:
+                                            <strong class="text-danger">
+                                                {{ batch.quantity }}
+                                            </strong>
+                                        </span>
+
+                                        <span class="text-danger">
+                                            {{ batch.expiry_date|date:"Y-m-d" }}
+                                        </span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        {% if expired_batches|length > 8 %}
+                            <div class="text-center small text-muted py-2">
+                                يتم عرض أول 8 دفعات فقط.
+                            </div>
+                        {% endif %}
+
+                    {% else %}
+                        <div class="text-center text-success py-4">
+                            <div class="fs-3">✓</div>
+                            <div>لا توجد دفعات منتهية الصلاحية.</div>
+                        </div>
+                    {% endif %}
+
+                    <div class="text-center py-2 border-top">
+                        <a href="{% url 'inventory:expired_list' %}"
+                           class="btn btn-sm btn-outline-danger">
+                            عرض جميع الدفعات المنتهية
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expiring Soon -->
+        <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-info bg-opacity-10 border-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <strong class="text-info">
+                            ⏳ تنتهي خلال 30 يومًا
+                        </strong>
+                        <span class="badge bg-info text-dark">
+                            {{ expiring_batches|length }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="card-body p-0">
+                    {% if expiring_batches %}
+                        <div class="list-group list-group-flush">
+                            {% for batch in expiring_batches|slice:":8" %}
+                                <div class="list-group-item">
+                                    <div class="fw-bold">
+                                        {{ batch.item.name_ar }}
+                                    </div>
+
+                                    <div class="small text-muted">
+                                        Batch:
+                                        {{ batch.batch_number|default:"غير محدد" }}
+                                    </div>
+
+                                    <div class="d-flex justify-content-between mt-2">
+                                        <span>
+                                            الكمية:
+                                            <strong class="text-warning">
+                                                {{ batch.quantity }}
+                                            </strong>
+                                        </span>
+
+                                        <span class="text-warning">
+                                            {{ batch.expiry_date|date:"Y-m-d" }}
+                                        </span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        {% if expiring_batches|length > 8 %}
+                            <div class="text-center small text-muted py-2">
+                                يتم عرض أول 8 دفعات فقط.
+                            </div>
+                        {% endif %}
+
+                        <div class="text-center py-2 border-top">
+                            <a href="{% url 'inventory:expiring_list' %}"
+                               class="btn btn-sm btn-outline-info">
+                                عرض جميع الدفعات القريبة
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="text-center text-success py-4">
+                            <div class="fs-3">✓</div>
+                            <div>لا توجد دفعات ستنتهي خلال 30 يومًا.</div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 mb-3">
+        <a href="{% url 'inventory:movement_list' %}"
+           class="btn btn-outline-primary">
+            📋 سجل حركات المخزون
+        </a>
+
+        <a href="{% url 'inventory:stock_value_report' %}"
+           class="btn btn-outline-success">
+            💰 تقرير قيمة المخزون
+        </a>
+
+        <a href="{% url 'inventory:stock_summary_report' %}"
+           class="btn btn-outline-info">
+            📊 تقرير المخزون حسب الصنف
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-transparent fw-bold">
+            آخر حركات المخزون
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>التاريخ</th>
+                            <th>الصنف</th>
+                            <th>المستودع</th>
+                            <th>الحركة</th>
+                            <th>الكمية</th>
+                            <th>المستخدم</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for movement in recent_movements %}
+                        <tr>
+                            <td>{{ movement.created_at|date:"Y-m-d H:i" }}</td>
+                            <td>
+                                {{ movement.batch.item.name_ar }}
+                                <small class="d-block text-muted">{{ movement.batch.item.code }}</small>
+                            </td>
+                            <td>{{ movement.batch.warehouse.name_ar }}</td>
+                            <td>{{ movement.get_movement_type_display }}</td>
+                            <td>{{ movement.quantity }}</td>
+                            <td>{{ movement.performed_by }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                لا توجد حركات مخزون حتى الآن.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

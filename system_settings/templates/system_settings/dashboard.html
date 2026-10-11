@@ -1,0 +1,854 @@
+{% load system_settings_tags %}
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>الإعدادات العامة | HIS / LIS</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family:
+                "Noto Sans Arabic",
+                "Tahoma",
+                "Arial",
+                sans-serif;
+
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        .topbar {
+            background: linear-gradient(135deg, #0f4c81, #1976b9);
+            color: white;
+            padding: 18px 20px;
+            box-shadow: 0 3px 12px rgba(0,0,0,.12);
+        }
+
+        .topbar-inner {
+            max-width: 1300px;
+            margin: auto;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 15px;
+        }
+
+        .brand h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .brand p {
+            margin: 5px 0 0;
+            opacity: .9;
+            font-size: 13px;
+        }
+
+        .back-btn {
+            color: white;
+            text-decoration: none;
+
+            border: 1px solid rgba(255,255,255,.45);
+
+            padding: 9px 14px;
+            border-radius: 9px;
+
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,.12);
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 25px auto;
+            padding: 0 15px;
+        }
+
+        .summary {
+            background: white;
+
+            border-radius: 15px;
+            padding: 18px;
+
+            margin-bottom: 20px;
+
+            box-shadow: 0 2px 10px rgba(0,0,0,.06);
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .summary-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .summary-subtitle {
+            margin-top: 5px;
+            color: #7b8794;
+            font-size: 12px;
+        }
+
+        .summary-count {
+            background: #e8f3fb;
+            color: #0f4c81;
+
+            border-radius: 20px;
+
+            padding: 7px 14px;
+
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .messages {
+            margin-bottom: 18px;
+        }
+
+        .message {
+            padding: 13px 15px;
+            border-radius: 10px;
+
+            margin-bottom: 8px;
+
+            background: #e8f5e9;
+            color: #256029;
+
+            border: 1px solid #c8e6c9;
+
+            font-size: 14px;
+        }
+
+        .settings-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+
+            gap: 18px;
+        }
+
+        .card {
+            background: white;
+
+            border-radius: 15px;
+
+            box-shadow: 0 2px 10px rgba(0,0,0,.06);
+
+            overflow: hidden;
+
+            border: 1px solid #e7edf4;
+        }
+
+        .card-header {
+            padding: 15px 17px;
+
+            background: #f8fbfe;
+
+            border-bottom: 1px solid #e6edf4;
+
+            display: flex;
+            align-items: center;
+
+            gap: 10px;
+        }
+
+        .card-icon {
+            font-size: 24px;
+        }
+
+        .card-title {
+            font-size: 17px;
+            font-weight: 700;
+
+            color: #0f4c81;
+        }
+
+        .card-code {
+            margin-right: auto;
+
+            font-size: 10px;
+            color: #8a97a6;
+
+            direction: ltr;
+        }
+
+        .card-body {
+            padding: 15px 17px;
+        }
+
+        .setting-row {
+            padding: 13px 0;
+
+            border-bottom: 1px solid #edf1f5;
+        }
+
+        .setting-row:last-child {
+            border-bottom: 0;
+        }
+
+        .setting-label {
+            display: block;
+
+            font-weight: 700;
+            font-size: 14px;
+
+            margin-bottom: 5px;
+        }
+
+        .setting-key {
+            display: block;
+
+            font-size: 10px;
+            color: #9aa5b1;
+
+            direction: ltr;
+            text-align: right;
+
+            margin-bottom: 7px;
+        }
+
+        .setting-description {
+            font-size: 11px;
+            color: #7b8794;
+
+            margin-bottom: 8px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="email"],
+        select,
+        textarea {
+
+            width: 100%;
+
+            border: 1px solid #cbd5e1;
+
+            border-radius: 8px;
+
+            padding: 10px 11px;
+
+            background: white;
+
+            font-size: 14px;
+
+            outline: none;
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+
+            border-color: #1976b9;
+
+            box-shadow:
+                0 0 0 3px rgba(25,118,185,.1);
+        }
+
+        .switch-wrap {
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+        }
+
+        .switch {
+            position: relative;
+
+            display: inline-block;
+
+            width: 48px;
+            height: 26px;
+        }
+
+        .switch input {
+            opacity: 0;
+
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+
+            inset: 0;
+
+            cursor: pointer;
+
+            background: #cbd5e1;
+
+            border-radius: 30px;
+
+            transition: .2s;
+        }
+
+        .slider:before {
+            content: "";
+
+            position: absolute;
+
+            width: 20px;
+            height: 20px;
+
+            right: 3px;
+            top: 3px;
+
+            background: white;
+
+            border-radius: 50%;
+
+            transition: .2s;
+
+            box-shadow:
+                0 1px 3px rgba(0,0,0,.25);
+        }
+
+        .switch input:checked + .slider {
+            background: #1976b9;
+        }
+
+        .switch input:checked + .slider:before {
+            transform: translateX(-22px);
+        }
+
+        .switch-status {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .hint {
+            background: #f1f7fc;
+
+            border-right: 4px solid #1976b9;
+
+            padding: 10px 12px;
+
+            border-radius: 7px;
+
+            color: #496273;
+
+            font-size: 12px;
+
+            margin-top: 8px;
+        }
+
+        .save-bar {
+            position: sticky;
+
+            bottom: 0;
+
+            z-index: 20;
+
+            background: rgba(255,255,255,.97);
+
+            border-top: 1px solid #dbe4ec;
+
+            padding: 14px;
+
+            margin-top: 22px;
+
+            box-shadow:
+                0 -3px 12px rgba(0,0,0,.08);
+
+            border-radius: 12px 12px 0 0;
+        }
+
+        .save-btn {
+            width: 100%;
+
+            border: 0;
+
+            border-radius: 10px;
+
+            background: #0f4c81;
+
+            color: white;
+
+            padding: 14px;
+
+            font-size: 16px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+        }
+
+        .save-btn:hover {
+            background: #0b3d68;
+        }
+
+        .footer {
+            text-align: center;
+
+            color: #8a97a6;
+
+            font-size: 11px;
+
+            padding: 25px 10px 35px;
+        }
+
+        @media (max-width: 800px) {
+
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .topbar-inner {
+                align-items: flex-start;
+            }
+
+            .brand h1 {
+                font-size: 20px;
+            }
+        }
+
+        @media (max-width: 500px) {
+
+            .container {
+                padding: 0 10px;
+                margin-top: 15px;
+            }
+
+            .topbar {
+                padding: 14px 12px;
+            }
+
+            .topbar-inner {
+                flex-direction: column;
+            }
+
+            .back-btn {
+                width: 100%;
+                text-align: center;
+            }
+
+            .summary {
+                padding: 14px;
+            }
+
+            .card-header {
+                padding: 13px;
+            }
+
+            .card-body {
+                padding: 12px 13px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="topbar">
+
+    <div class="topbar-inner">
+
+        <div class="brand">
+
+            <h1>
+                ⚙️ الإعدادات العامة
+            </h1>
+
+            <p>
+                HIS / LIS — الإدارة المركزية للنظام
+            </p>
+
+        </div>
+
+        <a
+            href="/accounts/"
+            class="back-btn"
+        >
+            ← العودة إلى لوحة النظام
+        </a>
+
+    </div>
+
+</header>
+
+
+<main class="container">
+
+    {% if messages %}
+
+        <div class="messages">
+
+            {% for message in messages %}
+
+                <div class="message">
+                    {{ message }}
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% endif %}
+
+
+    <section class="summary">
+
+        <div>
+
+            <div class="summary-title">
+                إعدادات المستشفى والنظام المركزي
+            </div>
+
+            <div class="summary-subtitle">
+                يتم تطبيق هذه الإعدادات على الوحدات المرتبطة بها في نظام HIS / LIS.
+            </div>
+
+        </div>
+
+        <div class="summary-count">
+            {{ total_settings }} إعداد محفوظ
+        </div>
+
+    </section>
+
+
+    <form
+        method="post"
+        action="{% url 'system_settings:update' %}"
+    >
+
+        {% csrf_token %}
+
+
+        <div class="settings-grid">
+
+
+            {% for code, icon, title in categories %}
+
+                {% with group=settings_by_category|get_item:code %}
+
+                    <section class="card">
+
+                        <div class="card-header">
+
+                            <span class="card-icon">
+                                {{ icon }}
+                            </span>
+
+                            <span class="card-title">
+                                {{ title }}
+                            </span>
+
+                            <span class="card-code">
+                                {{ code }}
+                            </span>
+
+                        </div>
+
+
+                        <div class="card-body">
+
+                            {% for setting in group.items %}
+
+                                <div class="setting-row">
+
+                                    <label class="setting-label">
+                                        {{ setting.description|default:setting.key }}
+                                    </label>
+
+                                    <span class="setting-key">
+                                        {{ setting.key }}
+                                    </span>
+
+
+                                    {% if setting.key == "numbering.patient_mode" %}
+
+                                        <select
+                                            name="setting_{{ setting.id }}"
+                                        >
+
+                                            <option
+                                                value="AUTO"
+                                                {% if setting.value == "AUTO" %}
+                                                    selected
+                                                {% endif %}
+                                            >
+                                                تلقائي — AUTO
+                                            </option>
+
+                                            <option
+                                                value="MANUAL"
+                                                {% if setting.value == "MANUAL" %}
+                                                    selected
+                                                {% endif %}
+                                            >
+                                                يدوي — MANUAL
+                                            </option>
+
+                                        </select>
+
+
+                                        <div class="hint">
+                                            AUTO ينشئ رقم المريض تلقائيًا،
+                                            وMANUAL يسمح بإدخال الرقم يدويًا من نموذج تسجيل المريض.
+                                        </div>
+
+
+                                    {% elif setting.key == "laboratory.default_priority" %}
+
+                                        <select
+                                            name="setting_{{ setting.id }}"
+                                        >
+
+                                            <option
+                                                value="NORMAL"
+                                                {% if setting.value == "NORMAL" %}
+                                                    selected
+                                                {% endif %}
+                                            >
+                                                عادي — NORMAL
+                                            </option>
+
+                                            <option
+                                                value="URGENT"
+                                                {% if setting.value == "URGENT" %}
+                                                    selected
+                                                {% endif %}
+                                            >
+                                                عاجل — URGENT
+                                            </option>
+
+                                            <option
+                                                value="STAT"
+                                                {% if setting.value == "STAT" %}
+                                                    selected
+                                                {% endif %}
+                                            >
+                                                طارئ جدًا — STAT
+                                            </option>
+
+                                        </select>
+
+
+                                    {% elif setting.key == "localization.language" %}
+
+                                        <select
+                                            name="setting_{{ setting.id }}"
+                                        >
+
+                                            <option
+                                                value="ar"
+                                                {% if setting.value == "ar" %}
+                                                    selected
+                                                {% endif %}
+                                            >
+                                                العربية — ar
+                                            </option>
+
+                                            <option
+                                                value="en"
+                                                {% if setting.value == "en" %}
+                                                    selected
+                                                {% endif %}
+                                            >
+                                                English — en
+                                            </option>
+
+                                        </select>
+
+
+                                    {% elif setting.key == "localization.timezone" %}
+
+                                        <select
+                                            name="setting_{{ setting.id }}"
+                                        >
+
+                                            <option
+                                                value="Asia/Aden"
+                                                {% if setting.value == "Asia/Aden" %}
+                                                    selected
+                                                {% endif %}
+                                            >
+                                                اليمن — Asia/Aden
+                                            </option>
+
+                                            <option
+                                                value="UTC"
+                                                {% if setting.value == "UTC" %}
+                                                    selected
+                                                {% endif %}
+                                            >
+                                                UTC
+                                            </option>
+
+                                        </select>
+
+
+                                    {% elif setting.key == "localization.date_format" %}
+
+                                        <select
+                                            name="setting_{{ setting.id }}"
+                                        >
+
+                                            <option
+                                                value="DD/MM/YYYY"
+                                                {% if setting.value == "DD/MM/YYYY" %}
+                                                    selected
+                                                {% endif %}
+                                            >
+                                                يوم / شهر / سنة
+                                            </option>
+
+                                            <option
+                                                value="YYYY-MM-DD"
+                                                {% if setting.value == "YYYY-MM-DD" %}
+                                                    selected
+                                                {% endif %}
+                                            >
+                                                سنة / شهر / يوم
+                                            </option>
+
+                                        </select>
+
+
+                                    {% elif setting.value == "true" or setting.value == "false" %}
+
+                                        <div class="switch-wrap">
+
+                                            <label class="switch">
+
+                                                <input
+                                                    type="checkbox"
+                                                    name="setting_{{ setting.id }}"
+                                                    value="true"
+
+                                                    {% if setting.value == "true" %}
+                                                        checked
+                                                    {% endif %}
+                                                >
+
+                                                <span class="slider"></span>
+
+                                            </label>
+
+
+                                            <span class="switch-status">
+
+                                                {% if setting.value == "true" %}
+
+                                                    مفعّل
+
+                                                {% else %}
+
+                                                    غير مفعّل
+
+                                                {% endif %}
+
+                                            </span>
+
+                                        </div>
+
+
+                                    {% elif setting.key == "reports.footer_text" %}
+
+                                        <textarea
+                                            name="setting_{{ setting.id }}"
+                                            autocomplete="off"
+                                        >{{ setting.value }}</textarea>
+
+
+                                    {% elif setting.key == "hospital.email" %}
+
+                                        <input
+                                            type="email"
+                                            name="setting_{{ setting.id }}"
+                                            value="{{ setting.value }}"
+                                            autocomplete="off"
+                                        >
+
+
+                                    {% else %}
+
+                                        <input
+                                            type="text"
+                                            name="setting_{{ setting.id }}"
+                                            value="{{ setting.value }}"
+                                            autocomplete="off"
+                                        >
+
+                                    {% endif %}
+
+                                </div>
+
+                            {% empty %}
+
+                                <div
+                                    style="
+                                        color:#8a97a6;
+                                        font-size:13px;
+                                        padding:10px 0;
+                                    "
+                                >
+                                    لا توجد إعدادات في هذا القسم.
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+                    </section>
+
+                {% endwith %}
+
+            {% endfor %}
+
+        </div>
+
+
+        <div class="save-bar">
+
+            <button
+                type="submit"
+                class="save-btn"
+            >
+                💾 حفظ جميع الإعدادات
+            </button>
+
+        </div>
+
+    </form>
+
+
+    <div class="footer">
+
+        HIS / LIS — System Settings
+
+        <br>
+
+        الإدارة المركزية للنظام
+
+    </div>
+
+</main>
+
+</body>
+</html>

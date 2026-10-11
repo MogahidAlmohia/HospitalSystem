@@ -1,0 +1,419 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+.delivery-shell{max-width:1600px;margin:auto}.delivery-shell>div{border-color:#e5eaf1!important;box-shadow:0 8px 24px rgba(15,23,42,.06)!important}.delivery-shell h2{color:#17324d}.delivery-shell table tbody tr{transition:.18s}.delivery-shell table tbody tr:hover{background:#f4f9ff}
+</style>
+
+<div dir="rtl" style="padding:20px;max-width:1500px;margin:auto;">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
+        <div>
+            <h2 style="margin:0;font-weight:800;">📤 متابعة إرسال واستلام نتائج المختبر</h2>
+            <div style="color:#6c757d;margin-top:6px;">
+                متابعة جميع عمليات إرسال نتائج المختبر إلى الأقسام والأطباء
+            </div>
+        </div>
+
+        <a href="{% url 'laboratory:dashboard' %}"
+           class="btn btn-secondary">
+            ← لوحة المختبر
+        </a>
+    </div>
+
+
+    <!-- الإحصائيات -->
+
+    <div style="
+        display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+        gap:15px;
+        margin-bottom:25px;
+    ">
+
+        <div style="background:#fff;border-radius:14px;padding:20px;
+                    box-shadow:0 3px 12px rgba(0,0,0,.08);
+                    border-right:5px solid #0d6efd;">
+            <div style="color:#6c757d;">إجمالي عمليات الإرسال</div>
+            <div style="font-size:32px;font-weight:800;margin-top:8px;">
+                {{ total_count }}
+            </div>
+        </div>
+
+        <div style="background:#fff;border-radius:14px;padding:20px;
+                    box-shadow:0 3px 12px rgba(0,0,0,.08);
+                    border-right:5px solid #198754;">
+            <div style="color:#6c757d;">تم الاستلام</div>
+            <div style="font-size:32px;font-weight:800;color:#198754;margin-top:8px;">
+                {{ received_count }}
+            </div>
+        </div>
+
+        <div style="background:#fff;border-radius:14px;padding:20px;
+                    box-shadow:0 3px 12px rgba(0,0,0,.08);
+                    border-right:5px solid #ffc107;">
+            <div style="color:#6c757d;">بانتظار الاستلام</div>
+            <div style="font-size:32px;font-weight:800;color:#997404;margin-top:8px;">
+                {{ pending_count }}
+            </div>
+        </div>
+
+        <div style="background:#fff;border-radius:14px;padding:20px;
+                    box-shadow:0 3px 12px rgba(0,0,0,.08);
+                    border-right:5px solid #6f42c1;">
+            <div style="color:#6c757d;">إرسال اليوم</div>
+            <div style="font-size:32px;font-weight:800;color:#6f42c1;margin-top:8px;">
+                {{ today_count }}
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- البحث والفلترة -->
+
+    <div style="
+        background:#fff;
+        border-radius:14px;
+        padding:20px;
+        box-shadow:0 3px 12px rgba(0,0,0,.08);
+        margin-bottom:25px;
+    ">
+
+        <h5 style="font-weight:800;margin-bottom:18px;">
+            🔎 البحث والفلترة
+        </h5>
+
+        <form method="get">
+
+            <div style="
+                display:grid;
+                grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+                gap:12px;
+            ">
+
+                <div>
+                    <label class="form-label">البحث</label>
+                    <input
+                        type="text"
+                        name="q"
+                        value="{{ q }}"
+                        class="form-control"
+                        placeholder="اسم المريض أو رقم الطلب">
+                </div>
+
+                <div>
+                    <label class="form-label">حالة الاستلام</label>
+                    <select name="status" class="form-select">
+                        <option value="">كل الحالات</option>
+                        <option value="received"
+                            {% if status == "received" %}selected{% endif %}>
+                            ✅ تم الاستلام
+                        </option>
+                        <option value="pending"
+                            {% if status == "pending" %}selected{% endif %}>
+                            ⏳ بانتظار الاستلام
+                        </option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="form-label">القسم</label>
+                    <select name="department_id" class="form-select">
+                        <option value="">كل الأقسام</option>
+
+                        {% for department in departments %}
+                            <option value="{{ department.id }}"
+                                {% if department_id == department.id|stringformat:"s" %}
+                                    selected
+                                {% endif %}>
+                                {{ department.name_ar }} - {{ department.name_en }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="form-label">الطبيب</label>
+                    <select name="doctor_id" class="form-select">
+                        <option value="">كل الأطباء</option>
+
+                        {% for doctor in doctors %}
+                            <option value="{{ doctor.id }}"
+                                {% if doctor_id == doctor.id|stringformat:"s" %}
+                                    selected
+                                {% endif %}>
+                                {{ doctor.full_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="form-label">من تاريخ</label>
+                    <input
+                        type="date"
+                        name="date_from"
+                        value="{{ date_from }}"
+                        class="form-control">
+                </div>
+
+                <div>
+                    <label class="form-label">إلى تاريخ</label>
+                    <input
+                        type="date"
+                        name="date_to"
+                        value="{{ date_to }}"
+                        class="form-control">
+                </div>
+
+            </div>
+
+            <div style="margin-top:15px;display:flex;gap:10px;flex-wrap:wrap;">
+
+                <button type="submit" class="btn btn-primary">
+                    🔎 بحث
+                </button>
+
+                <a href="{% url 'laboratory:result_delivery_dashboard' %}"
+                   class="btn btn-outline-secondary">
+                    إعادة ضبط
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- جدول النتائج -->
+
+    <div style="
+        background:#fff;
+        border-radius:14px;
+        padding:20px;
+        box-shadow:0 3px 12px rgba(0,0,0,.08);
+    ">
+
+        <div style="
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            flex-wrap:wrap;
+            gap:10px;
+            margin-bottom:15px;
+        ">
+
+            <h5 style="font-weight:800;margin:0;">
+                📋 سجل إرسال واستلام النتائج
+            </h5>
+
+            <span style="color:#6c757d;">
+                عدد السجلات المعروضة:
+                <strong>{{ deliveries|length }}</strong>
+            </span>
+
+        </div>
+
+
+        {% if deliveries %}
+
+        <div style="overflow-x:auto;">
+
+            <table class="table table-bordered table-hover align-middle"
+                   style="min-width:1150px;text-align:center;">
+
+                <thead class="table-light">
+
+                    <tr>
+                        <th>#</th>
+                        <th>رقم الطلب</th>
+                        <th>المريض</th>
+                        <th>القسم</th>
+                        <th>الطبيب</th>
+                        <th>أرسل بواسطة</th>
+                        <th>تاريخ الإرسال</th>
+                        <th>حالة الاستلام</th>
+                        <th>استلم بواسطة</th>
+                        <th>تاريخ الاستلام</th>
+                        <th>الإجراء</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for delivery in deliveries %}
+
+                    <tr>
+
+                        <td>{{ forloop.counter }}</td>
+
+                        <td>
+                            <strong>
+                                {{ delivery.order.order_number }}
+                            </strong>
+                        </td>
+
+                        <td>
+                            {{ delivery.order.patient.full_name }}
+                        </td>
+
+                        <td>
+                            {% if delivery.department %}
+                                {{ delivery.department.name_ar }}
+                                {% if delivery.department.name_en %}
+                                    <br>
+                                    <small style="color:#6c757d;">
+                                        {{ delivery.department.name_en }}
+                                    </small>
+                                {% endif %}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if delivery.doctor %}
+                                {{ delivery.doctor.full_name }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if delivery.sent_by %}
+                                {{ delivery.sent_by.get_full_name|default:delivery.sent_by.username }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{ delivery.sent_at|date:"Y-m-d" }}
+                            <br>
+                            <small style="color:#6c757d;">
+                                {{ delivery.sent_at|date:"H:i" }}
+                            </small>
+                        </td>
+
+                        <td>
+
+                            {% if delivery.received %}
+
+                                <span class="badge bg-success"
+                                      style="font-size:13px;">
+                                    ✅ تم الاستلام
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-warning text-dark"
+                                      style="font-size:13px;">
+                                    ⏳ بانتظار الاستلام
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+                            {% if delivery.received_by %}
+                                {{ delivery.received_by.get_full_name|default:delivery.received_by.username }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+                        <td>
+
+                            {% if delivery.received_at %}
+
+                                {{ delivery.received_at|date:"Y-m-d" }}
+                                <br>
+
+                                <small style="color:#6c757d;">
+                                    {{ delivery.received_at|date:"H:i" }}
+                                </small>
+
+                            {% else %}
+                                —
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            <div style="
+                                display:flex;
+                                gap:5px;
+                                justify-content:center;
+                                flex-wrap:wrap;
+                            ">
+
+                                <a
+                                    href="{% url 'laboratory:laboratory_report' delivery.order.id %}"
+                                    class="btn btn-sm btn-outline-primary">
+                                    📄 التقرير
+                                </a>
+
+                                {% if not delivery.received %}
+
+                                    <form method="post"
+                                          action="{% url 'laboratory:receive_result' delivery.id %}"
+                                          style="display:inline;">
+
+                                        {% csrf_token %}
+
+                                        <button
+                                            type="submit"
+                                            class="btn btn-sm btn-success">
+                                            ✅ استلام
+                                        </button>
+
+                                    </form>
+
+                                {% endif %}
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+            <div style="
+                padding:45px 20px;
+                text-align:center;
+                color:#6c757d;
+            ">
+
+                <div style="font-size:50px;">📭</div>
+
+                <h5 style="margin-top:10px;">
+                    لا توجد نتائج مطابقة للبحث
+                </h5>
+
+                <p>
+                    جرّب تغيير معايير البحث أو إزالة الفلاتر.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

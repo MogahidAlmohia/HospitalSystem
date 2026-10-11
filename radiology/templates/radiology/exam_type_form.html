@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}➕ إضافة فحص أشعة{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-pro">
+
+    <div class="command-header">
+        <div class="command-content">
+            <h1 class="command-title">
+                ➕ إضافة نوع فحص أشعة
+            </h1>
+        </div>
+    </div>
+
+
+    <div class="pro-panel p-4">
+
+        <form method="post">
+
+            {% csrf_token %}
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <label class="form-label">
+                        اسم الفحص بالعربي *
+                    </label>
+                    {{ form.name_ar }}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">
+                        Exam Name *
+                    </label>
+                    {{ form.name_en }}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">
+                        Code *
+                    </label>
+                    {{ form.code }}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">
+                        Modality
+                    </label>
+                    {{ form.modality }}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">
+                        السعر
+                    </label>
+                    {{ form.price }}
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">
+                        الوصف
+                    </label>
+                    {{ form.description }}
+                </div>
+
+                <div class="col-12">
+                    <div class="form-check">
+                        {{ form.is_active }}
+                        <label class="form-check-label">
+                            الفحص فعال
+                        </label>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <hr class="my-4">
+
+
+            <button class="btn btn-primary">
+                💾 حفظ
+            </button>
+
+            <a
+                href="{% url 'radiology:exam_type_list' %}"
+                class="btn btn-outline-secondary">
+                إلغاء
+            </a>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

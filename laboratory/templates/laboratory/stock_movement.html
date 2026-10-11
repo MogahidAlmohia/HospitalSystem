@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block content %}
+<style>.movement-page{max-width:1200px;margin:auto}.card,.movement-card{border:1px solid #e5eaf1;box-shadow:0 8px 24px rgba(15,23,42,.06);border-radius:16px}</style>
+<div dir="rtl" class="container py-4">
+
+<h2 class="mb-4">📋 حركة المخزون</h2>
+
+<div class="card shadow-sm mb-4">
+<div class="card-body">
+
+<h5>{{ stock.reagent.name }}</h5>
+
+<p>
+<strong>Lot:</strong> {{ stock.lot_number }}
+&nbsp;&nbsp;
+<strong>Expiry:</strong> {{ stock.expiry_date }}
+&nbsp;&nbsp;
+<strong>Current Quantity:</strong> {{ stock.quantity }}
+</p>
+
+<form method="post" class="row g-3">
+{% csrf_token %}
+
+<div class="col-md-4">
+<label class="form-label">نوع الحركة</label>
+<select name="movement_type" class="form-select" required>
+<option value="IN">Stock In</option>
+<option value="OUT">Stock Out</option>
+<option value="RETURN">Return</option>
+<option value="ADJUSTMENT">Adjustment</option>
+</select>
+</div>
+
+<div class="col-md-4">
+<label class="form-label">الكمية</label>
+<input type="number" step="0.01" name="quantity"
+class="form-control" required>
+</div>
+
+<div class="col-md-4">
+<label class="form-label">Reference</label>
+<input name="reference" class="form-control">
+</div>
+
+<div class="col-12">
+<label class="form-label">ملاحظات</label>
+<textarea name="notes" class="form-control"></textarea>
+</div>
+
+<div class="col-12">
+<button class="btn btn-success">تسجيل الحركة</button>
+<a href="{% url 'laboratory:inventory_dashboard' %}"
+class="btn btn-secondary">رجوع</a>
+</div>
+
+</form>
+
+</div>
+</div>
+
+<h4>سجل الحركات</h4>
+
+<div class="table-responsive">
+<table class="table table-bordered">
+
+<thead class="table-dark">
+<tr>
+<th>التاريخ</th>
+<th>الحركة</th>
+<th>الكمية</th>
+<th>Reference</th>
+<th>المستخدم</th>
+<th>ملاحظات</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for movement in movements %}
+<tr>
+<td>{{ movement.created_at|date:"Y-m-d H:i" }}</td>
+<td>{{ movement.get_movement_type_display }}</td>
+<td>{{ movement.quantity }}</td>
+<td>{{ movement.reference|default:"-" }}</td>
+<td>
+{% if movement.performed_by %}
+{{ movement.performed_by.username }}
+{% else %}
+-
+{% endif %}
+</td>
+<td>{{ movement.notes|default:"-" }}</td>
+</tr>
+{% empty %}
+<tr>
+<td colspan="6" class="text-center">
+لا توجد حركات.
+</td>
+</tr>
+{% endfor %}
+
+</tbody>
+</table>
+</div>
+
+</div>
+{% endblock %}
