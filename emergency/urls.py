@@ -2,32 +2,18 @@ from django.urls import path
 
 from . import views
 
-app_name = "emergency"
+app_name = "reception"
 
 urlpatterns = [
+    path("", views.reception_dashboard, name="dashboard"),
+    path("patients/register/", views.register_patient, name="register_patient"),
+    path("patients/search/", views.patient_search, name="patient_search"),
+    path("patients/<int:patient_id>/", views.patient_profile, name="patient_profile"),
     path(
-        "",
-        views.emergency_dashboard,
-        name="dashboard",
-    ),
-    path(
-        "create/",
-        views.emergency_case_create,
-        name="create",
-    ),
-    path(
-        "search/",
-        views.emergency_search,
-        name="search",
-    ),
-    path(
-        "<int:case_id>/",
-        views.emergency_case_detail,
-        name="detail",
-    ),
-    path(
-        "<int:case_id>/edit/",
-        views.emergency_case_update,
-        name="edit",
+        "patients/<int:patient_id>/visit/create/",
+        views.create_visit,
+        name="create_visit",
     ),
 ]
+
+
