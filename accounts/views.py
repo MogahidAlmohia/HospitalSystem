@@ -7,18 +7,26 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from departments.models import Department
 from .models import StaffProfile
-from .permissions import user_has_access, ROLE_PERMISSIONS, PERMISSION_GROUPS, get_user_role, get_user_department
+from .permissions import (
+    ROLE_PERMISSIONS,
+    PERMISSION_GROUPS,
+    get_user_department,
+    get_user_role,
+)
 
 
 def is_admin(user):
     if not user.is_authenticated:
         return False
+
     if user.is_superuser:
         return True
+
     try:
         return user.staff_profile.role in ["ADMIN", "MANAGER"]
     except StaffProfile.DoesNotExist:
         return False
+
 
 def logout_view(request):
     logout(request)
@@ -28,42 +36,22 @@ def logout_view(request):
 @login_required
 def dashboard(request):
     """
-    لوحة التحكم الرئيسية لنظام إدارة المستشفى والمختبر.
+    لوحة التحكم الرئيسية ل��ظام إدارة المستشفى والمختبر.
     قراءة فقط - لا تعدل أو تحذف أي بيانات.
     """
-
-    # ========================================================
-    # PHASE 13.2.7 — SMART ROLE LANDING
-    # ========================================================
-    # /accounts/ remains the single central entry point.
-    # The destination is selected according to the user's role.
-    # No database changes are performed here.
-
     role = get_user_role(request.user)
     user_department = get_user_department(request.user)
 
-    # Management keeps the full HIS/LIS management dashboard.
     if role in {"ADMIN", "MANAGER"}:
         pass
-
-    # Laboratory stays completely separate from the department center.
     elif role == "LAB":
         return redirect("laboratory:dashboard")
-
-    # Existing operational dashboards.
     elif role == "RECEPTION":
         return redirect("reception:dashboard")
-
     elif role == "EMERGENCY":
         return redirect("emergency:dashboard")
-
     elif role == "INPATIENT":
         return redirect("inpatient:dashboard")
-
-    # Department-based clinical/support roles.
-    # The corresponding operational apps currently do not yet expose
-    # real dashboards, so their safe landing page is their own department
-    # center rather than a fabricated URL.
     elif role in {
         "DOCTOR",
         "RADIOLOGY",
@@ -81,116 +69,49 @@ def dashboard(request):
                 department_id=user_department.id,
             )
 
-    # Fallback: keep the full management dashboard if a user has no
-    # valid department or an unexpected role.
-
-
-    from django.db.models import Q
-    from django.utils import timezone
     from django.urls import reverse
+    from django.utils import timezone
 
     from patients.models import Patient, Visit
     from doctors.models import Doctor
-    from departments.models import Department
-
     from laboratory.models import (
         LaboratoryOrder,
         LaboratoryOrderItem,
         LaboratoryResultDelivery,
     )
-
     from inpatient.models import Admission, Bed
     from emergency.models import EmergencyCase
 
     now = timezone.localtime()
     today = now.date()
 
-    # ============================================================
-    # المرضى والاستقبال
-    # ============================================================
-
     total_patients = Patient.objects.count()
-
-    active_patients = Patient.objects.filter(
-        is_active=True
-    ).count()
-
-    today_patients = Patient.objects.filter(
-        created_at__date=today
-    ).count()
-
-    today_visits = Visit.objects.filter(
-        created_at__date=today
-    ).count()
-
-    open_visits = Visit.objects.filter(
-        status__in=["OPEN", "IN_PROGRESS"]
-    ).count()
-
-    recent_patients = Patient.objects.order_by(
-        "-created_at"
-    )[:8]
-
+    active_patients = Patient.objects.filter(is_active=True).count()
+    today_patients = Patient.objects.filter(created_at__date=today).count()
+    today_visits = Visit.objects.filter(created_at__date=today).count()
+    open_visits = Visit.objects.filter(status__in=["OPEN", "IN_PROGRESS"]).count()
+    recent_patients = Patient.objects.order_by("-created_at")[:8]
     recent_visits = (
-        Visit.objects
-        .select_related("patient", "department", "doctor")
+        Visit.objects.select_related("patient", "department", "doctor")
         .order_by("-created_at")[:8]
     )
 
-    # ============================================================
-    # الأطباء والأقسام
-    # ============================================================
+    total_doctors = Doctor.objects.filter(is_active=True).count()
+    total_departments = Department.objects.filter(is_active=True).count()
 
-    total_doctors = Doctor.objects.filter(
-        is_active=True
-    ).count()
-
-    total_departments = Department.objects.filter(
-        is_active=True
-    ).count()
-
-    # ============================================================
-    # التنويم والأسرة
-    # ============================================================
-
-    active_admissions = Admission.objects.filter(
-        status="ADMITTED"
-    ).count()
-
-    transferred_admissions = Admission.objects.filter(
-        status="TRANSFERRED"
-    ).count()
-
-    occupied_beds = Bed.objects.filter(
-        status="OCCUPIED"
-    ).count()
-
-    available_beds = Bed.objects.filter(
-        status="AVAILABLE"
-    ).count()
-
-    reserved_beds = Bed.objects.filter(
-        status="RESERVED"
-    ).count()
-
-    maintenance_beds = Bed.objects.filter(
-        status="MAINTENANCE"
-    ).count()
-
-    operational_beds = Bed.objects.exclude(
-        status="INACTIVE"
-    ).count()
-
-    if operational_beds:
-        bed_occupancy_percent = round(
-            (occupied_beds / operational_beds) * 100
-        )
-    else:
-        bed_occupancy_percent = 0
+    active_admissions = Admission.objects.filter(status="ADMITTED").count()
+    transferred_admissions = Admission.objects.filter(status="TRANSFERRED").count()
+    occupied_beds = Bed.objects.filter(status="OCCUPIED").count()
+    available_beds = Bed.objects.filter(status="AVAILABLE").count()
+    reserved_beds = Bed.objects.filter(status="RESERVED").count()
+    maintenance_beds = Bed.objects.filter(status="MAINTENANCE").count()
+    operational_beds = Bed.objects.exclude(status="INACTIVE").count()
+    bed_occupancy_percent = (
+        round((occupied_beds / operational_beds) * 100) if operational_beds else 0
+    )
 
     recent_admissions = (
-        Admission.objects
-        .select_related(
+        Admission.objects.select_related(
             "patient",
             "department",
             "doctor",
@@ -200,132 +121,53 @@ def dashboard(request):
         .order_by("-admitted_at")[:8]
     )
 
-    # ============================================================
-    # الطوارئ
-    # ============================================================
-
-    emergency_active_statuses = [
-        "WAITING",
-        "TRIAGE",
-        "UNDER_CARE",
-        "OBSERVATION",
-    ]
-
+    emergency_active_statuses = ["WAITING", "TRIAGE", "UNDER_CARE", "OBSERVATION"]
     emergency_active = EmergencyCase.objects.filter(
         status__in=emergency_active_statuses
     ).count()
-
-    emergency_waiting = EmergencyCase.objects.filter(
-        status="WAITING"
-    ).count()
-
-    emergency_triage = EmergencyCase.objects.filter(
-        status="TRIAGE"
-    ).count()
-
-    emergency_under_care = EmergencyCase.objects.filter(
-        status="UNDER_CARE"
-    ).count()
-
+    emergency_waiting = EmergencyCase.objects.filter(status="WAITING").count()
+    emergency_triage = EmergencyCase.objects.filter(status="TRIAGE").count()
+    emergency_under_care = EmergencyCase.objects.filter(status="UNDER_CARE").count()
     emergency_critical = EmergencyCase.objects.filter(
         status__in=emergency_active_statuses,
         triage_level__in=["RED", "ORANGE"],
     ).count()
-
     recent_emergency = (
-        EmergencyCase.objects
-        .select_related("patient", "department", "doctor")
+        EmergencyCase.objects.select_related("patient", "department", "doctor")
         .order_by("-id")[:8]
     )
 
-    # ============================================================
-    # المختبر
-    # ============================================================
-
-    today_lab_orders = LaboratoryOrder.objects.filter(
-        requested_at__date=today
-    ).count()
-
+    today_lab_orders = LaboratoryOrder.objects.filter(requested_at__date=today).count()
     pending_lab_orders = LaboratoryOrder.objects.filter(
-        status__in=[
-            "REQUESTED",
-            "RECEIVED",
-            "COLLECTED",
-            "PROCESSING",
-        ]
+        status__in=["REQUESTED", "RECEIVED", "COLLECTED", "PROCESSING"]
     ).count()
-
-    processing_lab_orders = LaboratoryOrder.objects.filter(
-        status="PROCESSING"
-    ).count()
-
-    completed_lab_orders = LaboratoryOrder.objects.filter(
-        status="COMPLETED"
-    ).count()
-
+    processing_lab_orders = LaboratoryOrder.objects.filter(status="PROCESSING").count()
+    completed_lab_orders = LaboratoryOrder.objects.filter(status="COMPLETED").count()
     urgent_pending_lab_orders = LaboratoryOrder.objects.filter(
         priority__in=["URGENT", "STAT"],
-        status__in=[
-            "REQUESTED",
-            "RECEIVED",
-            "COLLECTED",
-            "PROCESSING",
-        ],
+        status__in=["REQUESTED", "RECEIVED", "COLLECTED", "PROCESSING"],
     ).count()
 
-    # ============================================================
-    # النتائج المدخلة ولم تعتمد
-    # ============================================================
-
     pending_result_items = (
-        LaboratoryOrderItem.objects
-        .filter(verified=False)
-        .filter(
-            (
-                Q(result__isnull=False)
-                & ~Q(result="")
-            )
-            |
-            Q(result_numeric__isnull=False)
-        )
+        LaboratoryOrderItem.objects.filter(verified=False)
+        .filter((Q(result__isnull=False) & ~Q(result="")) | Q(result_numeric__isnull=False))
         .exclude(status="CANCELLED")
         .exclude(status="REJECTED")
-        .select_related(
-            "order",
-            "order__patient",
-            "test",
-            "examiner",
-        )
+        .select_related("order", "order__patient", "test", "examiner")
         .order_by("-updated_at")[:10]
     )
 
     pending_verification_count = (
-        LaboratoryOrderItem.objects
-        .filter(verified=False)
-        .filter(
-            (
-                Q(result__isnull=False)
-                & ~Q(result="")
-            )
-            |
-            Q(result_numeric__isnull=False)
-        )
+        LaboratoryOrderItem.objects.filter(verified=False)
+        .filter((Q(result__isnull=False) & ~Q(result="")) | Q(result_numeric__isnull=False))
         .exclude(status="CANCELLED")
         .exclude(status="REJECTED")
         .count()
     )
 
     pending_result_orders_count = (
-        LaboratoryOrderItem.objects
-        .filter(verified=False)
-        .filter(
-            (
-                Q(result__isnull=False)
-                & ~Q(result="")
-            )
-            |
-            Q(result_numeric__isnull=False)
-        )
+        LaboratoryOrderItem.objects.filter(verified=False)
+        .filter((Q(result__isnull=False) & ~Q(result="")) | Q(result_numeric__isnull=False))
         .exclude(status="CANCELLED")
         .exclude(status="REJECTED")
         .values("order_id")
@@ -333,55 +175,22 @@ def dashboard(request):
         .count()
     )
 
-    # ============================================================
-    # نتائج جاهزة ولكن بها مشكلة سلامة بيانات
-    # ============================================================
-
     integrity_problem_items = (
-        LaboratoryOrderItem.objects
-        .filter(status="COMPLETED")
+        LaboratoryOrderItem.objects.filter(status="COMPLETED")
         .filter(
             Q(verified=False)
-            |
-            (
-                (
-                    Q(result__isnull=True)
-                    |
-                    Q(result="")
-                )
-                &
-                Q(result_numeric__isnull=True)
-            )
+            | ((Q(result__isnull=True) | Q(result="")) & Q(result_numeric__isnull=True))
         )
-        .select_related(
-            "order",
-            "order__patient",
-            "test",
-        )
+        .select_related("order", "order__patient", "test")
         .order_by("-updated_at", "-id")
     )
-
     integrity_problem_count = integrity_problem_items.count()
 
-    # ============================================================
-    # إرسال واستلام نتائج المختبر
-    # ============================================================
-
-    pending_result_deliveries = LaboratoryResultDelivery.objects.filter(
-        received=False
-    ).count()
-
-    today_result_deliveries = LaboratoryResultDelivery.objects.filter(
-        sent_at__date=today
-    ).count()
-
-    # ============================================================
-    # آخر طلبات المختبر
-    # ============================================================
+    pending_result_deliveries = LaboratoryResultDelivery.objects.filter(received=False).count()
+    today_result_deliveries = LaboratoryResultDelivery.objects.filter(sent_at__date=today).count()
 
     recent_lab_orders = (
-        LaboratoryOrder.objects
-        .select_related(
+        LaboratoryOrder.objects.select_related(
             "patient",
             "requesting_department",
             "requesting_doctor",
@@ -389,12 +198,7 @@ def dashboard(request):
         .order_by("-requested_at")[:10]
     )
 
-    # ============================================================
-    # تنبيهات Dashboard
-    # ============================================================
-
     alerts = []
-
     if emergency_critical:
         alerts.append({
             "level": "danger",
@@ -455,46 +259,23 @@ def dashboard(request):
             "url": reverse("inpatient:bed_list"),
         })
 
-    # ============================================================
-    # حالة أقسام المستشفى
-    # ============================================================
-
     department_summary = []
-
-    active_departments = (
-        Department.objects
-        .filter(is_active=True)
-        .order_by("name_ar")
-    )
+    active_departments = Department.objects.filter(is_active=True).order_by("name_ar")
 
     for department in active_departments:
         department_visits = Visit.objects.filter(
             department_id=department.id
-        ).filter(
-            status__in=["OPEN", "IN_PROGRESS"]
-        ).count()
-
+        ).filter(status__in=["OPEN", "IN_PROGRESS"]).count()
         department_admissions = Admission.objects.filter(
             department_id=department.id,
             status="ADMITTED",
         ).count()
-
         department_lab_orders = LaboratoryOrder.objects.filter(
             requesting_department_id=department.id,
-            status__in=[
-                "REQUESTED",
-                "RECEIVED",
-                "COLLECTED",
-                "PROCESSING",
-            ],
+            status__in=["REQUESTED", "RECEIVED", "COLLECTED", "PROCESSING"],
         ).count()
 
-        activity_total = (
-            department_visits
-            + department_admissions
-            + department_lab_orders
-        )
-
+        activity_total = department_visits + department_admissions + department_lab_orders
         if activity_total > 0:
             department_status = "ACTIVE"
             department_status_ar = "نشط"
@@ -513,10 +294,6 @@ def dashboard(request):
             "status": department_status,
             "status_ar": department_status_ar,
         })
-
-    # ============================================================
-    # بيانات الرسوم البيانية
-    # ============================================================
 
     chart_data = {
         "emergency": {
@@ -541,67 +318,20 @@ def dashboard(request):
         },
     }
 
-    # ============================================================
-    # روابط سريعة
-    # ============================================================
-
     quick_actions = [
-        {
-            "title": "تسجيل مريض",
-            "icon": "👤",
-            "url": reverse("reception:register_patient"),
-            "class": "primary",
-        },
-        {
-            "title": "بحث عن مريض",
-            "icon": "🔍",
-            "url": reverse("patients:search"),
-            "class": "info",
-        },
-        {
-            "title": "تنويم مريض",
-            "icon": "🛏️",
-            "url": reverse("inpatient:admission_create"),
-            "class": "success",
-        },
-        {
-            "title": "حالة طوارئ",
-            "icon": "🚑",
-            "url": reverse("emergency:create"),
-            "class": "danger",
-        },
-        {
-            "title": "استقبال عينات",
-            "icon": "🧪",
-            "url": reverse("laboratory:sample_reception"),
-            "class": "purple",
-        },
-        {
-            "title": "متابعة النتائج",
-            "icon": "📋",
-            "url": reverse("laboratory:result_workflow_dashboard"),
-            "class": "warning",
-        },
-        {
-            "title": "إرسال النتائج",
-            "icon": "📤",
-            "url": reverse("laboratory:result_delivery_dashboard"),
-            "class": "secondary",
-        },
-        {
-            "title": "الأطباء",
-            "icon": "👨‍⚕️",
-            "url": reverse("doctors:list"),
-            "class": "dark",
-        },
+        {"title": "تسجيل مريض", "icon": "👤", "url": reverse("reception:register_patient"), "class": "primary"},
+        {"title": "بحث عن مريض", "icon": "🔍", "url": reverse("patients:search"), "class": "info"},
+        {"title": "تنويم مريض", "icon": "🛏️", "url": reverse("inpatient:admission_create"), "class": "success"},
+        {"title": "حالة طوارئ", "icon": "🚑", "url": reverse("emergency:create"), "class": "danger"},
+        {"title": "استقبال عينات", "icon": "🧪", "url": reverse("laboratory:sample_reception"), "class": "purple"},
+        {"title": "متابعة النتائج", "icon": "📋", "url": reverse("laboratory:result_workflow_dashboard"), "class": "warning"},
+        {"title": "إرسال النتائج", "icon": "📤", "url": reverse("laboratory:result_delivery_dashboard"), "class": "secondary"},
+        {"title": "الأطباء", "icon": "👨‍⚕️", "url": reverse("doctors:list"), "class": "dark"},
     ]
 
     context = {
-        # عامة
         "now": now,
         "today": today,
-
-        # المرضى والاستقبال
         "total_patients": total_patients,
         "active_patients": active_patients,
         "today_patients": today_patients,
@@ -609,12 +339,8 @@ def dashboard(request):
         "open_visits": open_visits,
         "recent_patients": recent_patients,
         "recent_visits": recent_visits,
-
-        # الأطباء والأقسام
         "total_doctors": total_doctors,
         "total_departments": total_departments,
-
-        # التنويم
         "active_admissions": active_admissions,
         "transferred_admissions": transferred_admissions,
         "occupied_beds": occupied_beds,
@@ -624,65 +350,36 @@ def dashboard(request):
         "operational_beds": operational_beds,
         "bed_occupancy_percent": bed_occupancy_percent,
         "recent_admissions": recent_admissions,
-
-        # الطوارئ
         "emergency_active": emergency_active,
         "emergency_waiting": emergency_waiting,
         "emergency_triage": emergency_triage,
         "emergency_under_care": emergency_under_care,
         "emergency_critical": emergency_critical,
         "recent_emergency": recent_emergency,
-
-        # المختبر
         "today_lab_orders": today_lab_orders,
         "pending_lab_orders": pending_lab_orders,
         "processing_lab_orders": processing_lab_orders,
         "completed_lab_orders": completed_lab_orders,
         "urgent_pending_lab_orders": urgent_pending_lab_orders,
-
-        # النتائج
         "pending_verification_count": pending_verification_count,
         "pending_result_orders_count": pending_result_orders_count,
         "pending_result_items": pending_result_items,
-
-        # سلامة البيانات
         "integrity_problem_count": integrity_problem_count,
         "integrity_problem_items": integrity_problem_items[:10],
-
-        # إرسال واستلام النتائج
         "pending_result_deliveries": pending_result_deliveries,
         "today_result_deliveries": today_result_deliveries,
-
-        # آخر الطلبات
         "recent_lab_orders": recent_lab_orders,
-
-        # Dashboard
         "alerts": alerts,
         "quick_actions": quick_actions,
-
-        # حالة الأقسام
         "department_summary": department_summary,
-
-        # بيانات الرسوم
         "chart_data": chart_data,
     }
 
-    return render(
-        request,
-        "accounts/dashboard.html",
-        context,
-    )
-
+    return render(request, "accounts/dashboard.html", context)
 
 
 def login_view(request):
-    """
-    Hospital login page.
-
-    Users are displayed by their StaffProfile full name.
-    Authentication still uses the real Django username/password.
-    No database records are modified by this view.
-    """
+    """Hospital login page."""
     if request.user.is_authenticated:
         try:
             if request.user.staff_profile.is_active:
@@ -691,11 +388,7 @@ def login_view(request):
             pass
 
     login_users = (
-        User.objects
-        .filter(
-            is_active=True,
-            staff_profile__is_active=True,
-        )
+        User.objects.filter(is_active=True, staff_profile__is_active=True)
         .select_related("staff_profile", "staff_profile__department")
         .order_by("staff_profile__full_name", "username")
     )
@@ -704,48 +397,28 @@ def login_view(request):
         username = request.POST.get("username", "").strip()
         password = request.POST.get("password", "")
 
-        user = authenticate(
-            request,
-            username=username,
-            password=password,
-        )
-
+        user = authenticate(request, username=username, password=password)
         if user is not None and user.is_active:
             try:
                 if not user.staff_profile.is_active:
-                    raise ValueError("Inactive staff profile")
+                    messages.error(request, "حساب الموظف غير نشط.")
+                    return render(request, "accounts/login.html", {"login_users": login_users})
             except StaffProfile.DoesNotExist:
-                raise ValueError("Missing staff profile")
+                messages.error(request, "لا يوجد ملف موظف مرتبط بهذا الحساب.")
+                return render(request, "accounts/login.html", {"login_users": login_users})
 
             login(request, user)
-
-            # Superuser admin يدخل مباشرة إلى لوحة Django Admin
-            if user.is_superuser:
-                return redirect("accounts:dashboard")
-
-            # باقي المستخدمين يدخلون إلى لوحة HIS حسب صلاحياتهم
             return redirect("accounts:dashboard")
 
-        messages.error(
-            request,
-            "اسم المستخدم أو كلمة المرور غير صحيحة."
-        )
+        messages.error(request, "اسم المستخدم أو كلمة المرور غير صحيحة.")
 
-    return render(
-        request,
-        "accounts/login.html",
-        {
-            "login_users": login_users,
-        },
-    )
+    return render(request, "accounts/login.html", {"login_users": login_users})
 
 
-@login_required
-@user_passes_test(is_admin)
 @login_required
 @user_passes_test(is_admin)
 def hr_dashboard(request):
-    """لوحة الموارد البشرية المبنية على ملفات الموظفين الحالية."""
+    """لوحة الموارد البشرية."""
     profiles = StaffProfile.objects.select_related("user", "department").order_by("full_name")
     query = request.GET.get("q", "").strip()
     role = request.GET.get("role", "").strip()
@@ -797,7 +470,6 @@ def user_list(request):
     department_id = request.GET.get("department", "").strip()
 
     users = User.objects.select_related("staff_profile", "staff_profile__department").all()
-
     if query:
         users = users.filter(
             Q(username__icontains=query)
@@ -826,7 +498,6 @@ def user_list(request):
         "active_users": User.objects.filter(is_active=True).count(),
         "staff_count": StaffProfile.objects.count(),
     }
-
     return render(request, "accounts/user_list.html", context)
 
 
@@ -848,55 +519,29 @@ def user_create(request):
         valid_roles = {value for value, label in StaffProfile.ROLE_CHOICES}
         if role not in valid_roles:
             messages.error(request, "الدور الوظيفي المحدد غير صالح.")
-            return render(request, "accounts/user_form.html", {
-                "departments": departments,
-                "roles": StaffProfile.ROLE_CHOICES,
-            })
+            return render(request, "accounts/user_form.html", {"departments": departments, "roles": StaffProfile.ROLE_CHOICES})
 
-        if department_id:
-            if not Department.objects.filter(
-                pk=department_id,
-                is_active=True
-            ).exists():
-                messages.error(request, "القسم المحدد غير موجود أو غير نشط.")
-                return render(request, "accounts/user_form.html", {
-                    "departments": departments,
-                    "roles": StaffProfile.ROLE_CHOICES,
-                })
+        if department_id and not Department.objects.filter(pk=department_id, is_active=True).exists():
+            messages.error(request, "القسم المحدد غير موجود أو غير نشط.")
+            return render(request, "accounts/user_form.html", {"departments": departments, "roles": StaffProfile.ROLE_CHOICES})
 
         if not username or not password or not employee_number or not full_name:
             messages.error(request, "يرجى تعبئة جميع الحقول المطلوبة.")
-            return render(request, "accounts/user_form.html", {
-                "departments": departments,
-                "roles": StaffProfile.ROLE_CHOICES,
-            })
+            return render(request, "accounts/user_form.html", {"departments": departments, "roles": StaffProfile.ROLE_CHOICES})
 
         if password != password2:
             messages.error(request, "كلمتا المرور غير متطابقتين.")
-            return render(request, "accounts/user_form.html", {
-                "departments": departments,
-                "roles": StaffProfile.ROLE_CHOICES,
-            })
+            return render(request, "accounts/user_form.html", {"departments": departments, "roles": StaffProfile.ROLE_CHOICES})
 
         if User.objects.filter(username=username).exists():
             messages.error(request, "اسم المستخدم موجود مسبقًا.")
-            return render(request, "accounts/user_form.html", {
-                "departments": departments,
-                "roles": StaffProfile.ROLE_CHOICES,
-            })
+            return render(request, "accounts/user_form.html", {"departments": departments, "roles": StaffProfile.ROLE_CHOICES})
 
         if StaffProfile.objects.filter(employee_number=employee_number).exists():
             messages.error(request, "الرقم الوظيفي موجود مسبقًا.")
-            return render(request, "accounts/user_form.html", {
-                "departments": departments,
-                "roles": StaffProfile.ROLE_CHOICES,
-            })
+            return render(request, "accounts/user_form.html", {"departments": departments, "roles": StaffProfile.ROLE_CHOICES})
 
-        user = User.objects.create_user(
-            username=username,
-            password=password,
-        )
-
+        user = User.objects.create_user(username=username, password=password)
         profile = StaffProfile.objects.create(
             user=user,
             employee_number=employee_number,
@@ -910,10 +555,7 @@ def user_create(request):
         messages.success(request, f"تم إنشاء المستخدم {profile.full_name} بنجاح.")
         return redirect("accounts:user_list")
 
-    return render(request, "accounts/user_form.html", {
-        "departments": departments,
-        "roles": StaffProfile.ROLE_CHOICES,
-    })
+    return render(request, "accounts/user_form.html", {"departments": departments, "roles": StaffProfile.ROLE_CHOICES})
 
 
 @login_required
@@ -943,46 +585,20 @@ def user_edit(request, user_id):
 
         if not username or not employee_number or not full_name:
             messages.error(request, "يرجى تعبئة الحقول المطلوبة.")
-            return render(request, "accounts/user_form.html", {
-                "edit_mode": True,
-                "user_obj": user,
-                "profile": profile,
-                "departments": departments,
-                "roles": StaffProfile.ROLE_CHOICES,
-            })
+            return render(request, "accounts/user_form.html", {"edit_mode": True, "user_obj": user, "profile": profile, "departments": departments, "roles": StaffProfile.ROLE_CHOICES})
 
         if User.objects.exclude(pk=user.pk).filter(username=username).exists():
             messages.error(request, "اسم المستخدم مستخدم من حساب آخر.")
-            return render(request, "accounts/user_form.html", {
-                "edit_mode": True,
-                "user_obj": user,
-                "profile": profile,
-                "departments": departments,
-                "roles": StaffProfile.ROLE_CHOICES,
-            })
+            return render(request, "accounts/user_form.html", {"edit_mode": True, "user_obj": user, "profile": profile, "departments": departments, "roles": StaffProfile.ROLE_CHOICES})
 
-        if StaffProfile.objects.exclude(pk=profile.pk).filter(
-            employee_number=employee_number
-        ).exists():
+        if StaffProfile.objects.exclude(pk=profile.pk).filter(employee_number=employee_number).exists():
             messages.error(request, "الرقم الوظيفي مستخدم من موظف آخر.")
-            return render(request, "accounts/user_form.html", {
-                "edit_mode": True,
-                "user_obj": user,
-                "profile": profile,
-                "departments": departments,
-                "roles": StaffProfile.ROLE_CHOICES,
-            })
+            return render(request, "accounts/user_form.html", {"edit_mode": True, "user_obj": user, "profile": profile, "departments": departments, "roles": StaffProfile.ROLE_CHOICES})
 
         if new_password:
             if new_password != new_password2:
                 messages.error(request, "كلمتا المرور غير متطابقتين.")
-                return render(request, "accounts/user_form.html", {
-                    "edit_mode": True,
-                    "user_obj": user,
-                    "profile": profile,
-                    "departments": departments,
-                    "roles": StaffProfile.ROLE_CHOICES,
-                })
+                return render(request, "accounts/user_form.html", {"edit_mode": True, "user_obj": user, "profile": profile, "departments": departments, "roles": StaffProfile.ROLE_CHOICES})
             user.set_password(new_password)
 
         user.username = username
@@ -998,13 +614,7 @@ def user_edit(request, user_id):
         messages.success(request, "تم تحديث بيانات المستخدم بنجاح.")
         return redirect("accounts:user_list")
 
-    return render(request, "accounts/user_form.html", {
-        "edit_mode": True,
-        "user_obj": user,
-        "profile": profile,
-        "departments": departments,
-        "roles": StaffProfile.ROLE_CHOICES,
-    })
+    return render(request, "accounts/user_form.html", {"edit_mode": True, "user_obj": user, "profile": profile, "departments": departments, "roles": StaffProfile.ROLE_CHOICES})
 
 
 @login_required
@@ -1028,22 +638,13 @@ def user_toggle(request, user_id):
 
     state = "تم تفعيل المستخدم." if user.is_active else "تم تعطيل المستخدم."
     messages.success(request, state)
-
     return redirect("accounts:user_list")
 
 
 @login_required
 @user_passes_test(is_admin)
 def user_permissions(request, user_id):
-    """
-    إدارة الصلاحيات الفردية للمستخدم.
-
-    المعادلة:
-    صلاحيات الدور
-    + الصلاحيات الإضافية
-    - الصلاحيات الممنوعة
-    = الصلاحيات النهائية
-    """
+    """إدارة الصلاحيات الفردية للمستخدم."""
     target_user = get_object_or_404(User, pk=user_id)
 
     profile, created = StaffProfile.objects.get_or_create(
@@ -1067,59 +668,26 @@ def user_permissions(request, user_id):
         denied = request.POST.getlist("denied_permissions")
 
         profile.custom_permissions = [
-            permission
-            for permission in allowed
-            if permission in valid_permissions
+            permission for permission in allowed if permission in valid_permissions
         ]
-
         profile.denied_permissions = [
-            permission
-            for permission in denied
-            if permission in valid_permissions
+            permission for permission in denied if permission in valid_permissions
         ]
-
-        # الصلاحية الممنوعة لها أولوية.
         profile.custom_permissions = [
-            permission
-            for permission in profile.custom_permissions
-            if permission not in profile.denied_permissions
+            permission for permission in profile.custom_permissions if permission not in profile.denied_permissions
         ]
 
-        profile.save(
-            update_fields=[
-                "custom_permissions",
-                "denied_permissions",
-                "updated_at",
-            ]
-        )
+        profile.save(update_fields=["custom_permissions", "denied_permissions", "updated_at"])
 
-        messages.success(
-            request,
-            f"تم حفظ صلاحيات المستخدم {target_user.username} بنجاح."
-        )
-
-        return redirect(
-            "accounts:user_permissions",
-            user_id=target_user.id
-        )
+        messages.success(request, f"تم حفظ صلاحيات المستخدم {target_user.username} بنجاح.")
+        return redirect("accounts:user_permissions", user_id=target_user.id)
 
     custom_permissions = set(profile.custom_permissions or [])
     denied_permissions = set(profile.denied_permissions or [])
-
-    # الصلاحيات الموروثة من الدور.
     role = profile.role
-    role_permissions = set(
-        ROLE_PERMISSIONS.get(role, set())
-    )
-
-    # النجمة تعني وصول كامل.
+    role_permissions = set(ROLE_PERMISSIONS.get(role, set()))
     is_full_access = "*" in role_permissions
-
-    # الصلاحيات النهائية.
-    effective_permissions = (
-        role_permissions
-        | custom_permissions
-    ) - denied_permissions
+    effective_permissions = (role_permissions | custom_permissions) - denied_permissions
 
     context = {
         "target_user": target_user,
@@ -1131,9 +699,4 @@ def user_permissions(request, user_id):
         "effective_permissions": effective_permissions,
         "is_full_access": is_full_access,
     }
-
-    return render(
-        request,
-        "accounts/user_permissions.html",
-        context,
-    )
+    return render(request, "accounts/user_permissions.html", context)
