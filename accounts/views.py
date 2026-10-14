@@ -35,10 +35,15 @@ def logout_view(request):
 
 @login_required
 def dashboard(request):
-    """
-    لوحة التحكم الرئيسية ل��ظام إدارة المستشفى والمختبر.
-    قراءة فقط - لا تعدل أو تحذف أي بيانات.
-    """
+    """لوحة التحكم الرئيسية لنظام إدارة المستشفى والمختبر."""
+    try:
+        if not request.user.staff_profile.is_active:
+            logout(request)
+            return redirect("accounts:login")
+    except StaffProfile.DoesNotExist:
+        logout(request)
+        return redirect("accounts:login")
+
     role = get_user_role(request.user)
     user_department = get_user_department(request.user)
 
@@ -216,7 +221,7 @@ def dashboard(request):
             "title": "طلبات مختبر عاجلة",
             "count": urgent_pending_lab_orders,
             "text": "طلبات URGENT / STAT ما زالت قيد التنفيذ.",
-            "url": reverse("laboratory:dashboard"),
+            "url": reverse("laboratory:result_workflow_dashboard"),
         })
 
     if pending_verification_count:
