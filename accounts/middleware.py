@@ -340,5 +340,220 @@ class RolePermissionMiddleware:
             return "laboratory.view"
 
         # لا توجد صلاحية تفصيلية محددة
+        # ============================================================
+        # Reception / Patients
+        # ============================================================
+        if path.startswith("/reception/patients/register/"):
+            return "patients.create"
+
+        if path.startswith("/reception/patients/search/"):
+            return "patients.search"
+
+        if path.startswith("/reception/patients/"):
+            if "/visit/create/" in path:
+                return "patients.visits.create"
+            return "patients.profile"
+
+        if path.startswith("/reception/"):
+            return "reception.view"
+
+        # ============================================================
+        # Doctors
+        # ============================================================
+        if path.startswith("/doctors/create/"):
+            return "doctors.create"
+
+        if path.startswith("/doctors/"):
+            if "/edit/" in path:
+                return "doctors.edit"
+            if "/toggle/" in path:
+                return "doctors.edit"
+            return "doctors.view"
+
+        # ============================================================
+        # Radiology
+        # ============================================================
+        if path.startswith("/radiology/orders/create/"):
+            return "radiology.orders.create"
+
+        if path.startswith("/radiology/orders/"):
+            if path.endswith("/status/"):
+                return "radiology.orders.status"
+
+            if path.endswith("/report/"):
+                return "radiology.results.enter"
+
+            return "radiology.orders.view"
+
+        if path.startswith("/radiology/exam-types/"):
+            return "radiology.exam_types.manage"
+
+        if path.startswith("/radiology/patients/"):
+            return "radiology.orders.view"
+
+        if path.startswith("/radiology/"):
+            return "radiology.view"
+
+        # ============================================================
+        # Pharmacy
+        # ============================================================
+        if path.startswith("/pharmacy/prescriptions/create/"):
+            return "pharmacy.prescriptions.create"
+
+        if path.startswith("/pharmacy/prescriptions/"):
+            if "/add-item/" in path:
+                return "pharmacy.prescriptions.edit"
+
+            if "/dispense/" in path:
+                return "pharmacy.dispense"
+
+            return "pharmacy.prescriptions.view"
+
+        if path.startswith("/pharmacy/medicines/create/"):
+            return "pharmacy.create"
+
+        if path.startswith("/pharmacy/medicines/"):
+            if "/edit/" in path:
+                return "pharmacy.edit"
+            return "pharmacy.view"
+
+        if path.startswith("/pharmacy/stock/"):
+            if "/receive/" in path or "/adjust/" in path:
+                return "pharmacy.inventory.movement"
+            if path.startswith("/pharmacy/stock/movements/"):
+                return "pharmacy.inventory.movement"
+            return "pharmacy.inventory.view"
+
+        if path.startswith("/pharmacy/"):
+            return "pharmacy.view"
+
+        # ============================================================
+        # Nursing
+        # ============================================================
+        if path.startswith("/nursing/assessments/create/"):
+            return "nursing.assessment.create"
+
+        if path.startswith("/nursing/vitals/create/"):
+            return "nursing.vitals.enter"
+
+        if path.startswith("/nursing/notes/create/"):
+            return "nursing.notes.create"
+
+        if path.startswith("/nursing/medications/create/"):
+            return "nursing.medications.create"
+
+        if path.startswith("/nursing/care-plans/create/"):
+            return "nursing.care_plan.create"
+
+        if path.startswith("/nursing/"):
+            return "nursing.view"
+
+        # ============================================================
+        # Surgery
+        # ============================================================
+        if path.startswith("/surgery/orders/create/"):
+            return "surgery.create"
+
+        if path.startswith("/surgery/orders/"):
+            if "/status/" in path:
+                return "surgery.status"
+
+            if "/procedures/create/" in path:
+                return "surgery.procedures.create"
+
+            if "/team/create/" in path:
+                return "surgery.team.create"
+
+            if "/postoperative-notes/create/" in path:
+                return "surgery.postoperative_notes.create"
+
+            if "/edit/" in path:
+                return "surgery.edit"
+
+            return "surgery.view"
+
+        if path.startswith("/surgery/types/"):
+            return "surgery.types.manage"
+
+        if path.startswith("/surgery/patients/"):
+            return "surgery.view"
+
+        if path.startswith("/surgery/"):
+            return "surgery.view"
+
+        # ============================================================
+        # Blood Bank
+        # ============================================================
+        if path.startswith("/blood_bank/donors/create/"):
+            return "blood_bank.donors.create"
+
+        if path.startswith("/blood_bank/donors/"):
+            if "/edit/" in path:
+                return "blood_bank.donors.edit"
+            return "blood_bank.donors.view"
+
+        if path.startswith("/blood_bank/units/create/"):
+            return "blood_bank.units.create"
+
+        if path.startswith("/blood_bank/units/"):
+            return "blood_bank.units.view"
+
+        if path.startswith("/blood_bank/requests/create/"):
+            return "blood_bank.requests.create"
+
+        if path.startswith("/blood_bank/requests/"):
+            if "/issue/" in path:
+                return "blood_bank.issue"
+
+            if "/crossmatch/" in path:
+                return "blood_bank.crossmatch"
+
+            return "blood_bank.view"
+
+        if path.startswith("/blood_bank/issues/") and "/start-transfusion/" in path:
+            return "blood_bank.transfusion"
+
+        if path.startswith("/blood_bank/transfusions/"):
+            return "blood_bank.transfusion"
+
+        if path.startswith("/blood_bank/movements/"):
+            return "blood_bank.receive"
+
+        if path.startswith("/blood_bank/patients/"):
+            return "blood_bank.view"
+
+        if path.startswith("/blood_bank/"):
+            return "blood_bank.view"
+
+        # ============================================================
+        # Billing
+        # ============================================================
+        if path.startswith("/billing/bills/create/"):
+            return "billing.create"
+
+        if path.startswith("/billing/bills/"):
+            if "/items/create/" in path:
+                return "billing.items.create"
+
+            if "/payments/create/" in path:
+                return "billing.payment"
+
+            if "/status/" in path:
+                return "billing.status"
+
+            if "/edit/" in path:
+                return "billing.edit"
+
+            return "billing.view"
+
+        if path.startswith("/billing/items/") and "/delete/" in path:
+            return "billing.items.delete"
+
+        if path.startswith("/billing/patients/"):
+            return "billing.view"
+
+        if path.startswith("/billing/"):
+            return "billing.view"
+
         return None
 
