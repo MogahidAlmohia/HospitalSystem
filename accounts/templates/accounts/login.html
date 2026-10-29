@@ -308,14 +308,14 @@
                     <div
                         class="user-option"
                         data-username="{{ u.username }}"
-                        data-search="{{ u.staff_profile.full_name|default:u.username }} {{ u.staff_profile.department.name|default:'' }} {{ u.staff_profile.employee_number|default:'' }} {{ u.username }}"
+                        data-search="{{ u.staff_profile.full_name|default:u.username }} {{ u.staff_profile.department.name_ar|default:'' }} {{ u.staff_profile.department.name_en|default:'' }} {{ u.staff_profile.employee_number|default:'' }} {{ u.username }}"
                     >
                         <strong>
                             {{ u.staff_profile.full_name|default:u.username }}
                         </strong>
                         <small>
                             {% if u.staff_profile.department %}
-                                {{ u.staff_profile.department.name }}
+                                {{ u.staff_profile.department.name_ar|default:u.staff_profile.department.name_en|default:'' }}
                             {% endif %}
                             {% if u.staff_profile.employee_number %}
                                 — {{ u.staff_profile.employee_number }}
@@ -400,7 +400,7 @@
         let visible = 0;
 
         options.forEach(function (option) {
-            const text = option.dataset.search.toLowerCase();
+            const text = (option.dataset.search || "").toLowerCase();
             const match = !query || text.includes(query);
 
             option.style.display = match ? "block" : "none";
